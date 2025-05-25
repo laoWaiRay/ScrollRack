@@ -54,17 +54,17 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             {
                 nestedBuilder
                     .HasOne(e => e.User)
-                    .WithMany()
+                    .WithMany(e => e.GameParticipations)
                     .HasForeignKey(e => e.UserId);
 
                 nestedBuilder
                     .HasOne(e => e.Deck)
-                    .WithMany()
+                    .WithMany(e => e.GameParticipations)
                     .HasForeignKey(e => e.DeckId);
 
                 nestedBuilder
                     .HasOne(e => e.Game)
-                    .WithMany()
+                    .WithMany(e => e.GameParticipations)
                     .HasForeignKey(e => e.GameId);
             }
         );

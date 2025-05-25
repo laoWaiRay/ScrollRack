@@ -3,6 +3,7 @@ namespace Mtg_tracker.Models;
 
 public class GameParticipation
 {
+    public int Id { get; set; }
     public int UserId { get; set; }
     public User User { get; set; } = null!;
     public int GameId { get; set; }

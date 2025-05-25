@@ -13,8 +13,6 @@ public class User
     public List<GameParticipation> GameParticipations { get; } = [];
 
     // Friend Management
-    public List<FriendRequest> SentFriendRequests { get; } = [];
-    public List<FriendRequest> ReceivedFriendRequests { get; } = [];
     public List<User> Friends { get; } = [];
 
     // Statistics
