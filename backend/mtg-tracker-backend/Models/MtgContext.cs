@@ -12,7 +12,15 @@ public class MtgContext(DbContextOptions<MtgContext> options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<StatSnapshot>()
-            .Property(snapshot => snapshot.CreatedAt)
+            .Property(e => e.CreatedAt)
+            .HasDefaultValueSql("NOW()");
+    
+        modelBuilder.Entity<Game>()
+            .Property(e => e.CreatedAt)
+            .HasDefaultValueSql("NOW()");
+        
+        modelBuilder.Entity<Room>()
+            .Property(e => e.CreatedAt)
             .HasDefaultValueSql("NOW()");
 
         modelBuilder.Entity<FriendRequest>(
@@ -33,8 +41,32 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             }
         );
 
+        // This models 'Friends' as a symmetrical unidirectional
+        // many-to-many relationship - see FriendRequest.cs
         modelBuilder.Entity<User>()
             .HasMany(e => e.Friends)
             .WithMany();
+
+        // Setting explicitly probably not needed? EF Core can probably discover
+        // the relationships through convention
+        modelBuilder.Entity<GameParticipation>(
+            nestedBuilder =>
+            {
+                nestedBuilder
+                    .HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId);
+
+                nestedBuilder
+                    .HasOne(e => e.Deck)
+                    .WithMany()
+                    .HasForeignKey(e => e.DeckId);
+
+                nestedBuilder
+                    .HasOne(e => e.Game)
+                    .WithMany()
+                    .HasForeignKey(e => e.GameId);
+            }
+        );
     }
 }

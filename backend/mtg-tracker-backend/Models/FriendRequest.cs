@@ -41,5 +41,6 @@ public class FriendRequest
     public int Uid2 { get; set; }
     public User User1 { get; set; } = null!;
     public User User2 { get; set; } = null!;
+
     public required Requester Requester { get; set; }
 }

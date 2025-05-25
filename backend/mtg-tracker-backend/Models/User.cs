@@ -9,10 +9,13 @@ public class User
     public required string Password { get; set; }
     public string? Profile { get; set; }
 
+    public List<Deck> Decks { get; } = [];
+    public List<GameParticipation> GameParticipations { get; } = [];
+
     // Friend Management
-    public List<FriendRequest> SentFriendRequests { get; set; } = [];
-    public List<FriendRequest> ReceivedFriendRequests { get; set; } = [];
-    public List<User> Friends { get; set; } = [];
+    public List<FriendRequest> SentFriendRequests { get; } = [];
+    public List<FriendRequest> ReceivedFriendRequests { get; } = [];
+    public List<User> Friends { get; } = [];
 
     // Statistics
     public StatSnapshot? StatSnapshot { get; set; }
