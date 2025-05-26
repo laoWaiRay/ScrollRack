@@ -9,7 +9,7 @@ public class Deck
     public List<GameParticipation> GameParticipations { get; } = [];
 
     public required string Commander { get; set; }
-    public required string Moxfield { get; set; }
+    public string? Moxfield { get; set; }
     public int NumGames { get; set; }
     public int NumWins { get; set; }
 }
