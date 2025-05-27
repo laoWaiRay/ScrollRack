@@ -12,6 +12,7 @@ builder.Services.AddDbContext<MtgContext>(options =>
         .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
         .UseSnakeCaseNamingConvention()
 );
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 
