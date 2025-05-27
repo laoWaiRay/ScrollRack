@@ -60,9 +60,52 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             return StatusCode(500, "Error creating deck");
         }
 
-        return Ok();
+        return CreatedAtAction(
+            nameof(GetDecks),
+            new { id = deck.Id },
+            _mapper.Map<DeckDTO>(deck)
+        );
     }
 
+    // PUT: api/deck/{id}
+    // Update a deck
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<ActionResult<DeckDTO>> PutDeck(DeckDTO deckDTO, int id)
+    {
+        var userId = User.GetUserId();
+        if (userId != User.GetUserId())
+        {
+            return Unauthorized();
+        }
+
+        if (deckDTO.Id != id)
+        {
+            return BadRequest();
+        }
+
+        var deck = await _context.Decks.FindAsync(id);
+        if (deck is null)
+        {
+            return NotFound();
+        }
+
+        deck.Moxfield = deckDTO.Moxfield;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+    
+    // DELETE api/deck/{id}
+    // Deletes a deck
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteDeck(int id)
