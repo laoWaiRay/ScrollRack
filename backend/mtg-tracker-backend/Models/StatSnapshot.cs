@@ -3,8 +3,8 @@ namespace Mtg_tracker.Models;
 public class StatSnapshot
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
+    public required string UserId { get; set; }
+    public ApplicationUser User { get; set; } = null!;
 
     public int GamesPlayed { get; set; }
     public int GamesWon { get; set; }

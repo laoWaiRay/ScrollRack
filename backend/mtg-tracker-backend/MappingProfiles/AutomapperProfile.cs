@@ -15,7 +15,7 @@ public class AutoMapperProfile : Profile
         CreateMap<GameParticipation, GameParticipationDTO>();
         CreateMap<Room, RoomDTO>();
         CreateMap<StatSnapshot, StatSnapshotDTO>();
-        CreateMap<User, UserReadDTO>();
+        CreateMap<ApplicationUser, UserReadDTO>();
 
         // Client -> Server
         CreateMap<DeckDTO, Deck>();
@@ -24,7 +24,5 @@ public class AutoMapperProfile : Profile
         CreateMap<GameParticipationDTO, GameParticipation>();
         CreateMap<RoomDTO, Room>();
         CreateMap<StatSnapshotDTO, StatSnapshot>();
-        CreateMap<UserCreateDTO, User>();
-        CreateMap<UserUpdateDTO, User>();
     }
 }

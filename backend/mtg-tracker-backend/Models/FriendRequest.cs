@@ -26,21 +26,11 @@
 
 namespace Mtg_tracker.Models;
 
-// Use an enum and check constraint Uid1 < Uid2 to guarantee no duplicates
-// https://www.coderbased.com/p/user-friends-system-and-database
-public enum Requester
-{
-    UID1,   // Indicates User1 initiated the friend request
-    UID2    // Indicates User2 initiated the friend request
-}
-
 public class FriendRequest
 {
     public int Id { get; set; }
-    public int Uid1 { get; set; }
-    public int Uid2 { get; set; }
-    public User User1 { get; set; } = null!;
-    public User User2 { get; set; } = null!;
-
-    public required Requester Requester { get; set; }
+    public required string SenderId { get; set; }
+    public required string ReceiverId { get; set; }
+    public ApplicationUser Sender { get; set; } = null!;
+    public ApplicationUser Receiver { get; set; } = null!;
 }

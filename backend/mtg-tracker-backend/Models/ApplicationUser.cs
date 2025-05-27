@@ -1,19 +1,18 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace Mtg_tracker.Models;
 
-public class User
+public class ApplicationUser : IdentityUser
 {
-    // Account Details
-    public int Id { get; set; }
-    public required string Username { get; set; }
-    public required string Email { get; set; }
-    public required string Password { get; set; }
     public string? Profile { get; set; }
 
     public List<Deck> Decks { get; } = [];
     public List<GameParticipation> GameParticipations { get; } = [];
 
     // Friend Management
-    public List<User> Friends { get; } = [];
+    public List<ApplicationUser> Friends { get; } = [];
+    public List<FriendRequest> SentFriendRequests { get; } = [];
+    public List<FriendRequest> ReceivedFriendRequests { get; } = [];
 
     // Statistics
     public StatSnapshot? StatSnapshot { get; set; }
