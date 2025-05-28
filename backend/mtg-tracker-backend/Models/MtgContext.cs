@@ -63,6 +63,10 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             .HasMany(e => e.Friends)
             .WithMany();
 
+        modelBuilder.Entity<ApplicationUser>()
+            .HasIndex(e => e.UserName)
+            .IsUnique();
+
         // Setting explicitly probably not needed? EF Core can probably discover
         // the relationships through convention
         modelBuilder.Entity<GameParticipation>(

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mtg_tracker.Models;
 using Mtg_tracker.Models.DTOs;
+using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Data;
 
 namespace Mtg_tracker.Controllers;
 
@@ -39,25 +41,9 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         return _mapper.Map<List<UserReadDTO>>(users);
     }
 
-    // TODO: Test protected api endpoints
-    // GET: api/protected
-    [Authorize]
-    [HttpGet("protected")]
-    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsersProtected()
-    {
-        var userId = User.Identity.Name;
-        Console.WriteLine($"CLAIMS INFO: Name is --> {userId}");
-        foreach (var claim in User.Claims)
-        {
-            Console.WriteLine($"{claim.Type} : {claim.Value}");
-        }
-        var users = await _context.Users.ToListAsync();
-        return _mapper.Map<List<UserReadDTO>>(users);
-    }
-
-    // GET: api/User/id/1
+    // GET: api/User/id/{id}
     [HttpGet("id/{id}")]
-    public async Task<ActionResult<UserReadDTO>> GetUserById(int id)
+    public async Task<ActionResult<UserReadDTO>> GetUserById(string id)
     {
         var user = await _context.Users.FindAsync(id);
 
@@ -69,7 +55,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         return _mapper.Map<UserReadDTO>(user);
     }
 
-    // GET: api/User/name/raymond
+    // GET: api/User/name/{username}
     [HttpGet("name/{username}")]
     public async Task<ActionResult<UserReadDTO>> GetUserByName(string username)
     {
@@ -81,6 +67,47 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         return _mapper.Map<UserReadDTO>(user);
+    }
+
+    // PUT: api/User/{id}
+    // Edit username / profile picture
+    [Authorize]
+    [HttpPut("{id}")]
+    public async Task<ActionResult> PutUser(string id, UserWriteDTO userWriteDTO)
+    {
+        var userId = User.GetUserId();
+        if (userId is null || userId != id)
+        {
+            return Unauthorized();
+        }
+        if (userWriteDTO.Id != id)
+        {
+            return BadRequest();
+        }
+
+        var user = await _context.Users.FindAsync(id);
+        if (user is null)
+        {
+            return BadRequest();
+        }
+
+        user.Profile = userWriteDTO.Profile;
+        user.UserName = userWriteDTO.UserName;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict("Username already exists");
+        }
+        catch (DBConcurrencyException)
+        {
+            return StatusCode(500, "Error updating user details");
+        }
+
+        return NoContent();
     }
 
     [Authorize]
