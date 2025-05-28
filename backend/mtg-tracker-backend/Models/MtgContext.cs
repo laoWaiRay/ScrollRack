@@ -42,6 +42,18 @@ public class MtgContext(DbContextOptions<MtgContext> options)
                     .HasOne(e => e.Receiver)
                     .WithMany(e => e.ReceivedFriendRequests)
                     .HasForeignKey(e => e.ReceiverId);
+
+                nestedBuilder
+                    .Property(p => p.User1)
+                    .HasComputedColumnSql("LEAST(sender_id, receiver_id)", stored: true);
+
+                nestedBuilder
+                    .Property(p => p.User2)
+                    .HasComputedColumnSql("GREATEST(sender_id, receiver_id)", stored: true);
+
+                nestedBuilder
+                    .HasIndex(e => new { e.User1, e.User2 })
+                    .IsUnique();
             }
         );
 

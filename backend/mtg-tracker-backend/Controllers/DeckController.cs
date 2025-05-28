@@ -42,7 +42,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
     public async Task<ActionResult> PostDeck(DeckDTO deckDTO)
     {
         var userId = User.GetUserId();
-        if (userId is null || await _context.UserExists(userId) is false)
+        if (userId is null)
         {
             return Unauthorized();
         }
@@ -73,12 +73,6 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<DeckDTO>> PutDeck(DeckDTO deckDTO, int id)
     {
-        var userId = User.GetUserId();
-        if (userId != User.GetUserId())
-        {
-            return Unauthorized();
-        }
-
         if (deckDTO.Id != id)
         {
             return BadRequest();
@@ -88,6 +82,11 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
         if (deck is null)
         {
             return NotFound();
+        }
+
+        if (deck.UserId != User.GetUserId())
+        {
+            return Unauthorized();
         }
 
         deck.Moxfield = deckDTO.Moxfield;
