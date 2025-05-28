@@ -98,5 +98,21 @@ public class MtgContext(DbContextOptions<MtgContext> options)
                     .IsUnique();
             }
         );
+
+        modelBuilder.Entity<Room>(
+            nestedBuilder =>
+            {
+                nestedBuilder
+                    .HasOne(e => e.RoomOwner)
+                    .WithOne(e => e.HostedRoom)
+                    .HasForeignKey<Room>(e => e.RoomOwnerId);
+
+                nestedBuilder
+                    .HasMany(e => e.Players)
+                    .WithOne(e => e.JoinedRoom)
+                    .HasForeignKey(e => e.JoinedRoomId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            }
+        );
     }
 }

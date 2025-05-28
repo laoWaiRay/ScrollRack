@@ -9,6 +9,13 @@ public class ApplicationUser : IdentityUser
     public List<Deck> Decks { get; } = [];
     public List<GameParticipation> GameParticipations { get; } = [];
 
+    // A user may either be the host of a game room, or join another
+    // user's room, but not both at the same time.
+    public Room? HostedRoom { get; set; }
+
+    public Room? JoinedRoom { get; set; }
+    public int? JoinedRoomId { get; set; }
+
     // Friend Management
     public List<ApplicationUser> Friends { get; } = [];
     public List<FriendRequest> SentFriendRequests { get; } = [];
