@@ -66,12 +66,29 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
             return Unauthorized();
         }
 
+        var user = await _context.Users
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
         var receiver = await _context.Users.FindAsync(receiverId);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
         if (receiver is null)
         {
             return NotFound();
         }
 
+        // Check users are not already friends
+        var isAlreadyFriend = user.Friends.Any(u => u.Id == receiverId);
+        if (isAlreadyFriend)
+        {
+            return BadRequest();
+        }
+        
         var friendRequest = new FriendRequest
         {
             SenderId = userId,
