@@ -35,6 +35,21 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
         return _mapper.Map<List<DeckDTO>>(userDecks);
     }
 
+    // GET: api/deck/{id}
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<DeckDTO>> GetDeck(int id)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var deck = await _context.Decks.FindAsync(id);
+        return _mapper.Map<DeckDTO>(deck);
+    }
+
     // POST: api/deck
     // Creates a new deck for the current user
     [Authorize]
@@ -61,7 +76,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         return CreatedAtAction(
-            nameof(GetDecks),
+            nameof(GetDeck),
             new { id = deck.Id },
             _mapper.Map<DeckDTO>(deck)
         );
