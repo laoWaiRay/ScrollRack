@@ -28,7 +28,10 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        var currentUser = await _context.Users.FindAsync(userId);
+        var currentUser = await _context.Users
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
         if (currentUser is null)
         {
             return Unauthorized();
