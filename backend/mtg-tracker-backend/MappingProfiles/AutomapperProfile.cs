@@ -22,6 +22,7 @@ public class AutoMapperProfile : Profile
         CreateMap<FriendRequestDTO, FriendRequest>();
         CreateMap<GameDTO, Game>();
         CreateMap<GameParticipationReadDTO, GameParticipation>();
+        CreateMap<GameParticipationWriteDTO, GameParticipation>();
         CreateMap<RoomDTO, Room>();
         CreateMap<StatSnapshotDTO, StatSnapshot>();
     }
