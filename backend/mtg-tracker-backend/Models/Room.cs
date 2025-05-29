@@ -17,7 +17,7 @@ public class Room
     public string RoomOwnerId { get; set; } = null!;
     public ApplicationUser RoomOwner { get; set; } = null!;
 
-    // Players (not including the room owner)
+    // Players (including the room owner)
     public List<ApplicationUser> Players { get; set; } = [];
 
     public required string Code { get; set; }

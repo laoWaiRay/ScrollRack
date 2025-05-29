@@ -24,7 +24,10 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
     {
-        var rooms = await _context.Rooms.ToListAsync();
+        var rooms = await _context.Rooms
+            .Include(r => r.Players)
+            .ToListAsync();
+
         return _mapper.Map<List<RoomDTO>>(rooms);
     }
 
@@ -77,10 +80,17 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             }
         } while (codeTaken);
 
+        var user = await _context.Users.FindAsync(userId);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
         var room = new Room
         {
             Code = roomCode,
-            RoomOwnerId = userId
+            RoomOwnerId = userId,
+            Players = [user]
         };
 
         _context.Rooms.Add(room);
@@ -141,7 +151,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         room.Players.Add(user);
-        
+
         try
         {
             await _context.SaveChangesAsync();
@@ -153,7 +163,121 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
         return Ok();
     }
-    
+
+    // POST: api/room/{roomCode}/players
+    // Add a player to the room (Host-only)
+    [Authorize]
+    [HttpPost("{roomCode}/players")]
+    public async Task<ActionResult> AddPlayer(string roomCode, AddPlayerDTO addPlayerDTO)
+    {
+        string playerId = addPlayerDTO.Id;
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var room = await _context.Rooms
+            .Include(r => r.Players)
+            .FirstOrDefaultAsync(r => r.Code == roomCode);
+
+        if (room is null)
+        {
+            return NotFound();
+        }
+
+        // Only Host can add players to the room
+        if (room.RoomOwnerId != userId)
+        {
+            return Unauthorized();
+        }
+
+        // Player to add must not already be in a room
+        var playerToAdd = await _context.Users
+            .Include(u => u.HostedRoom)
+            .Include(u => u.JoinedRoom)
+            .FirstOrDefaultAsync(u => u.Id == playerId);
+
+        if (playerToAdd is null)
+        {
+            return NotFound();
+        }
+
+        if (playerToAdd.HostedRoom is not null || playerToAdd.JoinedRoom is not null)
+        {
+            return Conflict("Cannot add user already in a room");
+        }
+
+        // Check that players are friends before allowing host to manually add
+        var host = await _context.Users
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (host is null ||
+            host.Friends is null ||
+            host.Friends.Contains(playerToAdd) is false)
+        {
+            return Unauthorized("Can only add users in host's friend list");         
+        }
+
+        room.Players.Add(playerToAdd);
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return StatusCode(500, "Error adding player to room");
+        }
+
+        return Ok(_mapper.Map<RoomDTO>(room));
+    }
+
+    // DELETE: api/room/{roomCode}/players/{id}
+    // Removes a player from the room (Host only)
+    [Authorize]
+    [HttpDelete("{roomCode}/players/{id}")]
+    public async Task<ActionResult> RemovePlayer(string roomCode, string id)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        // Host should not remove themself using this endpoint. Instead they
+        // should use the endpoint that deletes the room, which will also remove
+        // every joined player.
+        if (userId == id)
+        {
+            return BadRequest();
+        }
+
+        var user = await _context.Users
+            .Include(u => u.HostedRoom)
+            .ThenInclude(r => r!.Players)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        // Only the Host can remove a player from the room
+        if (user is null ||
+            user.HostedRoom is null ||
+            user.HostedRoom.Code != roomCode)
+        {
+            return Unauthorized();
+        }
+
+        var playerToRemove = await _context.Users.FindAsync(id);
+        if (playerToRemove is null)
+        {
+            return NotFound();
+        }
+
+        user.HostedRoom.Players.Remove(playerToRemove);
+        await _context.SaveChangesAsync();
+
+        return Ok(_mapper.Map<RoomDTO>(user.HostedRoom));
+    }
+
     // DELETE: api/room
     // Reset the user's joined/hosted room status:
     //      Deletes the current user's hosted room, if they are hosting.
@@ -172,7 +296,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             .Include(u => u.HostedRoom)
             .Include(u => u.JoinedRoom)
             .FirstOrDefaultAsync(u => u.Id == userId);
-        
+
         if (user is null)
         {
             return Unauthorized();
