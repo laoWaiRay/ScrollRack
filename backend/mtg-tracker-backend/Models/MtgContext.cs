@@ -112,6 +112,16 @@ public class MtgContext(DbContextOptions<MtgContext> options)
                     .WithOne(e => e.JoinedRoom)
                     .HasForeignKey(e => e.JoinedRoomId)
                     .OnDelete(DeleteBehavior.SetNull);
+
+                nestedBuilder
+                    .HasMany(e => e.Games)
+                    .WithOne(e => e.Room)
+                    .HasForeignKey(e => e.RoomId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                nestedBuilder
+                    .HasIndex(b => new { b.Code })
+                    .IsUnique();
             }
         );
     }

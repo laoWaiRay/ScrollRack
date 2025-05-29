@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mtg_tracker.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mtg_tracker.Migrations
 {
     [DbContext(typeof(MtgContext))]
-    partial class MtgContextModelSnapshot : ModelSnapshot
+    [Migration("20250528234343_MakeRoomIdRequiredOnGameModel")]
+    partial class MakeRoomIdRequiredOnGameModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -417,7 +420,7 @@ namespace Mtg_tracker.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("num_turns");
 
-                    b.Property<int?>("RoomId")
+                    b.Property<int>("RoomId")
                         .HasColumnType("integer")
                         .HasColumnName("room_id");
 
@@ -425,6 +428,7 @@ namespace Mtg_tracker.Migrations
                         .HasName("pk_games");
 
                     b.HasIndex("RoomId")
+                        .IsUnique()
                         .HasDatabaseName("ix_games_room_id");
 
                     b.ToTable("games", (string)null);
@@ -495,12 +499,6 @@ namespace Mtg_tracker.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("room_owner_id");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea")
-                        .HasColumnName("row_version");
 
                     b.HasKey("Id")
                         .HasName("pk_rooms");
@@ -695,9 +693,10 @@ namespace Mtg_tracker.Migrations
             modelBuilder.Entity("Mtg_tracker.Models.Game", b =>
                 {
                     b.HasOne("Mtg_tracker.Models.Room", "Room")
-                        .WithMany("Games")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .WithOne("Game")
+                        .HasForeignKey("Mtg_tracker.Models.Game", "RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
                         .HasConstraintName("fk_games_rooms_room_id");
 
                     b.Navigation("Room");
@@ -784,7 +783,7 @@ namespace Mtg_tracker.Migrations
 
             modelBuilder.Entity("Mtg_tracker.Models.Room", b =>
                 {
-                    b.Navigation("Games");
+                    b.Navigation("Game");
 
                     b.Navigation("Players");
                 });

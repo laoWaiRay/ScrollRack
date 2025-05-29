@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Mtg_tracker.Models;
 
 /*
@@ -9,8 +11,7 @@ namespace Mtg_tracker.Models;
 public class Room
 {
     public int Id { get; set; }
-    public int GameId { get; set; }
-    public Game Game { get; set; } = null!;
+    public List<Game> Games { get; set; } = [];
 
     // The user that created the room
     public string RoomOwnerId { get; set; } = null!;
@@ -21,4 +22,9 @@ public class Room
 
     public required string Code { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Concurrency token for detecting conflicting writes
+    // (e.g. when players are joining a room)
+    [Timestamp]
+    public byte[]? RowVersion { get; set; }
 }
