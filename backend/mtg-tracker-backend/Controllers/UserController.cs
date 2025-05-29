@@ -110,6 +110,36 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         return NoContent();
     }
 
+    // POST: api/user/register
+    // Custom registration endpoint to be used instead of the default endpoint
+    // created by Identity minimal API endpoints
+    [HttpPost("register")]
+    public async Task<ActionResult> Register(UserManager<ApplicationUser> userManager, UserRegisterDTO userRegisterDTO)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = userRegisterDTO.UserName,
+            Email = userRegisterDTO.Email,
+        };
+
+        var result = await userManager.CreateAsync(user, userRegisterDTO.Password);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        // Create initial empty stat snapshot
+        user.StatSnapshot = new StatSnapshot
+        {
+            UserId = user.Id
+        };
+
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
     [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(SignInManager<ApplicationUser> signInManager, [FromBody] object empty)
