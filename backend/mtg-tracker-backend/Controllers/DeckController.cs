@@ -20,7 +20,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
     // Returns all decks for the current user
     [Authorize]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DeckDTO>>> GetDecks()
+    public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetDecks()
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -32,13 +32,14 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             .Where(d => d.UserId == userId)
             .ToListAsync();
 
-        return _mapper.Map<List<DeckDTO>>(userDecks);
+        return _mapper.Map<List<DeckReadDTO>>(userDecks);
     }
 
     // GET: api/deck/{id}
+    // Get a specific deck by id
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<ActionResult<DeckDTO>> GetDeck(int id)
+    public async Task<ActionResult<DeckReadDTO>> GetDeck(int id)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -47,14 +48,14 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         var deck = await _context.Decks.FindAsync(id);
-        return _mapper.Map<DeckDTO>(deck);
+        return _mapper.Map<DeckReadDTO>(deck);
     }
 
     // POST: api/deck
     // Creates a new deck for the current user
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostDeck(DeckDTO deckDTO)
+    public async Task<ActionResult> PostDeck(DeckWriteDTO deckDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -78,7 +79,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
         return CreatedAtAction(
             nameof(GetDeck),
             new { id = deck.Id },
-            _mapper.Map<DeckDTO>(deck)
+            _mapper.Map<DeckReadDTO>(deck)
         );
     }
 
@@ -86,13 +87,8 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
     // Update a deck
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult<DeckDTO>> PutDeck(DeckDTO deckDTO, int id)
+    public async Task<ActionResult<DeckReadDTO>> PutDeck(DeckWriteDTO deckDTO, int id)
     {
-        if (deckDTO.Id != id)
-        {
-            return BadRequest();
-        }
-
         var deck = await _context.Decks.FindAsync(id);
         if (deck is null)
         {
@@ -115,7 +111,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             return NotFound();
         }
 
-        return NoContent();
+        return Ok(_mapper.Map<DeckReadDTO>(deck));
     }
     
     // DELETE api/deck/{id}

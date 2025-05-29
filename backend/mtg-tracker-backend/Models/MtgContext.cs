@@ -30,6 +30,10 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             .Property(e => e.CreatedAt)
             .HasDefaultValueSql("NOW()");
 
+        modelBuilder.Entity<GameParticipation>()
+            .Property(e => e.CreatedAt)
+            .HasDefaultValueSql("NOW()");
+
         modelBuilder.Entity<FriendRequest>(
             nestedBuilder =>
             {
@@ -86,6 +90,10 @@ public class MtgContext(DbContextOptions<MtgContext> options)
                     .HasOne(e => e.Game)
                     .WithMany(e => e.GameParticipations)
                     .HasForeignKey(e => e.GameId);
+
+                nestedBuilder
+                    .HasIndex(e => new { e.DeckId, e.GameId })
+                    .IsUnique();
             }
         );
 

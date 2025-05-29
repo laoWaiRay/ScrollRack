@@ -9,19 +9,19 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         // Server -> Client
-        CreateMap<Deck, DeckDTO>();
+        CreateMap<Deck, DeckReadDTO>();
         CreateMap<FriendRequest, FriendRequestDTO>();
         CreateMap<Game, GameDTO>();
-        CreateMap<GameParticipation, GameParticipationDTO>();
+        CreateMap<GameParticipation, GameParticipationReadDTO>();
         CreateMap<Room, RoomDTO>();
         CreateMap<StatSnapshot, StatSnapshotDTO>();
         CreateMap<ApplicationUser, UserReadDTO>();
 
         // Client -> Server
-        CreateMap<DeckDTO, Deck>();
+        CreateMap<DeckReadDTO, Deck>();
         CreateMap<FriendRequestDTO, FriendRequest>();
         CreateMap<GameDTO, Game>();
-        CreateMap<GameParticipationDTO, GameParticipation>();
+        CreateMap<GameParticipationReadDTO, GameParticipation>();
         CreateMap<RoomDTO, Room>();
         CreateMap<StatSnapshotDTO, StatSnapshot>();
     }

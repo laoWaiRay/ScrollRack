@@ -12,4 +12,5 @@ public class GameParticipation
     public Deck Deck { get; set; } = null!;
 
     public bool Won { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
