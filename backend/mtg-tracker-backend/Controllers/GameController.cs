@@ -5,7 +5,6 @@ using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
 
 namespace Mtg_tracker.Controllers;
 
@@ -27,7 +26,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
 
     // GET: api/game/{id}
     // Returns details for a specific game
-    [HttpGet]
+    [HttpGet("{id}")]
     public async Task<ActionResult<GameDTO>> GetGame(int id)
     {
         var game = await _context.Games.FindAsync(id);
@@ -43,9 +42,32 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
     // Create a new game
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostGame()
+    public async Task<ActionResult> PostGame(GameDTO gameDTO)
     {
-        Game game = new();
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        // User must be the host of a room to create a game
+        var user = await _context.Users
+            .Include(u => u.HostedRoom)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        if (user.HostedRoom is null)
+        {
+            return BadRequest("Only room host can create a game");
+        }
+
+        Game game = _mapper.Map<Game>(gameDTO);
+        game.RoomId = user.HostedRoom.Id;
+
         _context.Games.Add(game);
         await _context.SaveChangesAsync();
 
