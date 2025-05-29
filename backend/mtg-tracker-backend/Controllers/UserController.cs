@@ -34,6 +34,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     private readonly IMapper _mapper = mapper;
 
     // GET: api/User
+    // Get a list of all users
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers()
     {
@@ -42,6 +43,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     }
 
     // GET: api/User/id/{id}
+    // Get a specific user by id
     [HttpGet("id/{id}")]
     public async Task<ActionResult<UserReadDTO>> GetUserById(string id)
     {
@@ -56,6 +58,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     }
 
     // GET: api/User/name/{username}
+    // Get a specific user by username
     [HttpGet("name/{username}")]
     public async Task<ActionResult<UserReadDTO>> GetUserByName(string username)
     {
@@ -67,6 +70,23 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         return _mapper.Map<UserReadDTO>(user);
+    }
+
+    // GET: api/User/{id}/decks
+    // Get all decks for a specific user
+    [HttpGet("{id}/decks")]
+    public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetUserDecks(string id)
+    {
+        var user = await _context.Users
+            .Include(u => u.Decks)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        return _mapper.Map<List<DeckReadDTO>>(user.Decks);
     }
 
     // PUT: api/User/{id}
