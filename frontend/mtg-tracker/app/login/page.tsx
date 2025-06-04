@@ -10,19 +10,22 @@ export default function LoginPage() {
           <div className="flex justify-center">
 
             {/* Login/Signup Form */}
-            <div className="p-12 border border-solid">
+            <div className="p-12 border border-solid rounded-md w-full mx-12">
               <form action="">
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome Back</h2>
                 <div className="flex flex-col">
-                  <input className="border-1 my-1 p-1" type="text" placeholder="Email" />                
-                  <input className="border-1 my-1 p-1" type="text" placeholder="Password" />                
+                  <input className="border my-1 p-1" type="text" placeholder="Email" />                
+                  <input className="border my-1 p-1" type="text" placeholder="Password" />                
                 </div>
-                <button></button>
               </form>
-              <button>
+              <div>- OR -</div>
+              <button className="border p-2 my-1">
                 Continue With Google
               </button>
+              <hr className="border-t border-black my-4" />
+              <div>Don't have an account? <a className="text-blue-800 font-semibold">Sign Up</a></div>
             </div>
+
 
           </div>
         </div>

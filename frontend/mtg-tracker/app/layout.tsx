@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         id="root"
-        className={`${commissioner.className} bg-slate-300 min-h-dvh`}
+        className={`${commissioner.className} bg-surface-600 text-fg min-h-dvh`}
       >
         {children}
       </body>
