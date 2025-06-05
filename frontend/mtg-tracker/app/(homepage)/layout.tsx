@@ -23,11 +23,11 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 						<div className="flex flex-col">
 							<div className="flex items-center">
                 <LogoImage title="Scroll with quill writing" className="text-white" />
-								<h2 className="font-dancing-script text-3xl text-white">
+								<h2 className="font-dancing-script text-3xl text-white select-none">
 									ScrollRack
 								</h2>
 							</div>
-							<h2 className="font-dancing-script text-xl text-fg">
+							<h2 className="font-dancing-script text-xl text-fg select-none">
 								the Commander game tracker
 							</h2>
 						</div>

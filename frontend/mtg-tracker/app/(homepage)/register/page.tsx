@@ -20,7 +20,7 @@ export default function RegisterPage() {
 			className={`${styles.gridB} flex flex-col justify-center items-start mx-12`}
 		>
 			<div className={`flex flex-col justify-center px-12 py-12`}>
-				<h1 className="text-lg mb-4 text-fg-light font-semibold">
+				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
 					Create an account
 				</h1>
 				<TextInput
@@ -56,7 +56,7 @@ export default function RegisterPage() {
 				<ButtonPrimary onClick={() => {}}>Log in</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
 					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
-					<span>OR</span>
+					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
 				<ButtonPrimary onClick={() => {}} style="google">
@@ -67,7 +67,7 @@ export default function RegisterPage() {
 
 				<div className="flex justify-center items-center">
 					Already have an account?{" "}
-					<Link href="/login" className="link">
+					<Link href="/login" className="link px-1">
 						Log in
 					</Link>
 				</div>
