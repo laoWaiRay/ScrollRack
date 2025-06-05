@@ -164,17 +164,37 @@ Tailwind CSS Theme
     --color-error: var(--error);
     
 
-    /* Font size changes use golden ratio */
+    /* Font size changes */
     --text-sm: 0.618rem;
     --text-base: 1rem;
-    --text-lg: 1.618rem;
-    --text-xl: 2.618rem;
-    --text-2xl: 4.236rem;
-    --text-3xl: 6.853rem;
+    --text-lg: 1.25rem; 
+    --text-xl: 2rem;
+    --text-2xl: 3.25rem;
+    --text-3xl: 5.25rem;
     
     /* Fonts */
     --font-dancing-script: var(--font-dancing-script), sans-serif;
 }
+
+
+/*--------------------------------------------------------------------------------------
+Global CSS
+--------------------------------------------------------------------------------------*/
+
+:root {
+    scrollbar-color: var(--surface-300) var(--surface-600);
+}
+
+*:focus-visible {
+    @apply outline-0 ring-2 ring-primary-100;
+}
+
+/* Change form input autofill style */
+input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px var(--primary-600) inset;
+  caret-color: black;
+}
+
 
 
 /*--------------------------------------------------------------------------------------
@@ -183,5 +203,25 @@ Tailwind Components
 @layer components {
     .bg-gradient-hero {
         background-image: linear-gradient(to right bottom, #2b2038, #241d2f, #1d1a25, #18161c, #121212);
+    }
+
+    .bg-primary-600.focus-outline[data-focus] {
+        @apply outline-0 !ring-4 !ring-primary-100;
+    }
+    
+    .link {
+        @apply font-semibold text-fg-light rounded px-1 py-1;
+    }
+}
+
+/*--------------------------------------------------------------------------------------
+Tailwind Utilities
+--------------------------------------------------------------------------------------*/
+@layer utilities {
+    .p-sm {
+        @apply px-1 py-1;
+    }
+    .p-md {
+        @apply px-4 py-2;
     }
 }

@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         id="root"
-        className={`${commissioner.className} ${dancingScript.variable} bg-surface-600 text-white min-h-dvh`}
+        className={`${commissioner.className} ${dancingScript.variable} bg-surface-600 text-fg min-h-dvh`}
       >
         {children}
       </body>
