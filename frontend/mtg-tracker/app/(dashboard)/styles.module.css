@@ -1,0 +1,17 @@
+.gridLayout {
+    display: grid;
+    grid-template-columns: 1fr 5fr;
+    grid-template-rows: 1fr;
+    column-gap: 20px;
+    margin-inline: 15px;
+}
+
+.gridA {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.gridB {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
