@@ -1,8 +1,16 @@
+import Link from "next/link";
+
 export default function HomePage() {
 	return (
 		<main>
 			<section className="bg-surface-600">Main Content</section>
       <div className="p-12 bg-surface-500">
+
+        <div className="flex gap-4">
+          <Link className="block p-6 bg-surface-300" href="/login">/login</Link>
+          <Link className="block p-6 bg-surface-300" href="/register">/register</Link>
+          <Link className="block p-6 bg-surface-300" href="/commandzone">/commandzone</Link>
+        </div>
 
         <p className="text-fg-light">Light Text</p>
         <p className="text-fg">Normal Text</p>

@@ -1,9 +1,7 @@
 .gridLayout {
     display: grid;
-    grid-template-columns: 1fr 5fr;
+    grid-template-columns: clamp(240px, 16.66vw, 300px) 1fr;
     grid-template-rows: 1fr;
-    column-gap: 20px;
-    margin-inline: 15px;
 }
 
 .gridA {
