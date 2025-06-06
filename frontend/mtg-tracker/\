@@ -8,7 +8,7 @@ interface SidebarLink {
 
 
 export default function SidebarLink({ children, href, isActive }: SidebarLink) {
-  const activeLinkStyle = isActive ? "bg-primary-500 hover:!bg-primary-400" : "";
+  const activeLinkStyle = isActive ? "bg-primary-600" : "";
 
   return (
     <Link href={href} className={`${activeLinkStyle} flex items-center justify-start p-md rounded text-fg-light hover:bg-surface-400`}>

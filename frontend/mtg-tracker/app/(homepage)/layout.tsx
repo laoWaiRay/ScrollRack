@@ -21,9 +21,9 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 						className={`flex flex-col justify-center items-center mb-16 mt-12`}
 					>
 						<div className="flex flex-col">
-							<div className="flex items-center">
-                <LogoImage title="Scroll with quill writing" className="text-white" />
-								<h2 className="font-dancing-script text-3xl text-white select-none">
+							<div className="flex items-center text-3xl text-white">
+                <LogoImage title="Scroll with quill writing" className="w-[1em] h-[1em] shrink-0" />
+								<h2 className="font-dancing-script select-none">
 									ScrollRack
 								</h2>
 							</div>

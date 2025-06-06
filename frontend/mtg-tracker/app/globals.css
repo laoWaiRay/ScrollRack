@@ -101,12 +101,12 @@ CSS VARIABLES
         --fg-dark: #ffffff61;
 
         /* Primary Tints: Buttons, links, and other primary elements */
-        --primary-100: #e2c9ff;
-        --primary-200: #dabbfe;
-        --primary-300: #d2aefe;
-        --primary-400: #caa1fd;
-        --primary-500: #c293fd;
-        --primary-600: #b986fc;
+        --primary-100: #be9af9;
+        --primary-200: #ab82f7;
+        --primary-300: #976af4;
+        --primary-400: #8251f1;
+        --primary-500: #6937ee;
+        --primary-600: #4917eb;
         
         /* Surface Colors: Cards, backgrounds, and other surface elements */
         --surface-100: #8b8b8b;
