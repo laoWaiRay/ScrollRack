@@ -27,7 +27,7 @@ export default function Footer() {
 					<a href="https://buymeacoffee.com/laowairay" className="flex mr-[6px] link text-fg">
 						Buy me a coffee
 						<Image
-              className="ml-2"
+              className="ml-2 w-[1em] h-[1em]"
 							src="/icons/bmc-logo-light.svg"
 							alt="Coffee cup"
 							width={16}

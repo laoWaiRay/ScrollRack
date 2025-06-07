@@ -15,9 +15,9 @@ interface ButtonStyle {
 
 const buttonStyles: {[style: string]: ButtonStyle} = {
   primary: {
-    color: 'bg-primary-600',
-    hover: 'data-hover:bg-primary-400',
-    active: 'data-hover:data-active:bg-primary-500',
+    color: 'bg-primary-500',
+    hover: 'data-hover:bg-primary-300',
+    active: 'data-hover:data-active:bg-primary-400',
     textColor: 'text-white'    
   },
   google: {

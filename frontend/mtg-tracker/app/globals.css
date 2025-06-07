@@ -19,12 +19,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    interpolate-size: allow-keywords;
-  }
-}
-
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
@@ -32,17 +26,6 @@ img, picture, video, canvas, svg {
 
 input, button, textarea, select {
   font: inherit;
-}
-
-p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-}
-
-p {
-  text-wrap: pretty;
-}
-h1, h2, h3, h4, h5, h6 {
-  text-wrap: balance;
 }
 
 #root {
@@ -194,7 +177,6 @@ input:-webkit-autofill {
   box-shadow: 0 0 0px 1000px var(--primary-600) inset;
   caret-color: black;
 }
-
 
 
 /*--------------------------------------------------------------------------------------

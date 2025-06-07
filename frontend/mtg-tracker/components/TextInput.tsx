@@ -26,7 +26,7 @@ export default function TextInput({
   toggleHidden
 }: TextInputProps) {
 	function renderEyeIcon() {
-    const iconStyle = `text-white absolute right-0 top-1/2 translate-y-[-57%]`;
+    const iconStyle = `text-white absolute right-0 top-1/2 translate-y-[-57%] p-2`;
 
 		if (type != "password" || toggleHidden == undefined) {
 			return null;

@@ -9,7 +9,7 @@ interface ButtonIconInterface {
 export default function ButtonIcon({ children, styles, onClick }: ButtonIconInterface) {
   return (
     <Button
-      className={`${styles} p-2 rounded hover:cursor-pointer`}
+      className={`${styles} rounded hover:cursor-pointer`}
       onClick={onClick}
     >
       { children }
