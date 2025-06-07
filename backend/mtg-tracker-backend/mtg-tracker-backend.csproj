@@ -5,6 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Mtg_tracker</RootNamespace>
+    
+    <!-- OpenApi file generation -->
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
+    <OpenApiFileName>open-api</OpenApiFileName>
+    <OpenApiGenerateDocumentsOptions>--file-name open-api</OpenApiGenerateDocumentsOptions>
+    <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,9 +29,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="9.0.4" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
   </ItemGroup>
+
+  <Target Name="CopyOpenApiToFrontend" AfterTargets="AfterBuild">
+      <PropertyGroup>
+          <FrontendRootDir>/Users/raymondly/repos/mtg-tracker/frontend/mtg-tracker</FrontendRootDir>
+          <OutputPath>$(FrontendRootDir)</OutputPath>
+      </PropertyGroup>
+      <Copy DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" SourceFiles="$(MSBuildProjectDirectory)/$(OpenApiFileName).json"></Copy>
+      <Message Text="Wrote OpenApi to $(OutputPath)/$(OpenApiFileName)" Importance="High"></Message>
+  </Target>
 
 </Project>

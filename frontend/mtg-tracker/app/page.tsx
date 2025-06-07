@@ -1,6 +1,15 @@
+"use client"
 import Link from "next/link";
+import { schemas, api } from "@/generated/client";
 
 export default function HomePage() {
+  // Testing the generated code
+  async function getUsers() {
+      // const users = await fetch("https://localhost:7165/api/user").then(response => response.json());
+      const users = await api.getApiUser();
+      console.log(users);
+  }
+
 	return (
 		<main>
 			<section className="bg-surface-600">Main Content</section>
@@ -49,6 +58,8 @@ export default function HomePage() {
         <p className="text-2xl">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas accusantium praesentium doloribus quos voluptatibus officia sapiente cumque minima ducimus, placeat officiis vel nesciunt, doloremque iusto dolore at mollitia non. Illum.</p>
         <p className="text-3xl">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laboriosam corrupti, quia temporibus culpa ullam aspernatur rem consequatur laborum id quos maxime atque praesentium voluptatem odit doloribus fugiat nobis exercitationem repudiandae.</p>
 
+        <h1>Test the API!</h1>
+        <button onClick={getUsers}>Get all users</button>
       </div>
 		</main>
 	);
