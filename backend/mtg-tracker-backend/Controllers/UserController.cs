@@ -33,6 +33,28 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
 
+    // GET: api/User/identity
+    // Return the current user. Used for session verification.
+    [Authorize]
+    [HttpGet("identity")]
+    public async Task<ActionResult<UserReadDTO>> Identity()
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users.FindAsync(userId);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        return _mapper.Map<UserReadDTO>(user);
+    }
+
     // GET: api/User
     // Get a list of all users
     [HttpGet]
@@ -170,5 +192,24 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             return Ok();
         }
         return Unauthorized();
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<UserReadDTO>> Login(SignInManager<ApplicationUser> signInManager, UserLoginDTO loginDTO)
+    {
+        var result = await signInManager.PasswordSignInAsync(loginDTO.Email, loginDTO.Password, true, false);
+
+        if (!result.Succeeded)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        return _mapper.Map<UserReadDTO>(user);
     }
 }

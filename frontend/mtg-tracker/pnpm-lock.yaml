@@ -17,6 +17,9 @@ importers:
       '@material-tailwind/react':
         specifier: ^2.1.10
         version: 2.1.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@next/env':
+        specifier: ^15.3.3
+        version: 15.3.3
       '@zodios/core':
         specifier: ^10.9.6
         version: 10.9.6(axios@1.9.0)(zod@3.25.56)

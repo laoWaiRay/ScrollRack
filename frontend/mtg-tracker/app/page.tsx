@@ -1,13 +1,17 @@
 "use client"
 import Link from "next/link";
-import { schemas, api } from "@/generated/client";
+import { verifySession } from "@/actions/verifySession";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  // Testing the generated code
-  async function getUsers() {
-      // const users = await fetch("https://localhost:7165/api/user").then(response => response.json());
-      const users = await api.getApiUser();
-      console.log(users);
+  const router = useRouter();
+
+  async function verifyHook() {
+    let user = await verifySession();
+    if (user == null) {
+      router.push("/login");
+    }
+    console.log(user);
   }
 
 	return (
@@ -59,7 +63,7 @@ export default function HomePage() {
         <p className="text-3xl">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Laboriosam corrupti, quia temporibus culpa ullam aspernatur rem consequatur laborum id quos maxime atque praesentium voluptatem odit doloribus fugiat nobis exercitationem repudiandae.</p>
 
         <h1>Test the API!</h1>
-        <button onClick={getUsers}>Get all users</button>
+        <button onClick={verifyHook}>Get all users</button>
       </div>
 		</main>
 	);

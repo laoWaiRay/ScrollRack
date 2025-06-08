@@ -17,7 +17,6 @@ type UserReadDTO = {
 
 const RegisterRequest = z
   .object({ email: z.string(), password: z.string() })
-  .strict()
   .passthrough();
 const LoginRequest = z
   .object({
@@ -26,7 +25,6 @@ const LoginRequest = z
     twoFactorCode: z.string().nullish(),
     twoFactorRecoveryCode: z.string().nullish(),
   })
-  .strict()
   .passthrough();
 const AccessTokenResponse = z
   .object({
@@ -35,23 +33,14 @@ const AccessTokenResponse = z
     expiresIn: z.number().int(),
     refreshToken: z.string(),
   })
-  .strict()
   .passthrough();
-const RefreshRequest = z
-  .object({ refreshToken: z.string() })
-  .strict()
-  .passthrough();
+const RefreshRequest = z.object({ refreshToken: z.string() }).passthrough();
 const ResendConfirmationEmailRequest = z
   .object({ email: z.string() })
-  .strict()
   .passthrough();
-const ForgotPasswordRequest = z
-  .object({ email: z.string() })
-  .strict()
-  .passthrough();
+const ForgotPasswordRequest = z.object({ email: z.string() }).passthrough();
 const ResetPasswordRequest = z
   .object({ email: z.string(), resetCode: z.string(), newPassword: z.string() })
-  .strict()
   .passthrough();
 const TwoFactorRequest = z
   .object({
@@ -62,7 +51,6 @@ const TwoFactorRequest = z
     forgetMachine: z.boolean(),
   })
   .partial()
-  .strict()
   .passthrough();
 const TwoFactorResponse = z
   .object({
@@ -72,11 +60,9 @@ const TwoFactorResponse = z
     isTwoFactorEnabled: z.boolean(),
     isMachineRemembered: z.boolean(),
   })
-  .strict()
   .passthrough();
 const InfoResponse = z
   .object({ email: z.string(), isEmailConfirmed: z.boolean() })
-  .strict()
   .passthrough();
 const InfoRequest = z
   .object({
@@ -85,7 +71,6 @@ const InfoRequest = z
     oldPassword: z.string().nullable(),
   })
   .partial()
-  .strict()
   .passthrough();
 const DeckReadDTO = z
   .object({
@@ -96,7 +81,6 @@ const DeckReadDTO = z
     numGames: z.number().int().optional(),
     numWins: z.number().int().optional(),
   })
-  .strict()
   .passthrough();
 const DeckWriteDTO = z
   .object({
@@ -106,7 +90,6 @@ const DeckWriteDTO = z
     numGames: z.number().int().optional(),
     numWins: z.number().int().optional(),
   })
-  .strict()
   .passthrough();
 const UserReadDTO: z.ZodType<UserReadDTO> = z
   .object({
@@ -115,7 +98,6 @@ const UserReadDTO: z.ZodType<UserReadDTO> = z
     email: z.string(),
     profile: z.string().nullish(),
   })
-  .strict()
   .passthrough();
 const FriendRequestDTO = z
   .object({
@@ -123,7 +105,6 @@ const FriendRequestDTO = z
     senderId: z.string(),
     receiverId: z.string(),
   })
-  .strict()
   .passthrough();
 const GameDTO = z
   .object({
@@ -134,12 +115,10 @@ const GameDTO = z
     createdAt: z.string().datetime({ offset: true }),
   })
   .partial()
-  .strict()
   .passthrough();
 const GameParticipationReadDTO = z
   .object({ id: z.number().int(), won: z.boolean() })
   .partial()
-  .strict()
   .passthrough();
 const GameParticipationWriteDTO = z
   .object({
@@ -148,7 +127,6 @@ const GameParticipationWriteDTO = z
     deckId: z.number().int().optional(),
     won: z.boolean().optional(),
   })
-  .strict()
   .passthrough();
 const RoomDTO: z.ZodType<RoomDTO> = z
   .object({
@@ -158,9 +136,8 @@ const RoomDTO: z.ZodType<RoomDTO> = z
     createdAt: z.string().datetime({ offset: true }).optional(),
     players: z.array(UserReadDTO).optional(),
   })
-  .strict()
   .passthrough();
-const AddPlayerDTO = z.object({ id: z.string() }).strict().passthrough();
+const AddPlayerDTO = z.object({ id: z.string() }).passthrough();
 const StatSnapshotDTO = z
   .object({
     gamesPlayed: z.number().int(),
@@ -173,7 +150,6 @@ const StatSnapshotDTO = z
     createdAt: z.string().datetime({ offset: true }),
   })
   .partial()
-  .strict()
   .passthrough();
 const UserWriteDTO = z
   .object({
@@ -181,11 +157,12 @@ const UserWriteDTO = z
     userName: z.string(),
     profile: z.string().nullish(),
   })
-  .strict()
   .passthrough();
 const UserRegisterDTO = z
   .object({ userName: z.string(), email: z.string(), password: z.string() })
-  .strict()
+  .passthrough();
+const UserLoginDTO = z
+  .object({ email: z.string(), password: z.string() })
   .passthrough();
 const HttpValidationProblemDetails = z
   .object({
@@ -197,7 +174,6 @@ const HttpValidationProblemDetails = z
     errors: z.record(z.array(z.string())),
   })
   .partial()
-  .strict()
   .passthrough();
 
 export const schemas = {
@@ -224,6 +200,7 @@ export const schemas = {
   StatSnapshotDTO,
   UserWriteDTO,
   UserRegisterDTO,
+  UserLoginDTO,
   HttpValidationProblemDetails,
 };
 
@@ -487,7 +464,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.object({ id: z.string() }).strict().passthrough(),
+        schema: z.object({ id: z.string() }).passthrough(),
       },
       {
         name: "roomCode",
@@ -592,6 +569,27 @@ const endpoints = makeApi([
     response: UserReadDTO,
   },
   {
+    method: "get",
+    path: "/api/User/identity",
+    alias: "getApiUseridentity",
+    requestFormat: "json",
+    response: UserReadDTO,
+  },
+  {
+    method: "post",
+    path: "/api/User/login",
+    alias: "postApiUserlogin",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: UserLoginDTO,
+      },
+    ],
+    response: UserReadDTO,
+  },
+  {
     method: "post",
     path: "/api/User/logout",
     alias: "postApiUserlogout",
@@ -666,7 +664,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.object({ email: z.string() }).strict().passthrough(),
+        schema: z.object({ email: z.string() }).passthrough(),
       },
     ],
     response: z.void(),
@@ -782,7 +780,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.object({ refreshToken: z.string() }).strict().passthrough(),
+        schema: z.object({ refreshToken: z.string() }).passthrough(),
       },
     ],
     response: AccessTokenResponse,
@@ -817,7 +815,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.object({ email: z.string() }).strict().passthrough(),
+        schema: z.object({ email: z.string() }).passthrough(),
       },
     ],
     response: z.void(),
