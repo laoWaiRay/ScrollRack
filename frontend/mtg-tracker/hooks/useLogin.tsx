@@ -2,12 +2,16 @@ import { useRouter } from "next/navigation";
 import { api, schemas } from "@/generated/client";
 import { useCallback } from "react";
 import z from "zod";
+import { useAuth } from "./useAuth";
+import { ActionType } from "@/context/AuthContext";
+
+type LoginRequest = z.infer<typeof schemas.LoginRequest>;
 
 export function useLogin() {
 	const router = useRouter();
-  type LoginRequest = z.infer<typeof schemas.LoginRequest>;
+  const { user, dispatch } = useAuth();
  
-  async function loginAsync(email: string, password: string) {
+  async function _loginAsync(email: string, password: string) {
     let user = null;
 
     try {
@@ -17,16 +21,15 @@ export function useLogin() {
         withCredentials: true
       });
       
-      // TODO: update the Auth Context with the user details
-      console.log(`Successfully logged in: ${JSON.stringify(user)}`)
+      dispatch!({ type: ActionType.LOGIN, payload: user });
       router.push("/commandzone");
     } catch (error) {
-      console.log(JSON.stringify(error));
+      console.error(JSON.stringify(error));
       router.push("/login");
     }
   }
 
-  const login = useCallback(loginAsync, []);
+  const loginAsync = useCallback(_loginAsync, []);
   
-  return { login };
+  return { loginAsync };
 }

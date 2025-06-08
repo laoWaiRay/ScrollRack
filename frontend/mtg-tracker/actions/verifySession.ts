@@ -1,8 +1,7 @@
-"use server"
+"use server";
 
 import { api } from "@/generated/client";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function verifySession() {
 	const aspNetCoreIdentityCookieName = ".AspNetCore.Identity.Application";
@@ -10,25 +9,17 @@ export async function verifySession() {
 	const cookie = cookieStore.get(aspNetCoreIdentityCookieName);
 
 	if (cookie === undefined) {
-		redirect("/login");
+		return null;
 	}
 
-	let user = null;
-
 	try {
-		user = await api.getApiUseridentity({
+		const user = await api.getApiUseridentity({
 			headers: {
 				cookie: `${aspNetCoreIdentityCookieName}=${cookie.value}`,
 			},
 		});
+		return user;
 	} catch (error) {
-		console.log(JSON.stringify(error));
-    redirect("/login");
+		return null;
 	}
-  
-  if (user == null) {
-    redirect("/login");
-  }
-  
-  return user;
 }

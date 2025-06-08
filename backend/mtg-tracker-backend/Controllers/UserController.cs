@@ -182,7 +182,6 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         return Ok();
     }
 
-    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(SignInManager<ApplicationUser> signInManager, [FromBody] object empty)
     {
@@ -191,7 +190,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             await signInManager.SignOutAsync();
             return Ok();
         }
-        return Unauthorized();
+        return BadRequest();
     }
 
     [HttpPost("login")]
