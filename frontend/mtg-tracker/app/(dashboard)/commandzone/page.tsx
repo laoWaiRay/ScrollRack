@@ -5,8 +5,11 @@ import UserAdd from "@/public/icons/user-add.svg";
 import ButtonIcon from "@/components/ButtonIcon";
 import Tooltip from "@/components/Tooltip";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@headlessui/react";
 
 export default function CommandZone() {
+	const { user } = useAuth();
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 
 	return (
@@ -30,18 +33,25 @@ export default function CommandZone() {
 						</Tooltip>
 
 						{/* User Profile Card  */}
-						<div className="w-[2em] h-[2em] rounded ml-2 overflow-hidden">
-							<Image
-								className="h-full w-full object-cover"
-								src="/mock/avatar.png"
-								height={32}
-								width={32}
-								alt="User avatar"
-							/>
-						</div>
+						<Button className="flex items-center justify-center gap-3 py-2 px-3 ml-1 rounded
+            data-hover:cursor-pointer data-hover:bg-surface-500">
+							<div className="w-[1.5em] h-[1.5em] d overflow-hidden">
+								<Image
+									className="h-full w-full object-cover"
+									src="/mock/avatar.png"
+									height={32}
+									width={32}
+									alt="User avatar"
+								/>
+							</div>
+							<div className="text-base select-none">{user?.userName}</div>
+						</Button>
 					</div>
 				</div>
 			</div>
+      
+      {/* Main Content */}
+      <p>{JSON.stringify(user)}</p> 
 		</div>
 	);
 }

@@ -13,6 +13,7 @@ interface TextInputProps {
 	type?: "password" | "text";
 	hidden?: boolean;
   toggleHidden?: (e: MouseEvent<HTMLButtonElement>) => void;
+  errorMessage?: React.ReactNode;
 }
 
 export default function TextInput({
@@ -23,7 +24,8 @@ export default function TextInput({
 	placeholder,
 	type,
 	hidden,
-  toggleHidden
+  toggleHidden,
+  errorMessage
 }: TextInputProps) {
 	function renderEyeIcon() {
     const iconStyle = `text-white absolute right-0 top-1/2 translate-y-[-57%] p-2`;
@@ -65,6 +67,7 @@ export default function TextInput({
 	return (
 		<Field className="flex flex-col">
 			<Label className="mb-1.5 text-fg">{label}</Label>
+      {errorMessage}
 			<div className="relative">
 				<Input
 					className={`bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline pr-11`}

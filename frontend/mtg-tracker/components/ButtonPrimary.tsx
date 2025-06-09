@@ -4,6 +4,7 @@ interface ButtonPrimaryProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
   style?: 'primary' | 'google';
+  type?: "submit" | "button";
 }
 
 interface ButtonStyle {
@@ -28,11 +29,12 @@ const buttonStyles: {[style: string]: ButtonStyle} = {
   }
 }
 
-export default function ButtonPrimary({ onClick, children, style = 'primary' }: ButtonPrimaryProps) {
+export default function ButtonPrimary({ onClick, children, style = 'primary', type = "button" }: ButtonPrimaryProps) {
   const {color, hover, active, textColor} = buttonStyles[style];
 
 	return (
 		<Button
+      type={type}
 			className={`${color} ${hover} ${active} ${textColor} my-4 p-md rounded font-semibold`}
 			onClick={onClick}
 		>

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace Mtg_tracker.Models;
@@ -5,6 +6,10 @@ namespace Mtg_tracker.Models;
 public class ApplicationUser : IdentityUser
 {
     public string? Profile { get; set; }
+
+    [ProtectedPersonalData]
+    [EmailAddress]
+    public override string? Email { get; set; }
 
     public List<Deck> Decks { get; } = [];
     public List<GameParticipation> GameParticipations { get; } = [];

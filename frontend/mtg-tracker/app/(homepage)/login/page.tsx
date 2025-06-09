@@ -6,27 +6,41 @@ import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { useLogin } from "@/hooks/useLogin";
-import { useAuth } from "@/hooks/useAuth";
+import { AppError } from "@/errors";
+import ErrorDescription from "@/components/ErrorDescription";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isPwHidden, setIsPwHidden] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { loginAsync } = useLogin();
-  const { user } = useAuth();
+  
+  async function handleLogin(e: React.SyntheticEvent) {
+    e.preventDefault();
+
+    try {
+      await loginAsync(email, password);
+      setError(null)
+    } catch (error) {
+      if (error instanceof AppError && error.name == "LOGIN_ERROR") {
+        setError(error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
 
 	return (
 		<div
 			className={`${styles.gridB} flex flex-col justify-center items-start mx-12`}
 		>
-			<div className={`flex flex-col justify-center px-12 py-12`}>
+			<form className={`flex flex-col justify-center px-12 py-12`}>
 				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
 					Log in to your account
 				</h1>
-        // TODO: remove this
-        <h6>
-          <p>{user ? JSON.stringify(user) : "No auth"}</p>
-        </h6>
+        
+        {error && <ErrorDescription _key={error} description={error} />}
 				<TextInput
 					name="email"
 					label="Email"
@@ -43,7 +57,7 @@ export default function LoginPage() {
 					onChange={(e) => setPassword(e.target.value)}
 				/>
         <Link href='/forgot-password' className="self-end text-fg font-normal rounded p-sm">Forgot password?</Link>
-				<ButtonPrimary onClick={async () => await loginAsync("test@gmail.com", "Test123!")}>Log in</ButtonPrimary>
+				<ButtonPrimary type="submit" onClick={handleLogin}>Log in</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
 					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
 					<span className="select-none">OR</span>
@@ -61,7 +75,7 @@ export default function LoginPage() {
 						Sign up
 					</Link>
 				</div>
-			</div>
+			</form>
 		</div>
 	);
 }

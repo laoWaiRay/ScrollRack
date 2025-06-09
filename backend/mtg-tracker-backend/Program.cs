@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mtg_tracker.Models;
 using Mtg_tracker.MappingProfiles;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<MtgContext>(options =>
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 // Identity Services (authentication/authorization)
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+});
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<MtgContext>();

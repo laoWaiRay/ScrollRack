@@ -7,6 +7,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Data;
+using System.Text.Json;
+using System.Collections;
+using NuGet.Protocol;
 
 namespace Mtg_tracker.Controllers;
 
@@ -164,20 +167,52 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             Email = userRegisterDTO.Email,
         };
 
-        var result = await userManager.CreateAsync(user, userRegisterDTO.Password);
+        var allErrors = new List<IdentityError>();
 
-        if (!result.Succeeded)
+        foreach (var validator in userManager.UserValidators)
         {
-            return BadRequest(result.Errors);
+            var result = await validator.ValidateAsync(userManager, user);
+            if (!result.Succeeded)
+            {
+                allErrors.AddRange(result.Errors);
+            }
         }
 
-        // Create initial empty stat snapshot
-        user.StatSnapshot = new StatSnapshot
+        foreach (var validator in userManager.PasswordValidators)
         {
-            UserId = user.Id
-        };
+            var result = await validator.ValidateAsync(userManager, user, userRegisterDTO.Password);
+            if (!result.Succeeded)
+            {
+                allErrors.AddRange(result.Errors);
+            }
+        }
 
-        await _context.SaveChangesAsync();
+        if (allErrors.Count > 0)
+        {
+            return BadRequest(allErrors);
+        }
+
+        try
+        {
+            var result = await userManager.CreateAsync(user, userRegisterDTO.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            // Create initial empty stat snapshot
+            user.StatSnapshot = new StatSnapshot
+            {
+                UserId = user.Id
+            };
+
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest();
+        }
 
         return Ok();
     }
@@ -196,15 +231,15 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<UserReadDTO>> Login(SignInManager<ApplicationUser> signInManager, UserLoginDTO loginDTO)
     {
-        var result = await signInManager.PasswordSignInAsync(loginDTO.Email, loginDTO.Password, true, false);
-
-        if (!result.Succeeded)
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
+        if (user is null || user.UserName is null)
         {
             return Unauthorized();
         }
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
-        if (user is null)
+        var result = await signInManager.PasswordSignInAsync(user.UserName, loginDTO.Password, true, false);
+
+        if (!result.Succeeded)
         {
             return Unauthorized();
         }
