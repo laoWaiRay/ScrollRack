@@ -18,7 +18,7 @@ public class AutoMapperProfile : Profile
         CreateMap<ApplicationUser, UserReadDTO>();
 
         // Client -> Server
-        CreateMap<DeckReadDTO, Deck>();
+        CreateMap<DeckWriteDTO, Deck>();
         CreateMap<FriendRequestDTO, FriendRequest>();
         CreateMap<GameDTO, Game>();
         CreateMap<GameParticipationReadDTO, GameParticipation>();

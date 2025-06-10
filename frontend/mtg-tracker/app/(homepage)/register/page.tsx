@@ -1,13 +1,14 @@
 "use client";
 import styles from "../styles.module.css";
 import TextInput from "@/components/TextInput";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { api } from "@/generated/client";
 import { isAxiosError } from "axios";
 import ErrorDescription from "@/components/ErrorDescription";
+import { BAD_REQUEST } from "@/constants/httpStatus";
 
 interface FormData {
 	email: string;
@@ -113,10 +114,6 @@ const requiredPassword: ValidationError = {
 	code: "RequiredPassword",
 	description: "Password is required",
 };
-const requiredConfirmPassword: ValidationError = {
-	code: "RequiredConfirmPassword",
-	description: "Confirm Password is required",
-};
 
 export default function RegisterPage() {
 	const [email, setEmail] = useState("");
@@ -156,7 +153,7 @@ export default function RegisterPage() {
 			await api.postApiUserregister({ userName: username, email, password });
 			setErrors(null);
 		} catch (error) {
-			if (isAxiosError(error) && error.response?.status == 400) {
+			if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
 				if (
 					error.response?.data != null &&
 					isValidationErrorArray(error.response.data)
@@ -176,7 +173,7 @@ export default function RegisterPage() {
 
 	function renderErrors(errors: ValidationError[] | undefined) {
 		return errors?.map((e) => (
-			<ErrorDescription _key={e.code} description={e.description} />
+			<ErrorDescription _key={e.description} description={e.description} />
 		));
 	}
 

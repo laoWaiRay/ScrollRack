@@ -1,0 +1,28 @@
+import { schemas } from "@/generated/client";
+import z from "zod";
+
+export type RegisterRequest = z.infer<typeof schemas.RegisterRequest>;
+export type LoginRequest = z.infer<typeof schemas.LoginRequest>;
+export type AccessTokenResponse = z.infer<typeof schemas.AccessTokenResponse>;
+export type RefreshRequest = z.infer<typeof schemas.RefreshRequest>;
+export type ResendConfirmationEmailRequest = z.infer<typeof schemas.ResendConfirmationEmailRequest>;
+export type ForgotPasswordRequest = z.infer<typeof schemas.ForgotPasswordRequest>;
+export type ResetPasswordRequest = z.infer<typeof schemas.ResetPasswordRequest>;
+export type TwoFactorRequest = z.infer<typeof schemas.TwoFactorRequest>;
+export type TwoFactorResponse = z.infer<typeof schemas.TwoFactorResponse>;
+export type InfoResponse = z.infer<typeof schemas.InfoResponse>;
+export type InfoRequest = z.infer<typeof schemas.InfoRequest>;
+export type DeckReadDTO = z.infer<typeof schemas.DeckReadDTO>;
+export type DeckWriteDTO = z.infer<typeof schemas.DeckWriteDTO>;
+export type UserReadDTO = z.infer<typeof schemas.UserReadDTO>;
+export type FriendRequestDTO = z.infer<typeof schemas.FriendRequestDTO>;
+export type GameDTO = z.infer<typeof schemas.GameDTO>;
+export type GameParticipationReadDTO = z.infer<typeof schemas.GameParticipationReadDTO>;
+export type GameParticipationWriteDTO = z.infer<typeof schemas.GameParticipationWriteDTO>;
+export type RoomDTO = z.infer<typeof schemas.RoomDTO>;
+export type AddPlayerDTO = z.infer<typeof schemas.AddPlayerDTO>;
+export type StatSnapshotDTO = z.infer<typeof schemas.StatSnapshotDTO>;
+export type UserWriteDTO = z.infer<typeof schemas.UserWriteDTO>;
+export type UserRegisterDTO = z.infer<typeof schemas.UserRegisterDTO>;
+export type UserLoginDTO = z.infer<typeof schemas.UserLoginDTO>;
+export type HttpValidationProblemDetails = z.infer<typeof schemas.HttpValidationProblemDetails>;

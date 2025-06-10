@@ -67,10 +67,12 @@ export default function TextInput({
 	return (
 		<Field className="flex flex-col">
 			<Label className="mb-1.5 text-fg">{label}</Label>
-      {errorMessage}
+      <div className="max-w-xs">
+        {errorMessage}
+      </div>
 			<div className="relative">
 				<Input
-					className={`bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline pr-11`}
+					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline pr-11`}
 					name={name}
 					type={getInputType()}
           autoComplete="new-password"
