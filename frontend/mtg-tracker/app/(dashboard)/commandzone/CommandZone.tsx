@@ -119,9 +119,9 @@ export default function CommandZone({
 
 					<StatCard styles="col-span-2">
 						<div className="flex gap-6 h-full items-start">
-							<div className="flex flex-col justify-between grow max-w-[295px]">
+							<div className="flex flex-col justify-start grow max-w-[295px] h-full">
 								<h3 className="mb-4 text-fg-light">Commander Showcase</h3>
-								<div className="w-full aspect-[5/7] relative">
+								<div className="w-full aspect-[5/7] relative rounded-xl overflow-hidden">
 									<Image
 										src="https://cards.scryfall.io/large/front/7/b/7b7a348a-51f7-4dc5-8fe7-1c70fea5e050.jpg?1689996774"
 										alt="Commander Card"

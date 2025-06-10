@@ -4,16 +4,20 @@ import { useState } from "react";
 interface TooltipInterface {
   children: React.ReactNode;
   text: string;
+  placement?: 'bottom' | 'right';
+  _offset?: number;
+  styles?: string;
 }
 
-export default function Tooltip({ children, text }: TooltipInterface) {
+export default function Tooltip({ children, text, placement = 'bottom', _offset = 1, styles }: TooltipInterface) {
 	const [isOpen, setIsOpen] = useState(false);
 	const { refs, floatingStyles, context } = useFloating({
 		open: isOpen,
 		onOpenChange: setIsOpen,
     middleware: [
-      offset(1)
-    ]
+      offset(_offset)
+    ],
+    placement: placement,
 	});
 	const hover = useHover(context, {
 		mouseOnly: true,
@@ -28,7 +32,7 @@ export default function Tooltip({ children, text }: TooltipInterface) {
     <>
       {isOpen && (
         <div
-          className="bg-surface-500 rounded-lg text-fg p-md text-base"
+          className={`${styles} bg-surface-400 rounded-lg text-fg p-md text-base w-max z-10`}
           ref={refs.setFloating}
           {...getReferenceProps()}
           style={floatingStyles}

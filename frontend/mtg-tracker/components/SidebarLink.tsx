@@ -1,20 +1,24 @@
-import Link from "next/link"
+import Link from "next/link";
 
 interface SidebarLink {
-  children: React.ReactNode;
-  href: string;
-  isActive: boolean;
+	children: React.ReactNode;
+	href: string;
+	isActive: boolean;
 }
 
-
 export default function SidebarLink({ children, href, isActive }: SidebarLink) {
-  const activeLinkStyle = isActive ? "bg-primary-500 hover:!bg-primary-400" : "";
+	const activeLinkStyle = isActive
+		? "bg-primary-500 hover:!bg-primary-400"
+		: "";
 
-  return (
-    <Link href={href} className={`${activeLinkStyle} flex items-center justify-start p-md rounded text-fg-light hover:bg-surface-400`}>
-      <span className="ml-3 flex items-center justify-start">
-        {children}
-      </span>
-    </Link>
-  )
+	return (
+		<Link
+			href={href}
+			className={`${activeLinkStyle} flex items-center justify-center xl:justify-start rounded text-fg-light hover:bg-surface-400 p-md`}
+		>
+			<span className="xl:ml-3 flex items-center justify-start w-fit">
+				{children}
+			</span>
+		</Link>
+	);
 }

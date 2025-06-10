@@ -1,15 +1,22 @@
 .gridLayout {
-    display: grid;
-    grid-template-columns: clamp(240px, 16.66vw, 300px) 1fr;
-    grid-template-rows: 1fr;
+	display: grid;
+	grid-template-columns: auto 1fr;
+    grid-template-rows: auto;
 }
 
 .gridA {
-    grid-column-start: 1;
-    grid-column-end: 2;
+    width: fit-content;
+	grid-column-start: 1;
+	grid-column-end: 2;
 }
 
 .gridB {
-    grid-column-start: 2;
-    grid-column-end: 3;
+	grid-column-start: 2;
+	grid-column-end: 3;
+}
+
+@media screen and (min-width: 80rem) {
+    .gridA {
+        width: clamp(240px, 16.66vw, 300px);
+    }
 }
