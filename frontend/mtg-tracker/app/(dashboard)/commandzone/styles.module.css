@@ -1,7 +1,16 @@
-.gridLayout {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1rem;
-    margin: 1rem 0;
+/* .gridLayout {
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    margin: 1rem 0;
+} */
+
+@media screen and (min-width: 64rem) {
+    .gridLayout {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+        width: 100%;
+    }
 }

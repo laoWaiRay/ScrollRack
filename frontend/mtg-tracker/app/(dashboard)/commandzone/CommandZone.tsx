@@ -11,6 +11,7 @@ import { Button } from "@headlessui/react";
 import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -25,12 +26,14 @@ export default function CommandZone({
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 
 	return (
-		<div className={`${styles.gridB} flex flex-col items-center m-4 min-h-dvh mt-24 lg:mt-4`}>
+		<div
+			className={`${styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh mt-24 lg:mt-4`}
+		>
 			{/* Main Header */}
-			<div className="border-b-2 border-surface-500 w-full pb-2.5">
+			<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5">
 				<div className="flex justify-between items-center mx-4">
 					<div className="text-lg font-semibold select-none">Command Zone</div>
-					<div className="text-lg flex items-center justify-between">
+					<div className="text-lg items-center justify-between hidden lg:flex">
 						{/* User Controls */}
 						<Tooltip text="Add Friends">
 							<ButtonIcon onClick={() => {}} styles={buttonIconStyle}>
@@ -65,8 +68,10 @@ export default function CommandZone({
 			</div>
 
 			{/* Main Content */}
-			<div className="h-full w-full max-w-[1480px] flex justify-center items-center grow">
-				<div className={`${pageStyles.gridLayout} `}>
+			<div className="lg:h-full w-full lg:max-w-[1480px] flex justify-center items-center grow">
+				<div
+					className={`${pageStyles.gridLayout} flex flex-col gap-2 m-2 lg:m-4 w-full items-center`}
+				>
 					<StatCard>
 						<div>Total Games</div>
 						<div className="text-2xl text-fg-light my-2">
@@ -139,7 +144,7 @@ export default function CommandZone({
 						</div>
 					</StatCard>
 
-					<StatCard styles="col-span-3 max-h-[45vh] overflow-auto">
+					<StatCard styles="col-span-3 max-h-[45vh] overflow-auto !hidden lg:!flex">
 						{[...Array(10)].map((_, i) => (
 							<GameLogCard
 								key={i}
@@ -152,6 +157,12 @@ export default function CommandZone({
 							/>
 						))}
 					</StatCard>
+
+					<div className="lg:hidden w-full">
+						<div className="mx-10">
+							<ButtonPrimary onClick={() => {}}>View Game Log</ButtonPrimary>
+						</div>
+					</div>
 
 					{/* <p className="">{JSON.stringify(user, null, 3)}</p>
         <p className="">{JSON.stringify(statSnapshot, null, 3)}</p>

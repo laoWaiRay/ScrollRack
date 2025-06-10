@@ -14,6 +14,8 @@ import UserRemove from "@/public/icons/user-remove.svg";
 import Settings from "@/public/icons/settings.svg";
 import Search from "@/public/icons/search.svg";
 import Filter from "@/public/icons/filter.svg";
+import UserAdd from "@/public/icons/user-add.svg";
+import Bell from "@/public/icons/bell.svg";
 import SidebarLink from "@/components/SidebarLink";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
@@ -70,6 +72,19 @@ const linkData: LinkData[] = [
 		name: "Settings",
 		icon: Settings,
 	},
+];
+
+const mobileOnlyLinkData: LinkData[] = [
+  {
+    href: "/friends/add",
+    name: "Add Friend",
+    icon: UserAdd,
+  },
+  {
+    href: "/notifications",
+    name: "Notifications",
+    icon: Bell,
+  },
 ];
 
 export default function HomepageLayout({ children }: HomepageLayoutProps) {
@@ -173,10 +188,10 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 
 				{/* Hidden Drawer */}
 				<div
-					className={`w-screen h-screen bg-surface-600 fixed z-90 transition-all duration-250 flex flex-col
+					className={`w-screen h-screen overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-all duration-250 flex flex-col
           justify-center ${isDrawerOpen && "translate-x-full"}`}
 				>
-					<div className="flex flex-col">
+					<div className="flex flex-col h-full mt-[80px]">
 						<h2 className="text-fg-dark mb-2 flex justify-center">
 							MAIN MENU
 						</h2>
@@ -186,9 +201,10 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 									(data) => !["Account", "Settings"].includes(data.name)
 								)
 							)}
+              {renderMobileLinks(mobileOnlyLinkData)}
 						</ul>
 
-						<h2 className="text-fg-dark mt-8 mb-2 flex justify-center">
+						<h2 className="text-fg-dark mt-4 mb-2 flex justify-center">
 							PROFILE
 						</h2>
 						<ul className="flex flex-col gap-2">

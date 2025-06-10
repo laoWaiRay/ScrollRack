@@ -16,7 +16,7 @@ interface ButtonStyle {
 
 const buttonStyles: {[style: string]: ButtonStyle} = {
   primary: {
-    color: 'bg-primary-500',
+    color: 'bg-primary-400',
     hover: 'data-hover:bg-primary-300',
     active: 'data-hover:data-active:bg-primary-400',
     textColor: 'text-white'    
@@ -35,7 +35,7 @@ export default function ButtonPrimary({ onClick, children, style = 'primary', ty
 	return (
 		<Button
       type={type}
-			className={`${color} ${hover} ${active} ${textColor} my-4 p-md rounded font-semibold`}
+			className={`${color} ${hover} ${active} ${textColor} my-4 py-6 px-4 lg:py-2 rounded font-semibold w-full`}
 			onClick={onClick}
 		>
       {children}
