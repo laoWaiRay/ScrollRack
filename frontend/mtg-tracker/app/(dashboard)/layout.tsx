@@ -47,7 +47,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 						<div>
 							<h2 className="text-fg-dark text-sm mb-2 mx-5">MAIN MENU</h2>
 							<ul className="flex flex-col gap-2">
-								<li>
+								<li className="flex flex-col gap-2">
 									<SidebarLink href="/commandzone" isActive={pathname.includes("/commandzone")}>
 										<Tower className="w-[2em] h-[2em] stroke-2 mr-2" />
 										Command Zone

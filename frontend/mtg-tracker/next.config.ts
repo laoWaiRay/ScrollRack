@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
         as: '*.js',
       }
     }
-  }
+  },
+  images: {
+    domains: [
+      "cards.scryfall.io"
+    ],
+  },
 };
 
 export default nextConfig;

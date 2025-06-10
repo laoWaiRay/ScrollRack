@@ -11,6 +11,7 @@ CSS Reset, inspired by: https://www.joshwcomeau.com/css/custom-css-reset/
 
 * {
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 body {
@@ -70,6 +71,7 @@ CSS VARIABLES
 
   /* Special Colors */
   --error: #b00020;  /* WCAG-accessible error red for light backgrounds */
+  --success: #b9eb17;
 }
 
 /* Dark mode variants */
@@ -101,6 +103,7 @@ CSS VARIABLES
 
         /* Special Colors */
         --error: #cf6679;
+        --success: #b9eb17;
     }
 }
 
@@ -145,6 +148,7 @@ Tailwind CSS Theme
 
     /* Special Colors */
     --color-error: var(--error);
+    --color-success: var(--success);
     
 
     /* Font size changes */
