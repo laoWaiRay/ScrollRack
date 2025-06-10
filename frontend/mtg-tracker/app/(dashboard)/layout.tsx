@@ -1,7 +1,7 @@
 "use client";
 import Footer from "@/components/Footer";
 import styles from "./styles.module.css";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import LogoImage from "@/public/icons/scroll.svg";
 import Tower from "@/public/icons/tower.svg";
 import LogScroll from "@/public/icons/log-scroll.svg";
@@ -17,24 +17,104 @@ import Filter from "@/public/icons/filter.svg";
 import SidebarLink from "@/components/SidebarLink";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
+import Hamburger from "@/components/animations/Hamburger";
 
 interface HomepageLayoutProps {
 	children: ReactNode;
 }
 
+interface LinkData {
+	href: string;
+	name: string;
+	icon: any;
+}
+
+const linkData: LinkData[] = [
+	{
+		href: "/commandzone",
+		name: "Command Zone",
+		icon: Tower,
+	},
+	{
+		href: "/decks",
+		name: "Decks",
+		icon: Cards,
+	},
+	{
+		href: "/friends",
+		name: "Friends",
+		icon: UsersMultiple,
+	},
+	{
+		href: "/log",
+		name: "Game Log",
+		icon: LogScroll,
+	},
+	{
+		href: "/pod/join",
+		name: "Join Pod",
+		icon: DoorEnter,
+	},
+	{
+		href: "/pod/create",
+		name: "Create Pod",
+		icon: DoorOpen,
+	},
+	{
+		href: "/account",
+		name: "Account",
+		icon: User,
+	},
+	{
+		href: "/settings",
+		name: "Settings",
+		icon: Settings,
+	},
+];
+
 export default function HomepageLayout({ children }: HomepageLayoutProps) {
 	const pathname = usePathname();
+	const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+
+	function renderDesktopLinks(links: LinkData[]) {
+		return links.map((data) => (
+			<li key={data.name}>
+				<Tooltip
+					text={data.name}
+					placement="right"
+					_offset={15}
+					styles="xl:hidden"
+				>
+					<SidebarLink href={data.href} isActive={pathname.includes(data.href)}>
+						<data.icon className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
+						<span className="hidden xl:inline">{data.name}</span>
+					</SidebarLink>
+				</Tooltip>
+			</li>
+		));
+	}
+
+	function renderMobileLinks(links: LinkData[]) {
+		return links.map((data) => (
+			<li key={data.name}>
+				<SidebarLink href={data.href} isActive={pathname.includes(data.href)}>
+					<data.icon className="w-[2em] h-[2em]" />
+					<span className="ml-4">{data.name}</span>
+				</SidebarLink>
+			</li>
+		));
+	}
 
 	return (
 		<div className="bg-surface-600">
 			<div
 				id="main-wrapper"
-				className={`min-h-dvh ${styles.gridLayout} bg-surface-500`}
+				className={`min-h-dvh ${styles.gridLayout} bg-surface-500 relative`}
 			>
-				{/* Sidebar */}
+				{/* Desktop Sidebar */}
 				<nav
 					aria-labelledby="Sidebar navigation"
-					className={`${styles.gridA} flex flex-col items-stretch mx-2 sticky h-screen top-0 bg-surface-500 z-10`}
+					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-10`}
 				>
 					<header className="font-dancing-script text-white text-xl flex items-center justify-center xl:justify-start select-none my-4 mx-5">
 						<LogoImage
@@ -50,97 +130,11 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 								MAIN MENU
 							</h2>
 							<ul className="flex flex-col gap-2">
-								<li className="flex flex-col gap-2">
-									<Tooltip
-										text="Command Zone"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/commandzone"
-											isActive={pathname.includes("/commandzone")}
-										>
-											<Tower className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Command Zone</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Decks"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/decks"
-											isActive={pathname.includes("/decks")}
-										>
-											<Cards className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Decks</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Friends"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/friends"
-											isActive={pathname.includes("/friends")}
-										>
-											<UsersMultiple className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Friends</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Game Log"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/log"
-											isActive={pathname.includes("/log")}
-										>
-											<LogScroll className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Game Log</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Join Pod"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/pod/join"
-											isActive={pathname.includes("/pod/join")}
-										>
-											<DoorEnter className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Join Pod</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Create Pod"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/pod/create"
-											isActive={pathname.includes("/pod/create")}
-										>
-											<DoorOpen className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Create Pod</span>
-										</SidebarLink>
-									</Tooltip>
-								</li>
+								{renderDesktopLinks(
+									linkData.filter(
+										(data) => !["Account", "Settings"].includes(data.name)
+									)
+								)}
 							</ul>
 						</div>
 
@@ -149,41 +143,63 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 								PROFILE
 							</h2>
 							<ul className="flex flex-col gap-2">
-								<li>
-									<Tooltip
-										text="Account"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/account"
-											isActive={pathname.includes("/account")}
-										>
-											<User className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Account</span>
-										</SidebarLink>
-									</Tooltip>
-
-									<Tooltip
-										text="Settings"
-										placement="right"
-										_offset={15}
-										styles="xl:hidden"
-									>
-										<SidebarLink
-											href="/settings"
-											isActive={pathname.includes("/settings")}
-										>
-											<Settings className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
-											<span className="hidden xl:inline">Settings</span>
-										</SidebarLink>
-									</Tooltip>
-								</li>
+								{renderDesktopLinks(
+									linkData.filter((data) =>
+										["Account", "Settings"].includes(data.name)
+									)
+								)}
 							</ul>
 						</div>
 					</div>
 				</nav>
+
+				{/* Mobile Top Navigation */}
+				<header
+					className="lg:hidden flex fixed w-screen justify-between items-center font-dancing-script text-white 
+        text-xl select-none p-4 z-90 bg-surface-500"
+				>
+					<div className="flex items-center justify-center ml-4">
+						<LogoImage
+							title="Scroll with quill writing"
+							className="text-white w-[1em] h-[1em]"
+						/>
+						<span className="">ScrollRack</span>
+					</div>
+				</header>
+
+				<div className="lg:hidden">
+					<Hamburger onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
+				</div>
+
+				{/* Hidden Drawer */}
+				<div
+					className={`w-screen h-screen bg-surface-600 fixed z-90 transition-all duration-250 flex flex-col
+          justify-center ${isDrawerOpen && "translate-x-full"}`}
+				>
+					<div className="flex flex-col">
+						<h2 className="text-fg-dark mb-2 flex justify-center">
+							MAIN MENU
+						</h2>
+						<ul className="flex flex-col gap-2">
+							{renderMobileLinks(
+								linkData.filter(
+									(data) => !["Account", "Settings"].includes(data.name)
+								)
+							)}
+						</ul>
+
+						<h2 className="text-fg-dark mt-8 mb-2 flex justify-center">
+							PROFILE
+						</h2>
+						<ul className="flex flex-col gap-2">
+							{renderMobileLinks(
+								linkData.filter(
+									(data) => ["Account", "Settings"].includes(data.name)
+								)
+							)}
+						</ul>
+					</div>
+				</div>
 
 				{/* Main Content */}
 				<main className={`${styles.gridB} bg-surface-600`}>{children}</main>

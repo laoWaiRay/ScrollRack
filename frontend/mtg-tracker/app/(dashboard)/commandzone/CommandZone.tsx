@@ -9,13 +9,6 @@ import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@headlessui/react";
 import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
-import {
-	Card,
-	CardBody,
-	CardFooter,
-	Typography,
-	Button as MaterialButton,
-} from "@material-tailwind/react";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 
@@ -32,7 +25,7 @@ export default function CommandZone({
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 
 	return (
-		<div className={`${styles.gridB} flex flex-col items-center m-4 min-h-dvh`}>
+		<div className={`${styles.gridB} flex flex-col items-center m-4 min-h-dvh mt-24 lg:mt-4`}>
 			{/* Main Header */}
 			<div className="border-b-2 border-surface-500 w-full pb-2.5">
 				<div className="flex justify-between items-center mx-4">

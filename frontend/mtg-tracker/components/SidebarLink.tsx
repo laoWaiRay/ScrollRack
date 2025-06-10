@@ -14,7 +14,8 @@ export default function SidebarLink({ children, href, isActive }: SidebarLink) {
 	return (
 		<Link
 			href={href}
-			className={`${activeLinkStyle} flex items-center justify-center xl:justify-start rounded text-fg-light hover:bg-surface-400 p-md`}
+			className={`${activeLinkStyle} flex items-center justify-center xl:justify-start rounded text-fg-light 
+      hover:bg-surface-400 py-4 lg:py-2 lg:p-md`}
 		>
 			<span className="xl:ml-3 flex items-center justify-start w-fit">
 				{children}

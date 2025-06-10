@@ -1,22 +1,29 @@
 .gridLayout {
-	display: grid;
-	grid-template-columns: auto 1fr;
-    grid-template-rows: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.gridA {
-    width: fit-content;
-	grid-column-start: 1;
-	grid-column-end: 2;
-}
+@media screen and (min-width: 64rem) {
+	.gridLayout {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		grid-template-rows: auto;
+	}
 
-.gridB {
-	grid-column-start: 2;
-	grid-column-end: 3;
+	.gridA {
+		width: fit-content;
+		grid-column-start: 1;
+		grid-column-end: 2;
+	}
+
+	.gridB {
+		grid-column-start: 2;
+		grid-column-end: 3;
+	}
 }
 
 @media screen and (min-width: 80rem) {
-    .gridA {
-        width: clamp(240px, 16.66vw, 300px);
-    }
+	.gridA {
+		width: clamp(240px, 16.66vw, 300px);
+	}
 }
