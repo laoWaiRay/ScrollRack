@@ -129,7 +129,7 @@ export default function CommandZone({
 
 					<StatCard
 						styles="col-span-2"
-						innerStyles="!px-2 !pt-4 !pb-0 !justify-center !items-stretch"
+						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
 					>
 						<PieChart height="350px" />
 					</StatCard>
