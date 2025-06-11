@@ -189,7 +189,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 				{/* Hidden Drawer */}
 				<div
 					className={`w-screen h-screen overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-all duration-250 flex flex-col
-          justify-center ${isDrawerOpen && "translate-x-full"}`}
+          justify-center ${isDrawerOpen && "translate-x-[300%]"}`}
 				>
 					<div className="flex flex-col h-full mt-[80px]">
 						<h2 className="text-fg-dark mb-2 flex justify-center">

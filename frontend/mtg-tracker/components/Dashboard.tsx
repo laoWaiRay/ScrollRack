@@ -1,3 +1,5 @@
+import styles from "./DashboardStyles.module.css";
+import { ReactNode } from "react";
 import { Button } from "@headlessui/react";
 import ButtonIcon from "./ButtonIcon";
 import Tooltip from "./Tooltip";
@@ -6,12 +8,30 @@ import Bell from "@/public/icons/bell.svg";
 import UserAdd from "@/public/icons/user-add.svg";
 import { UserReadDTO } from "@/types/client";
 
+interface DashboardLayoutInterface {
+	children: ReactNode;
+}
+
+interface DashboardMainInterface {
+	children: ReactNode;
+}
+
 interface DashboardHeaderInterface {
   user: UserReadDTO | null;
   title: string;
 }
 
-export default function DashboardHeader({ user, title }: DashboardHeaderInterface) {
+export function DashboardLayout({ children }: DashboardLayoutInterface) {
+	return (
+		<div
+			className={`${styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh mt-24 lg:mt-4 mx-3`}
+		>
+			{children}
+		</div>
+	);
+}
+
+export function DashboardHeader({ user, title }: DashboardHeaderInterface) {
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 
 	return (
@@ -52,6 +72,14 @@ export default function DashboardHeader({ user, title }: DashboardHeaderInterfac
 					</Button>
 				</div>
 			</div>
+		</div>
+	);
+}
+
+export function DashboardMain({ children }: DashboardMainInterface) {
+	return (
+		<div className="lg:h-full w-full lg:max-w-[1480px] flex justify-center items-center grow">
+			{children}
 		</div>
 	);
 }

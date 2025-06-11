@@ -5,7 +5,7 @@ import {
 	ReactNode,
 	useReducer,
 	Reducer,
-	ActionDispatch,
+	Dispatch,
 } from "react";
 import { schemas } from "@/generated/client";
 import { z } from "zod";
@@ -23,7 +23,7 @@ type Action =
 
 interface AuthContextType {
 	user: UserReadDTO | null;
-  dispatch: ActionDispatch<[action: Action]> | undefined;
+  dispatch: Dispatch<Action> | undefined;
 }
 
 export const AuthContext = createContext<AuthContextType>({ user: null, dispatch: undefined });
@@ -32,9 +32,9 @@ export function AuthProvider({ children, initialUser }: { children: ReactNode, i
 	const [user, dispatch] = useReducer(authReducer, initialUser);
   
   return (
-    <AuthContext value={{ user, dispatch }}>
-      { children }
-    </AuthContext>
+	<AuthContext.Provider value={{ user, dispatch }}>
+	  { children }
+	</AuthContext.Provider>
   );
 }
 

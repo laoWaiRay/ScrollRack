@@ -1,11 +1,3 @@
-/* .gridLayout {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin: 1rem 0;
-} */
-
-
 @media screen and (min-width: 64rem) {
     .gridLayout {
         display: grid;

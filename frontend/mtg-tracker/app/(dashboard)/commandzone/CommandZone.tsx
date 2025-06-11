@@ -1,6 +1,5 @@
 "use client";
-import styles from "../styles.module.css";
-import pageStyles from "./styles.module.css";
+import styles from "./styles.module.css";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
@@ -9,7 +8,11 @@ import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import PieChart from "@/components/PieChart";
 import LineChart from "@/components/LineChart";
-import DashboardHeader from "@/components/DashboardHeader";
+import {
+	DashboardLayout,
+	DashboardHeader,
+	DashboardMain,
+} from "@/components/Dashboard";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -74,34 +77,25 @@ export default function CommandZone({
 	];
 
 	function renderStatCards() {
-    return statCardData.map(data => (
-      <StatCard key={data.title}>
-        <h3>{data.title}</h3>
-          <div className={data.styles?.main}>
-            {data.data}
-          </div>
-        <div className={data.styles?.sub}>{data.subData}</div>
-      </StatCard>
-    ))
-  }
+		return statCardData.map((data) => (
+			<StatCard key={data.title}>
+				<h3>{data.title}</h3>
+				<div className={data.styles?.main}>{data.data}</div>
+				<div className={data.styles?.sub}>{data.subData}</div>
+			</StatCard>
+		));
+	}
 
 	return (
-		<div
-			className={`${styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh mt-24 lg:mt-4 mx-3`}
-		>
-			{/* Main Header */}
+		<DashboardLayout>
 			<DashboardHeader user={user} title="Command Zone" />
-
-			{/* Main Content */}
-			<div className="lg:h-full w-full lg:max-w-[1480px] flex justify-center items-center grow">
+			<DashboardMain>
 				<div
-					className={`${pageStyles.gridLayout} flex flex-col gap-2 w-full items-center my-2`}
+					className={`${styles.gridLayout} flex flex-col gap-2 w-full items-center my-2`}
 				>
-          {
-            renderStatCards()
-          }
+					{renderStatCards()}
 
-          {/* Line Chart */}
+					{/* Line Chart */}
 					<StatCard
 						styles="col-span-3"
 						innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
@@ -109,7 +103,7 @@ export default function CommandZone({
 						<LineChart height="350px" />
 					</StatCard>
 
-          {/* Donut Chart */}
+					{/* Donut Chart */}
 					<StatCard
 						styles="col-span-2"
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
@@ -117,7 +111,7 @@ export default function CommandZone({
 						<PieChart height="350px" />
 					</StatCard>
 
-          {/* Commander Showcase */}
+					{/* Commander Showcase */}
 					<StatCard styles="col-span-2">
 						<h3 className="pb-4 mb-4 border-b border-surface-500 text-fg-light">
 							Commander Showcase
@@ -165,7 +159,7 @@ export default function CommandZone({
 						</div>
 					</StatCard>
 
-          {/* Recent Game Log */}
+					{/* Recent Game Log */}
 					<StatCard
 						styles="col-span-3 !hidden lg:!flex"
 						innerStyles="lg:justify-start h-full"
@@ -194,7 +188,7 @@ export default function CommandZone({
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
+			</DashboardMain>
+		</DashboardLayout>
 	);
 }
