@@ -1,125 +1,107 @@
 "use client";
 import styles from "../styles.module.css";
 import pageStyles from "./styles.module.css";
-import Bell from "@/public/icons/bell.svg";
-import UserAdd from "@/public/icons/user-add.svg";
-import ButtonIcon from "@/components/ButtonIcon";
-import Tooltip from "@/components/Tooltip";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@headlessui/react";
 import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
-import dynamic from "next/dynamic";
 import PieChart from "@/components/PieChart";
 import LineChart from "@/components/LineChart";
-
-const Chart = dynamic(() => import("react-apexcharts"), {
-	ssr: false, // Ensure ApexCharts is not imported during SSR
-});
+import DashboardHeader from "@/components/DashboardHeader";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
 	decks: DeckReadDTO[] | null;
 }
 
+interface StatCardData {
+	title: string;
+	data: string | number;
+	subData: string | number;
+	styles?: { main: string; sub: string };
+}
+
+const statCardNumberStyles = {
+	main: "text-2xl text-fg-light my-2",
+	sub: "text-fg-dark",
+};
+
 export default function CommandZone({
 	statSnapshot,
 	decks,
 }: CommandZoneInterface) {
 	const { user } = useAuth();
-	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
+
+	const statCardData: StatCardData[] = [
+		{
+			title: "Total Games",
+			data: statSnapshot?.gamesPlayed ?? 0,
+			subData: `this month: ${0}`,
+			styles: statCardNumberStyles,
+		},
+		{
+			title: "Total Wins",
+			data: statSnapshot?.gamesWon ?? 0,
+			subData: `this month: ${0}`,
+			styles: statCardNumberStyles,
+		},
+		{
+			title: "Decks",
+			data: statSnapshot?.numDecks ?? 0,
+			subData: `this month: ${0}`,
+			styles: statCardNumberStyles,
+		},
+		{
+			title: "Most Played",
+			data: `${"Urza, Lord High Artificer"}`,
+			subData: `this month: ${"Atraxa, Grand Unifier"}`,
+			styles: {
+				main: "text-lg text-fg-light my-2",
+				sub: "text-fg-dark",
+			},
+		},
+		{
+			title: "Recently Played",
+			data: `${"Atraxa, Grand Unifier"}`,
+			subData: `WIN`,
+			styles: {
+				main: "text-lg text-fg-light my-2",
+				sub: "text-success font-bold tracking-wider",
+			},
+		},
+	];
+
+	function renderStatCards() {
+    return statCardData.map(data => (
+      <StatCard key={data.title}>
+        <h3>{data.title}</h3>
+          <div className={data.styles?.main}>
+            {data.data}
+          </div>
+        <div className={data.styles?.sub}>{data.subData}</div>
+      </StatCard>
+    ))
+  }
 
 	return (
 		<div
 			className={`${styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh mt-24 lg:mt-4 mx-3`}
 		>
 			{/* Main Header */}
-			<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
-				<div className="flex justify-between items-center mx-4">
-					<div className="text-lg font-semibold select-none">Command Zone</div>
-					<div className="text-lg items-center justify-between hidden lg:flex">
-						{/* User Controls */}
-						<Tooltip text="Add Friends">
-							<ButtonIcon onClick={() => {}} styles={buttonIconStyle}>
-								<UserAdd className="w-[1.5em] h-[1.5em] stroke-1" />
-							</ButtonIcon>
-						</Tooltip>
-
-						<Tooltip text="Notifications">
-							<ButtonIcon onClick={() => {}} styles={buttonIconStyle}>
-								<Bell className="w-[1.5em] h-[1.5em] stroke-1" />
-							</ButtonIcon>
-						</Tooltip>
-
-						{/* User Profile Card  */}
-						<Button
-							className="flex items-center justify-center gap-3 py-2 px-3 ml-1 rounded
-            data-hover:cursor-pointer data-hover:bg-surface-500"
-						>
-							<div className="w-[1.5em] h-[1.5em] d overflow-hidden">
-								<Image
-									className="h-full w-full object-cover"
-									src="/mock/avatar.png"
-									height={32}
-									width={32}
-									alt="User avatar"
-								/>
-							</div>
-							<div className="text-base text-fg-light select-none">
-								{user?.userName}
-							</div>
-						</Button>
-					</div>
-				</div>
-			</div>
+			<DashboardHeader user={user} title="Command Zone" />
 
 			{/* Main Content */}
 			<div className="lg:h-full w-full lg:max-w-[1480px] flex justify-center items-center grow">
 				<div
 					className={`${pageStyles.gridLayout} flex flex-col gap-2 w-full items-center my-2`}
 				>
-					<StatCard>
-						<div>Total Games</div>
-						<div className="text-2xl text-fg-light my-2">
-							{statSnapshot?.gamesPlayed}
-						</div>
-						<div className="text-fg-dark">this month: 0</div>
-					</StatCard>
-					<StatCard>
-						<h3>Total Wins</h3>
-						<div className="text-2xl text-fg-light my-2">
-							{statSnapshot?.gamesWon}
-						</div>
-						<div className="text-fg-dark">this month: 0</div>
-					</StatCard>
-					<StatCard>
-						<h3>Decks</h3>
-						<div className="text-2xl text-fg-light my-2">
-							{statSnapshot?.numDecks}
-						</div>
-						<div className="text-fg-dark">this month: 0</div>
-					</StatCard>
-					<StatCard>
-						<h3>Most Played</h3>
-						<div className="text-lg text-fg-light my-2">
-							Urza, Lord High Artificer
-						</div>
-						<div className="text-fg-dark">
-							this month: <br /> Atraxa, Grand Unifier
-						</div>
-					</StatCard>
-					<StatCard>
-						<h3>Recently Played</h3>
-						<div className="text-lg text-fg-light my-2">
-							Atraxa, Grand Unifier
-						</div>
-						<div className="text-success font-bold tracking-wider">WIN</div>
-						{/* <div className="text-error font-bold tracking-wider">LOSS</div> */}
-					</StatCard>
+          {
+            renderStatCards()
+          }
 
+          {/* Line Chart */}
 					<StatCard
 						styles="col-span-3"
 						innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
@@ -127,6 +109,7 @@ export default function CommandZone({
 						<LineChart height="350px" />
 					</StatCard>
 
+          {/* Donut Chart */}
 					<StatCard
 						styles="col-span-2"
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
@@ -134,6 +117,7 @@ export default function CommandZone({
 						<PieChart height="350px" />
 					</StatCard>
 
+          {/* Commander Showcase */}
 					<StatCard styles="col-span-2">
 						<h3 className="pb-4 mb-4 border-b border-surface-500 text-fg-light">
 							Commander Showcase
@@ -150,9 +134,7 @@ export default function CommandZone({
 							</div>
 
 							<div className="flex flex-col text-fg-light w-full gap-4 items-center lg:items-start shrink-[2]">
-								<h3 className="hidden lg:block">
-									Urza, Lord High Artificer
-								</h3>
+								<h3 className="hidden lg:block">Urza, Lord High Artificer</h3>
 
 								<div className="w-[250px] lg:w-full lg:gap-4 flex flex-wrap -translate-x-2 lg:translate-x-0">
 									<div className="flex flex-col w-1/2 lg:w-full items-center lg:items-start pb-4 lg:pb-0">
@@ -183,6 +165,7 @@ export default function CommandZone({
 						</div>
 					</StatCard>
 
+          {/* Recent Game Log */}
 					<StatCard
 						styles="col-span-3 !hidden lg:!flex"
 						innerStyles="lg:justify-start h-full"
@@ -210,10 +193,6 @@ export default function CommandZone({
 							<ButtonPrimary onClick={() => {}}>View Game Log</ButtonPrimary>
 						</div>
 					</div>
-
-					{/* <p className="">{JSON.stringify(user, null, 3)}</p>
-        <p className="">{JSON.stringify(statSnapshot, null, 3)}</p>
-        <p className="">{JSON.stringify(decks, null, 3)}</p> */}
 				</div>
 			</div>
 		</div>

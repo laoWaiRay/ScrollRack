@@ -1,4 +1,11 @@
 @import "tailwindcss";
+@source inline('text-2xl');
+@source inline('text-fg-light');
+@source inline('my-2');
+@source inline('text-fg-dark');
+@source inline('text-success');
+@source inline('font-bold');
+@source inline('tracking-wider');
 
 /*--------------------------------------------------------------------------------------
 CSS Reset, inspired by: https://www.joshwcomeau.com/css/custom-css-reset/
