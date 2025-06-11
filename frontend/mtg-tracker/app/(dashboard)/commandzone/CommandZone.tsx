@@ -12,6 +12,27 @@ import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
+import dynamic from "next/dynamic";
+import {
+  BLACK,
+	BLUE,
+	BLUE2,
+	BLUE3,
+	BLUE5,
+	GREEN,
+	GREEN2,
+	GREEN3,
+	GREEN5,
+	RED,
+	RED2,
+	RED3,
+	RED5,
+	WHITE,
+} from "@/constants/colors";
+
+const Chart = dynamic(() => import("react-apexcharts"), {
+	ssr: false, // Ensure ApexCharts is not imported during SSR
+});
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -24,6 +45,175 @@ export default function CommandZone({
 }: CommandZoneInterface) {
 	const { user } = useAuth();
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
+  
+	const pieChartConfig = {
+		type: "donut",
+		series: [1,1,1,1,1,1,1,1,1,1],
+		options: {
+			labels: ["Sheoldred", "Atraxa", "Jin-Gitaxias", "Urabrask", "Vorinclex", "Urza, Lord High Artificer", 
+        "Wilson, Refined Grizzly", "Traxos, Scourge of Kroog", "The Prismatic Bridge", "Mr. House",
+        "Chun Li", "Jon Irenicus"],
+			chart: {
+				toolbar: {
+					show: false,
+				},
+			},
+			title: {
+				text: "Decks Played",
+				align: "center",
+				style: {
+					fontSize: "16px",
+					fontWeight: "normal",
+					fontFamily: "inherit",
+					color: WHITE,
+				},
+			},
+			dataLabels: {
+				enabled: false,
+			},
+			colors: [BLACK, WHITE, BLUE, RED, BLUE, GREEN, WHITE, WHITE, WHITE],
+      tooltip: {
+        enabled: true,
+        fillSeriesColor: false,
+        theme: "dark"
+      },
+      stroke: {
+        colors: ["#121212"],
+        width: 4
+      },
+			legend: {
+				show: true,
+        position: "bottom",
+				labels: {
+					colors: WHITE,
+				},
+        offsetY: 2,
+			},
+      responsive: [
+        {
+          breakpoint: 1024,
+          height: "480px",
+          options: {
+            legend: {
+              position: "bottom"
+            }
+          }
+        }
+      ]
+		},
+	};
+
+	const lineChartConfig = {
+		type: "line",
+		series: [
+			{
+				name: "Played",
+				data: [6, 2, 3, 8, 1, 4, 2, 5, 6, 10, 5, 2],
+			},
+			{
+				name: "Win",
+				data: [3, 1, 2, 5, 0, 3, 0, 2, 3, 5, 3, 2],
+			},
+			{
+				name: "Loss",
+				data: [3, 1, 1, 3, 1, 1, 2, 3, 3, 5, 2, 0],
+			},
+		],
+		options: {
+			chart: {
+				toolbar: {
+					show: false,
+				},
+			},
+			title: {
+				text: "Game History",
+				align: "center",
+				style: {
+					fontSize: "16px",
+					fontWeight: "normal",
+					fontFamily: "inherit",
+					color: WHITE,
+				},
+			},
+			dataLabels: {
+				enabled: false,
+			},
+			legend: {
+				show: true,
+				labels: {
+					colors: WHITE,
+				},
+			},
+			colors: [BLUE, GREEN, RED],
+			stroke: {
+				lineCap: "round",
+				curve: "smooth",
+			},
+			markers: {
+				size: 0,
+			},
+			xaxis: {
+				axisTicks: {
+					show: true,
+				},
+				axisBorder: {
+					show: false,
+				},
+				labels: {
+					style: {
+						colors: WHITE,
+						fontSize: "1em",
+						fontFamily: "inherit",
+						fontWeight: "inherit",
+					},
+				},
+				categories: [
+					"Jan",
+					"Feb",
+					"Mar",
+					"Apr",
+					"May",
+					"Jun",
+					"Jul",
+					"Aug",
+					"Sep",
+					"Oct",
+					"Nov",
+					"Dec",
+				],
+			},
+			yaxis: {
+				labels: {
+					style: {
+						colors: WHITE,
+						fontSize: "1em",
+						fontFamily: "inherit",
+						fontWeight: "inherit",
+					},
+				},
+			},
+			grid: {
+				show: true,
+				borderColor: "#dddddd",
+				strokeDashArray: 1,
+				xaxis: {
+					lines: {
+						show: false,
+					},
+				},
+				padding: {
+					top: 5,
+					right: 20,
+				},
+			},
+			fill: {
+				opacity: 0.8,
+			},
+			tooltip: {
+				theme: "dark",
+			},
+		},
+	};
 
 	return (
 		<div
@@ -111,9 +301,13 @@ export default function CommandZone({
 						{/* <div className="text-error font-bold tracking-wider">LOSS</div> */}
 					</StatCard>
 
-					<StatCard styles="col-span-3 !h-[200px]">GRAPH</StatCard>
+					<StatCard styles="col-span-3" innerStyles="!px-2 !pt-6 !pb-0 !justify-start !items-stretch">
+						<Chart {...lineChartConfig} width={"100%"} height={"350px"} />
+					</StatCard>
 
-					<StatCard styles="col-span-2">PIE CHART</StatCard>
+					<StatCard styles="col-span-2" innerStyles="!px-2 !pt-6 !pb-0 !justify-center !items-stretch">
+						<Chart {...pieChartConfig} width={"100%"} height={"350px"} />
+					</StatCard>
 
 					<StatCard styles="col-span-2">
 						<div className="flex gap-6 h-full items-start">
