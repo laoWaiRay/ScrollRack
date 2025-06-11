@@ -192,6 +192,7 @@ input:-webkit-autofill {
 
 .apexcharts-tooltip {
   box-shadow: none !important;
+  background-color: #121212BF !important;
 }
 
 

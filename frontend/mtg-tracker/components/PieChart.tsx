@@ -53,6 +53,7 @@ export default function PieChart({ height }: PieChartInterface) {
 			title: {
 				text: "Decks Played",
 				align: "center",
+        margin: 10,
 				style: {
 					fontSize: "16px",
 					fontWeight: "normal",

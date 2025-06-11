@@ -17,16 +17,52 @@ import {
 	WHITE,
 } from "@/constants/colors";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 const Chart = dynamic(() => import("react-apexcharts"), {
 	ssr: false, // Ensure ApexCharts is not imported during SSR
 });
 
 interface LineChartInterface {
-  height: string;
+	height: string;
 }
 
+const initialMonthNames = [
+	"Jan",
+	"Feb",
+	"Mar",
+	"Apr",
+	"May",
+	"Jun",
+	"Jul",
+	"Aug",
+	"Sep",
+	"Oct",
+	"Nov",
+	"Dec",
+];
+
 export default function LineChart({ height }: LineChartInterface) {
+	const [monthNames, setMonthNames] = useState(initialMonthNames);
+	useEffect(() => {
+		if (window.innerWidth <= 768) {
+			setMonthNames([
+				"J",
+				"F",
+				"M",
+				"A",
+				"M",
+				"J",
+				"J",
+				"A",
+				"S",
+				"O",
+				"N",
+				"D",
+			]);
+		}
+	}, []);
+
 	const lineChartConfig = {
 		type: "line",
 		series: [
@@ -67,9 +103,9 @@ export default function LineChart({ height }: LineChartInterface) {
 				labels: {
 					colors: WHITE,
 				},
-        itemMargin: {
-          horizontal: 10,
-        },
+				itemMargin: {
+					horizontal: 10,
+				},
 			},
 			colors: [BLUE, GREEN, RED],
 			stroke: {
@@ -94,20 +130,10 @@ export default function LineChart({ height }: LineChartInterface) {
 						fontWeight: "inherit",
 					},
 				},
-				categories: [
-					"Jan",
-					"Feb",
-					"Mar",
-					"Apr",
-					"May",
-					"Jun",
-					"Jul",
-					"Aug",
-					"Sep",
-					"Oct",
-					"Nov",
-					"Dec",
-				],
+				categories: monthNames,
+        tooltip: {
+          enabled: false,
+        },
 			},
 			yaxis: {
 				labels: {
@@ -138,6 +164,9 @@ export default function LineChart({ height }: LineChartInterface) {
 			},
 			tooltip: {
 				theme: "dark",
+        x: {
+          show: false
+        },
 			},
 		},
 	};
