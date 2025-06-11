@@ -5,12 +5,19 @@
     margin: 1rem 0;
 } */
 
+
 @media screen and (min-width: 64rem) {
     .gridLayout {
         display: grid;
+        grid-template-rows: auto auto 29rem;
         grid-template-columns: repeat(5, 1fr);
         gap: 1rem;
-        margin: 1rem 0;
         width: 100%;
+    }
+}
+
+@media screen and (min-width: 90rem) {
+    .gridLayout {
+        grid-template-rows: auto auto 29rem;
     }
 }
