@@ -1,4 +1,4 @@
-import styles from "./DashboardStyles.module.css";
+import _styles from "./DashboardStyles.module.css";
 import { ReactNode } from "react";
 import { Button } from "@headlessui/react";
 import ButtonIcon from "./ButtonIcon";
@@ -10,10 +10,12 @@ import { UserReadDTO } from "@/types/client";
 
 interface DashboardLayoutInterface {
 	children: ReactNode;
+  styles?: string;
 }
 
 interface DashboardMainInterface {
 	children: ReactNode;
+  styles?: string;
 }
 
 interface DashboardHeaderInterface {
@@ -21,12 +23,15 @@ interface DashboardHeaderInterface {
   title: string;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutInterface) {
+export function DashboardLayout({ children, styles }: DashboardLayoutInterface) {
 	return (
 		<div
-			className={`${styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh mt-24 lg:mt-4 mx-3`}
+			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3`}
 		>
-			{children}
+      {/* Make room for the navbar on mobile */}
+      <div className="pt-24 w-full lg:pt-0 grow flex flex-col items-center">
+        {children}
+      </div>
 		</div>
 	);
 }
@@ -76,9 +81,9 @@ export function DashboardHeader({ user, title }: DashboardHeaderInterface) {
 	);
 }
 
-export function DashboardMain({ children }: DashboardMainInterface) {
+export function DashboardMain({ children, styles }: DashboardMainInterface) {
 	return (
-		<div className="lg:h-full w-full lg:max-w-[1480px] flex justify-center items-center grow">
+		<div className={`lg:h-full w-full lg:max-w-[1480px] flex justify-center items-start grow ${styles}`}>
 			{children}
 		</div>
 	);

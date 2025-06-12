@@ -91,7 +91,7 @@ export default function CommandZone({
 			<DashboardHeader user={user} title="Command Zone" />
 			<DashboardMain>
 				<div
-					className={`${styles.gridLayout} flex flex-col gap-2 w-full items-center my-2`}
+					className={`dashboard-main-content-layout ${styles.gridLayout} `}
 				>
 					{renderStatCards()}
 

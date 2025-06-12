@@ -1,11 +1,4 @@
 @import "tailwindcss";
-@source inline('text-2xl');
-@source inline('text-fg-light');
-@source inline('my-2');
-@source inline('text-fg-dark');
-@source inline('text-success');
-@source inline('font-bold');
-@source inline('tracking-wider');
 
 /*--------------------------------------------------------------------------------------
 CSS Reset, inspired by: https://www.joshwcomeau.com/css/custom-css-reset/
@@ -217,6 +210,10 @@ Tailwind Components
     
     .link {
         @apply font-semibold text-fg-light rounded mx-0.5;
+    }
+    
+    .dashboard-main-content-layout {
+        @apply flex flex-col gap-2 w-full items-center my-2; 
     }
 }
 

@@ -3,7 +3,7 @@ import { Button } from "@headlessui/react";
 interface ButtonPrimaryProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
-  style?: 'primary' | 'google';
+  style?: 'primary' | 'secondary' | 'google';
   type?: "submit" | "button";
 }
 
@@ -21,10 +21,16 @@ const buttonStyles: {[style: string]: ButtonStyle} = {
     active: 'data-hover:data-active:bg-primary-400',
     textColor: 'text-white'    
   },
+  secondary: {
+    color: 'bg-surface-400',
+    hover: 'data-hover:bg-surface-300',
+    active: 'data-hover:data-active:bg-surface-400',
+    textColor: 'text-fg-light'    
+  },
   google: {
-    color: 'bg-surface-500',
-    hover: 'data-hover:bg-surface-400',
-    active: 'data-hover:data-active:bg-surface-600',
+    color: 'bg-surface-400',
+    hover: 'data-hover:bg-surface-300',
+    active: 'data-hover:data-active:bg-surface-400',
     textColor: 'text-fg-light'
   }
 }

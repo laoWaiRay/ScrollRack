@@ -89,7 +89,9 @@ const mobileOnlyLinkData: LinkData[] = [
 
 export default function HomepageLayout({ children }: HomepageLayoutProps) {
 	const pathname = usePathname();
-	const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const openDrawer = () => setIsDrawerOpen(true);
+  const closeDrawer = () => setIsDrawerOpen(false);
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (
@@ -112,7 +114,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 	function renderMobileLinks(links: LinkData[]) {
 		return links.map((data) => (
 			<li key={data.name}>
-				<SidebarLink href={data.href} isActive={pathname.includes(data.href)}>
+				<SidebarLink href={data.href} isActive={pathname.includes(data.href)} onClick={closeDrawer}>
 					<data.icon className="w-[2em] h-[2em]" />
 					<span className="ml-4">{data.name}</span>
 				</SidebarLink>
@@ -188,8 +190,8 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 
 				{/* Hidden Drawer */}
 				<div
-					className={`w-screen h-screen overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-all duration-250 flex flex-col
-          justify-center ${isDrawerOpen && "translate-x-[300%]"}`}
+					className={`w-screen h-screen overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-all duration-700 ease-in-out flex flex-col
+          justify-center ${!isDrawerOpen && "translate-x-[300%]"}`}
 				>
 					<div className="flex flex-col h-full mt-[80px]">
 						<h2 className="text-fg-dark mb-2 flex justify-center">
