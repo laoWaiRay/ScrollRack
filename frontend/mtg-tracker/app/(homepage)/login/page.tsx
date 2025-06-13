@@ -70,7 +70,7 @@ export default function LoginPage() {
 				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
 				onSubmit={(e) => handleSubmit(onSubmit, e)}
 			>
-				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light">
+				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light pt-6">
 					Log in to your account
 				</h1>
 

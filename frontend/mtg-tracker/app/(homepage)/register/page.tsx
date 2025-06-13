@@ -20,6 +20,7 @@ import {
 	passwordMismatch,
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
+import { Form, FormField } from "@/components/Form";
 
 const initialValues: FormData = {
 	email: "",
@@ -37,59 +38,56 @@ export default function RegisterPage() {
 	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
 
 	const { email, username, password, confirmPassword } = values;
-	const emailErrorMessages = errors?.email && renderErrors(errors.email);
-	const usernameErrorMessages =
-		errors?.username && renderErrors(errors.username);
-	const passwordErrorMessages =
-		errors?.password && renderErrors(errors.password);
-	const confirmPasswordErrorMessages =
-		errors?.confirmPassword && renderErrors(errors.confirmPassword);
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
+
+	const formFields: FormField[] = [
+		{
+			type: "text",
+			name: "email",
+			label: "Email",
+			value: email,
+			errorMessages: errors?.email,
+		},
+		{
+			type: "text",
+			name: "username",
+			label: "Username",
+			value: username,
+			errorMessages: errors?.username,
+		},
+		{
+			type: "password",
+			name: "password",
+			label: "Password",
+			value: password,
+			errorMessages: errors?.password,
+      hidden: isPwHidden,
+      toggleHidden: () => setIsPwHidden(!isPwHidden),
+		},
+		{
+			type: "password",
+			name: "confirmPassword",
+			label: "Confirm Password",
+			value: confirmPassword,
+			errorMessages: errors?.confirmPassword,
+      hidden: isConfirmPwHidden,
+      toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
+		},
+	];
 
 	return (
 		<div className={`${styles.gridB}`}>
 			<form
 				onSubmit={(e) => handleSubmit(onSubmit, e)}
-				className={`flex flex-col justify-center px-12 py-12`}
+				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
 			>
-				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
+				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light pt-6">
 					Create an account
 				</h1>
 				<div>{unknownErrorMessages}</div>
-				<TextInput
-					name="email"
-					label="Email"
-					value={email}
-					onChange={(e) => handleChange(e)}
-					errorMessage={emailErrorMessages}
-				/>
-				<TextInput
-					name="username"
-					label="Username"
-					value={username}
-					onChange={(e) => handleChange(e)}
-					errorMessage={usernameErrorMessages}
-				/>
-				<TextInput
-					type="password"
-					hidden={isPwHidden}
-					toggleHidden={() => setIsPwHidden(!isPwHidden)}
-					name="password"
-					label="Password"
-					value={password}
-					onChange={(e) => handleChange(e)}
-					errorMessage={passwordErrorMessages}
-				/>
-				<TextInput
-					type="password"
-					hidden={isConfirmPwHidden}
-					toggleHidden={() => setIsConfirmPwHidden(!isConfirmPwHidden)}
-					name="confirmPassword"
-					label="Confirm Password"
-					value={confirmPassword}
-					onChange={(e) => handleChange(e)}
-					errorMessage={confirmPasswordErrorMessages}
-				/>
+
+        <Form fields={formFields} handleChange={handleChange}  />
+
 				<ButtonPrimary onClick={() => {}} type="submit">
 					Sign Up
 				</ButtonPrimary>
@@ -104,7 +102,7 @@ export default function RegisterPage() {
 					</div>
 				</ButtonPrimary>
 
-				<div className="flex justify-center items-center">
+				<div className="flex justify-center items-center py-2">
 					Already have an account?{" "}
 					<Link href="/login" className="link px-1">
 						Log in

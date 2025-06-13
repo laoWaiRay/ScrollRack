@@ -1,6 +1,7 @@
 .gridLayout {
 	display: flex;
 	flex-flow: column wrap;
+    padding-bottom: 4rem;
 }
 
 .gridB {
