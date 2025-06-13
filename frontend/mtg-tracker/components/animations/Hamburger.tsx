@@ -4,14 +4,12 @@ import styles from "./Hamburger.module.css";
 
 interface HamburgerInterface {
   onClick: (e: React.MouseEvent) => void;
+  isActive: boolean;
 }
 
-export default function Hamburger({ onClick }: HamburgerInterface) {
-	const [isActive, setIsActive] = useState(false);
-  
+export default function Hamburger({ onClick, isActive }: HamburgerInterface) {
   function handleClick(e: React.MouseEvent) {
     onClick(e);
-    setIsActive(!isActive);
   }
 
 	return (

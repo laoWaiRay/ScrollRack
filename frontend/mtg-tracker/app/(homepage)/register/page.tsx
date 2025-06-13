@@ -1,72 +1,171 @@
 "use client";
 import styles from "../styles.module.css";
 import TextInput from "@/components/TextInput";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { api } from "@/generated/client";
 import { isAxiosError } from "axios";
-import ErrorDescription from "@/components/ErrorDescription";
 import { BAD_REQUEST } from "@/constants/httpStatus";
+import useForm from "@/hooks/useForm";
+import {
+	ValidationError,
+	RegisterErrors as Errors,
+	RegisterFormData as FormData,
+	registerFormErrorFieldMap as errorFieldMap,
+	requiredEmail,
+	requiredUsername,
+	requiredPassword,
+	passwordMismatch,
+} from "@/types/formValidation";
+import { renderErrors } from "@/helpers/renderErrors";
 
-interface FormData {
-	email: string;
-	username: string;
-	password: string;
-	confirmPassword: string;
-}
+const initialValues: FormData = {
+	email: "",
+	username: "",
+	password: "",
+	confirmPassword: "",
+};
 
-interface ValidationError {
-	code: string;
-	description: string;
-}
+export default function RegisterPage() {
+	const { values, errors, handleChange, handleSubmit } = useForm<
+		FormData,
+		Errors
+	>(initialValues, validateForm);
+	const [isPwHidden, setIsPwHidden] = useState(true);
+	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
 
-class Errors {
-	constructor(
-		public email: ValidationError[] = [],
-		public username: ValidationError[] = [],
-		public password: ValidationError[] = [],
-		public confirmPassword: ValidationError[] = [],
-		public unknown: ValidationError[] = []
-	) {}
-}
+	const { email, username, password, confirmPassword } = values;
+	const emailErrorMessages = errors?.email && renderErrors(errors.email);
+	const usernameErrorMessages =
+		errors?.username && renderErrors(errors.username);
+	const passwordErrorMessages =
+		errors?.password && renderErrors(errors.password);
+	const confirmPasswordErrorMessages =
+		errors?.confirmPassword && renderErrors(errors.confirmPassword);
+	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
 
-function isValidationErrorArray(data: unknown): data is ValidationError[] {
 	return (
-		Array.isArray(data) &&
-		data.every(
-			(item) =>
-				typeof item == "object" &&
-				item !== null &&
-				"code" in item &&
-				"description" in item &&
-				typeof item.code == "string" &&
-				typeof item.description == "string"
-		)
+		<div className={`${styles.gridB}`}>
+			<form
+				onSubmit={(e) => handleSubmit(onSubmit, e)}
+				className={`flex flex-col justify-center px-12 py-12`}
+			>
+				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
+					Create an account
+				</h1>
+				<div>{unknownErrorMessages}</div>
+				<TextInput
+					name="email"
+					label="Email"
+					value={email}
+					onChange={(e) => handleChange(e)}
+					errorMessage={emailErrorMessages}
+				/>
+				<TextInput
+					name="username"
+					label="Username"
+					value={username}
+					onChange={(e) => handleChange(e)}
+					errorMessage={usernameErrorMessages}
+				/>
+				<TextInput
+					type="password"
+					hidden={isPwHidden}
+					toggleHidden={() => setIsPwHidden(!isPwHidden)}
+					name="password"
+					label="Password"
+					value={password}
+					onChange={(e) => handleChange(e)}
+					errorMessage={passwordErrorMessages}
+				/>
+				<TextInput
+					type="password"
+					hidden={isConfirmPwHidden}
+					toggleHidden={() => setIsConfirmPwHidden(!isConfirmPwHidden)}
+					name="confirmPassword"
+					label="Confirm Password"
+					value={confirmPassword}
+					onChange={(e) => handleChange(e)}
+					errorMessage={confirmPasswordErrorMessages}
+				/>
+				<ButtonPrimary onClick={() => {}} type="submit">
+					Sign Up
+				</ButtonPrimary>
+				<div className="text-fg-dark flex justify-center items-center">
+					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
+					<span className="select-none">OR</span>
+					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
+				</div>
+				<ButtonPrimary onClick={() => {}} style="google">
+					<div className="flex items-center justify-center">
+						Sign up with Google <GoogleLogo className="ml-2" />
+					</div>
+				</ButtonPrimary>
+
+				<div className="flex justify-center items-center">
+					Already have an account?{" "}
+					<Link href="/login" className="link px-1">
+						Log in
+					</Link>
+				</div>
+			</form>
+		</div>
 	);
 }
 
-const errorFieldMap: Record<string, keyof FormData> = {
-	InvalidEmail: "email",
-	DuplicateEmail: "email",
-	RequiredEmail: "email",
+function validateForm(data: FormData) {
+	const errors = new Errors();
+	const { email, username, password, confirmPassword } = data;
+	if (!email || !username || !password) {
+		if (!email) {
+			errors.email.push(requiredEmail);
+		}
+		if (!username) {
+			errors.username.push(requiredUsername);
+		}
+		if (!password) {
+			errors.password.push(requiredPassword);
+		}
+	}
 
-	InvalidUserName: "username",
-	DuplicateUserName: "username",
-	RequiredUsername: "username",
+	if (!confirmPassword || password !== confirmPassword) {
+		errors.confirmPassword.push(passwordMismatch);
+	}
 
-	PasswordTooShort: "password",
-	PasswordRequiresDigit: "password",
-	PasswordRequiresLower: "password",
-	PasswordRequiresUpper: "password",
-	PasswordRequiresNonAlphanumeric: "password",
-	PasswordRequiresUniqueChars: "password",
-	RequiredPassword: "password",
+	return errors;
+}
 
-	PasswordMismatch: "confirmPassword",
-	RequiredConfirmPassword: "confirmPassword",
-};
+async function onSubmit(
+	data: FormData,
+	_errors?: Partial<Errors>,
+	_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
+) {
+	const { username, email, password } = data;
+	try {
+		await api.postApiUserregister({ userName: username, email, password });
+	} catch (error) {
+		if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
+			if (
+				error.response?.data != null &&
+				isValidationErrorArray(error.response.data)
+			) {
+				const responseErrors = validationErrorArrayToErrors(
+					error.response.data
+				);
+				if (_setErrors) {
+					_setErrors({
+						...(_errors || {}),
+						...responseErrors,
+					});
+				}
+			}
+		} else {
+			throw error;
+		}
+	}
+}
 
 function validationErrorArrayToErrors(errorArray: ValidationError[]) {
 	const errors = new Errors();
@@ -91,168 +190,23 @@ function validationErrorArrayToErrors(errorArray: ValidationError[]) {
 					break;
 			}
 		} else {
-      errors.unknown.push(validationError);
-    }
+			errors.unknown.push(validationError);
+		}
 	}
 	return errors;
 }
 
-const passwordMismatch: ValidationError = {
-	code: "PasswordMismatch",
-	description: "Passwords must match",
-};
-
-const requiredEmail: ValidationError = {
-	code: "RequiredEmail",
-	description: "Email is required",
-};
-const requiredUsername: ValidationError = {
-	code: "RequiredUsername",
-	description: "Username is required",
-};
-const requiredPassword: ValidationError = {
-	code: "RequiredPassword",
-	description: "Password is required",
-};
-
-export default function RegisterPage() {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
-	const [username, setUsername] = useState("");
-	const [isPwHidden, setIsPwHidden] = useState(true);
-	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
-	const [errors, setErrors] = useState<Errors | null>(null);
-
-	async function handleRegister(e: React.SyntheticEvent) {
-		e.preventDefault();
-		let validationErrors = new Errors();
-
-		if (!email || !username || !password) {
-			if (!email) {
-				validationErrors.email.push(requiredEmail);
-			}
-			if (!username) {
-				validationErrors.username.push(requiredUsername);
-			}
-			if (!password) {
-				validationErrors.password.push(requiredPassword);
-			}
-		}
-
-		if (!confirmPassword || password !== confirmPassword) {
-			validationErrors.confirmPassword.push(passwordMismatch);
-		}
-    
-    if (validationErrors && !(Object.values(validationErrors).every(arr => arr.length == 0))) {
-      setErrors(validationErrors);
-      return;
-    }
-
-		try {
-			await api.postApiUserregister({ userName: username, email, password });
-			setErrors(null);
-		} catch (error) {
-			if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
-				if (
-					error.response?.data != null &&
-					isValidationErrorArray(error.response.data)
-				) {
-					const errors = validationErrorArrayToErrors(error.response.data);
-					validationErrors = { ...validationErrors, ...errors };
-				}
-
-				if (validationErrors) {
-					setErrors(validationErrors);
-				}
-			} else {
-				throw error;
-			}
-		}
-	}
-
-	function renderErrors(errors: ValidationError[] | undefined) {
-		return errors?.map((e) => (
-			<ErrorDescription _key={e.description} description={e.description} />
-		));
-	}
-
-	const emailErrorMessages = errors?.email && renderErrors(errors.email);
-	const usernameErrorMessages =
-		errors?.username && renderErrors(errors.username);
-	const passwordErrorMessages =
-		errors?.password && renderErrors(errors.password);
-	const confirmPasswordErrorMessages =
-		errors?.confirmPassword && renderErrors(errors.confirmPassword);
-	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
-
+function isValidationErrorArray(data: unknown): data is ValidationError[] {
 	return (
-		<div
-			className={`${styles.gridB} flex flex-col justify-center items-start mx-12`}
-		>
-			<form
-				onSubmit={() => console.log("submit")}
-				className={`flex flex-col justify-center px-12 py-12`}
-			>
-				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
-					Create an account
-				</h1>
-				<div>{unknownErrorMessages}</div>
-				<TextInput
-					name="email"
-					label="Email"
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
-					errorMessage={emailErrorMessages}
-				/>
-				<TextInput
-					name="username"
-					label="Username"
-					value={username}
-					onChange={(e) => setUsername(e.target.value)}
-					errorMessage={usernameErrorMessages}
-				/>
-				<TextInput
-					type="password"
-					hidden={isPwHidden}
-					toggleHidden={() => setIsPwHidden(!isPwHidden)}
-					name="password"
-					label="Password"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					errorMessage={passwordErrorMessages}
-				/>
-				<TextInput
-					type="password"
-					hidden={isConfirmPwHidden}
-					toggleHidden={() => setIsConfirmPwHidden(!isConfirmPwHidden)}
-					name="confirmPassword"
-					label="Confirm Password"
-					value={confirmPassword}
-					onChange={(e) => setConfirmPassword(e.target.value)}
-					errorMessage={confirmPasswordErrorMessages}
-				/>
-				<ButtonPrimary onClick={handleRegister} type="submit">
-					Sign Up
-				</ButtonPrimary>
-				<div className="text-fg-dark flex justify-center items-center">
-					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
-					<span className="select-none">OR</span>
-					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
-				</div>
-				<ButtonPrimary onClick={() => {}} style="google">
-					<div className="flex items-center justify-center">
-						Sign up with Google <GoogleLogo className="ml-2" />
-					</div>
-				</ButtonPrimary>
-
-				<div className="flex justify-center items-center">
-					Already have an account?{" "}
-					<Link href="/login" className="link px-1">
-						Log in
-					</Link>
-				</div>
-			</form>
-		</div>
+		Array.isArray(data) &&
+		data.every(
+			(item) =>
+				typeof item == "object" &&
+				item !== null &&
+				"code" in item &&
+				"description" in item &&
+				typeof item.code == "string" &&
+				typeof item.description == "string"
+		)
 	);
 }

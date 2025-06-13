@@ -15,28 +15,27 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
       
         {/* Left side of page is the Hero image */}
 				<div
-					className={`${styles.gridA} flex flex-col justify-center items-end mx-12`}
+					className={`${styles.gridA} flex flex-col justify-center items-center lg:items-end mx-0 lg:mr-20 w-full`}
 				>
 					<div
-						className={`flex flex-col justify-center items-center mb-16 mt-12`}
+						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mb-8 mt-12`}
 					>
 						<div className="flex flex-col">
-							<div className="flex items-center text-3xl text-white">
+							<div className="flex items-center text-[3.75rem] lg:text-3xl text-white">
                 <LogoImage title="Scroll with quill writing" className="w-[1em] h-[1em] shrink-0" />
-								<h2 className="font-dancing-script select-none">
+								<h2 className="font-dancing-script select-none leading-[1.5em]">
 									ScrollRack
 								</h2>
 							</div>
-							<h2 className="font-dancing-script text-xl text-fg select-none">
+							<h2 className="font-dancing-script text-[1.6rem] lg:text-xl text-fg select-none">
 								the Commander game tracker
 							</h2>
 						</div>
-						<div className="mt-8">
+						<div className="mt-8 w-[30rem] xl:w-[40rem] aspect-[34/25] relative hidden lg:block">
 							<Image
 								src="/images/Hero.png"
 								alt="ScrollRack app dashboard view"
-								width={542}
-								height={399}
+                fill={true}
                 priority={true}
 							/>
 						</div>

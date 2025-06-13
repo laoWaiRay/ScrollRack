@@ -41,7 +41,7 @@ export default function ButtonPrimary({ onClick, children, style = 'primary', ty
 	return (
 		<Button
       type={type}
-			className={`${color} ${hover} ${active} ${textColor} my-4 py-6 px-4 lg:py-2 rounded font-semibold w-full`}
+			className={`${color} ${hover} ${active} ${textColor} my-4 py-4 px-4 lg:py-2 rounded font-semibold w-full`}
 			onClick={onClick}
 		>
       {children}

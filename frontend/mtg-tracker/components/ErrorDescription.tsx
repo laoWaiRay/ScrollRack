@@ -1,12 +1,11 @@
 
 interface ErrorDescriptionInterface {
-  _key: string;
   description: string;
 }
 
-export default function ErrorDescription({ _key, description }: ErrorDescriptionInterface) {
+export default function ErrorDescription({ description }: ErrorDescriptionInterface) {
 	return (
-		<div className="text-error -mt-2 mb-1" key={_key}>
+		<div className="text-error -mt-2 mb-1">
 			{description}
 		</div>
 	);

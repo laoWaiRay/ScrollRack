@@ -1,15 +1,30 @@
 .gridLayout {
-    display: grid;
-    grid-template-areas:
-        "a a a a a a b b b b b b";
-    gap: 20px;
-    margin-inline: 15px;
-}
-
-.gridA {
-    grid-area: a;
+	display: flex;
+	flex-flow: column wrap;
 }
 
 .gridB {
-    grid-area: b;
+    display: flex;
+    flex-flow: column wrap;
+	justify-content: center;
+	align-items: center;
+}
+
+@media screen and (min-width: 64rem) {
+	.gridLayout {
+		display: grid;
+		grid-template-areas: "a a a a a a b b b b b b";
+		gap: 20px;
+		margin-inline: 15px;
+	}
+
+	.gridA {
+		grid-area: a;
+	}
+
+	.gridB {
+		grid-area: b;
+        align-items: flex-start;
+        margin-left: 5rem;
+	}
 }

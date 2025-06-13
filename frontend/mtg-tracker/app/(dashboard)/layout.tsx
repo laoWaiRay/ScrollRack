@@ -185,7 +185,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 				</header>
 
 				<div className="lg:hidden">
-					<Hamburger onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
+					<Hamburger onClick={() => setIsDrawerOpen(!isDrawerOpen)} isActive={isDrawerOpen} />
 				</div>
 
 				{/* Hidden Drawer */}

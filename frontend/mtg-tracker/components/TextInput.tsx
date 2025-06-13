@@ -65,8 +65,8 @@ export default function TextInput({
   }
 
 	return (
-		<Field className="flex flex-col">
-			<Label className="mb-1.5 text-fg">{label}</Label>
+		<Field className="flex flex-col mb-2">
+			<Label className="mb-2 text-fg">{label}</Label>
       <div className="max-w-xs">
         {errorMessage}
       </div>

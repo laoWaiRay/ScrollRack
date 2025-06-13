@@ -5,31 +5,37 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { useAuth } from "@/hooks/useAuth";
-import { Button, Switch } from "@headlessui/react";
+import { Button } from "@headlessui/react";
 import ArrowLeft from "@/public/icons/angle-left-b.svg";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
 
 interface OptionsLayoutInterface {
-  children: ReactNode;
+	children: ReactNode;
+  title: string;
 }
 
-export default function OptionsLayout({ children }: OptionsLayoutInterface) {
+export default function OptionsLayout({ children, title }: OptionsLayoutInterface) {
 	const { user } = useAuth();
-  const router = useRouter();
+	const router = useRouter();
 
 	return (
 		<DashboardLayout styles="relative">
-			<DashboardHeader title="Settings" user={user} />
+			<DashboardHeader title={title} user={user} />
 			{/* Back Button */}
 			<div className="w-full flex sticky top-24 left-0 pt-4 lg:top-0 lg:relative max-w-lg ml-14 lg:max-w-md">
-				<Button className="w-16 h-16 bg-surface-400 rounded-full p-3" onClick={() => router.back()}>
+				<Button
+					className="w-16 h-16 bg-surface-400 rounded-full p-3"
+					onClick={() => router.back()}
+				>
 					<ArrowLeft className="text-fg-light -translate-x-0.5" />
 				</Button>
 			</div>
 			<DashboardMain styles="!max-w-lg">
 				<div className="dashboard-main-content-layout relative">
-          { children }
+					<section className="w-full flex flex-col px-8 mx-4">
+						{children}
+					</section>
 				</div>
 			</DashboardMain>
 		</DashboardLayout>

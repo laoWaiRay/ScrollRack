@@ -1,73 +1,116 @@
 "use client";
 import styles from "../styles.module.css";
 import TextInput from "@/components/TextInput";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { useLogin } from "@/hooks/useLogin";
 import { AppError } from "@/errors";
-import ErrorDescription from "@/components/ErrorDescription";
+import {
+	LoginFormData as FormData,
+	LoginErrors as Errors,
+	requiredEmail,
+	requiredPassword,
+	invalidLoginCredentials,
+} from "@/types/formValidation";
+import useForm from "@/hooks/useForm";
+import { renderErrors } from "@/helpers/renderErrors";
+
+const initialValues: FormData = {
+	email: "",
+	password: "",
+};
 
 export default function LoginPage() {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
+	const { values, errors, handleChange, handleSubmit } = useForm<
+		FormData,
+		Errors
+	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { loginAsync } = useLogin();
-  
-  async function handleLogin(e: React.SyntheticEvent) {
-    e.preventDefault();
+	const { loginAsync } = useLogin();
+	const { email, password } = values;
 
-    try {
-      await loginAsync(email, password);
-      setError(null)
-    } catch (error) {
-      if (error instanceof AppError && error.name == "LOGIN_ERROR") {
-        setError(error.message);
-      } else {
-        throw error;
-      }
-    }
-  }
+	async function onSubmit(
+		_: FormData,
+		_errors?: Partial<Errors>,
+		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
+	) {
+		try {
+			await loginAsync(email, password);
+			if (_setErrors) {
+				_setErrors({});
+			}
+		} catch (error) {
+			if (error instanceof AppError && error.name == "LOGIN_ERROR") {
+				if (_setErrors) {
+					_setErrors({
+						invalidUsernameOrPassword: [invalidLoginCredentials],
+					});
+				}
+			} else {
+				throw error;
+			}
+		}
+	}
+
+	const invalidLoginMessages =
+		errors?.invalidUsernameOrPassword &&
+		renderErrors(errors.invalidUsernameOrPassword);
+	const emailErrorMessages = errors?.email && renderErrors(errors.email);
+	const passwordErrorMessages =
+		errors?.password && renderErrors(errors.password);
+	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
 
 	return (
 		<div
-			className={`${styles.gridB} flex flex-col justify-center items-start mx-12`}
+			className={`${styles.gridB} flex flex-col justify-center items-center lg:items-start mx-0 lg:ml-20 w-full`}
 		>
-			<form className={`flex flex-col justify-center px-12 py-12`}>
-				<h1 className="text-lg mb-4 text-fg-light font-semibold select-none">
+			<form
+				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
+				onSubmit={(e) => handleSubmit(onSubmit, e)}
+			>
+				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light">
 					Log in to your account
 				</h1>
-        
-        {error && <ErrorDescription _key={error} description={error} />}
+
+				<div>{invalidLoginMessages}</div>
+				<div>{unknownErrorMessages}</div>
 				<TextInput
 					name="email"
 					label="Email"
 					value={email}
-					onChange={(e) => setEmail(e.target.value)}
+					onChange={(e) => handleChange(e)}
+					errorMessage={emailErrorMessages}
 				/>
 				<TextInput
 					type="password"
 					hidden={isPwHidden}
-          toggleHidden={() => setIsPwHidden(!isPwHidden)}
+					toggleHidden={() => setIsPwHidden(!isPwHidden)}
 					name="password"
 					label="Password"
 					value={password}
-					onChange={(e) => setPassword(e.target.value)}
+					onChange={(e) => handleChange(e)}
+					errorMessage={passwordErrorMessages}
 				/>
-        <Link href='/forgot-password' className="self-end text-fg font-normal rounded p-sm">Forgot password?</Link>
-				<ButtonPrimary type="submit" onClick={handleLogin}>Log in</ButtonPrimary>
+				<Link
+					href="/forgot-password"
+					className="self-end text-fg font-normal rounded p-sm -mt-1"
+				>
+					Forgot password?
+				</Link>
+				<ButtonPrimary type="submit" onClick={() => {}}>
+					Log in
+				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
 					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
 				<ButtonPrimary onClick={() => {}} style="google">
-          <div className="flex items-center justify-center">
-            Sign in with Google{" "}
-            <GoogleLogo className="ml-2" />
-          </div>
+					<div className="flex items-center justify-center">
+						Sign in with Google <GoogleLogo className="ml-2" />
+					</div>
 				</ButtonPrimary>
 				<div className="flex justify-center items-center">
 					Don't have an account?{" "}
@@ -78,4 +121,16 @@ export default function LoginPage() {
 			</form>
 		</div>
 	);
+}
+
+function validateForm(data: FormData) {
+	const errors = new Errors();
+	const { email, password } = data;
+	if (!email) {
+		errors.email.push(requiredEmail);
+	}
+	if (!password) {
+		errors.password.push(requiredPassword);
+	}
+	return errors;
 }
