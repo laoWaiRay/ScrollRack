@@ -3,8 +3,9 @@ import { Button } from "@headlessui/react";
 interface ButtonPrimaryProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
-  style?: 'primary' | 'secondary' | 'google';
+  style?: 'primary' | 'secondary' | 'transparent' | 'google';
   type?: "submit" | "button";
+  uppercase?: boolean;
 }
 
 interface ButtonStyle {
@@ -27,6 +28,12 @@ const buttonStyles: {[style: string]: ButtonStyle} = {
     active: 'data-hover:data-active:bg-surface-400',
     textColor: 'text-fg-light'    
   },
+  transparent: {
+    color: 'bg-transparent',
+    hover: 'data-hover:border-b data-hover:border-inherit data-hover:cursor-pointer',
+    active: '',
+    textColor: 'text-fg-light',
+  },
   google: {
     color: 'bg-surface-400',
     hover: 'data-hover:bg-surface-300',
@@ -35,13 +42,16 @@ const buttonStyles: {[style: string]: ButtonStyle} = {
   }
 }
 
-export default function ButtonPrimary({ onClick, children, style = 'primary', type = "button" }: ButtonPrimaryProps) {
+export default function ButtonPrimary({ onClick, children, style = 'primary', type = "button", uppercase = true }: ButtonPrimaryProps) {
   const {color, hover, active, textColor} = buttonStyles[style];
-
+  const padding = style === "transparent" ? "py-1 px-0.5" : "p-4 lg:py-3";
+  const border = style === "transparent" ? "" : "rounded";
+  const textStyles = uppercase ? "uppercase text-sm" : "text-base";
+  
 	return (
 		<Button
       type={type}
-			className={`${color} ${hover} ${active} ${textColor} my-4 py-4 px-4 lg:py-2 rounded font-semibold w-full`}
+			className={`${color} ${hover} ${active} ${textColor} ${padding} ${border} ${textStyles} my-4 w-full`}
 			onClick={onClick}
 		>
       {children}

@@ -13,6 +13,7 @@ import {
 	passwordMismatch,
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 const initialValues: FormData = {
 	email: "",
@@ -40,6 +41,7 @@ export default function Account() {
 			label: "Email",
 			value: email,
 			errorMessages: errors?.email,
+      disabled: false,
 		},
 		{
 			type: "text",
@@ -47,6 +49,7 @@ export default function Account() {
 			label: "Username",
 			value: username,
 			errorMessages: errors?.username,
+      disabled: false,
 		},
 		{
 			type: "password",
@@ -54,8 +57,10 @@ export default function Account() {
 			label: "Password",
 			value: password,
 			errorMessages: errors?.password,
-      hidden: isPwHidden,
-      toggleHidden: () => setIsPwHidden(!isPwHidden),
+			hidden: isPwHidden,
+			toggleHidden: () => setIsPwHidden(!isPwHidden),
+      disabled: false,
+      autoComplete: "current-password"
 		},
 		{
 			type: "password",
@@ -63,23 +68,40 @@ export default function Account() {
 			label: "Confirm New Password",
 			value: confirmPassword,
 			errorMessages: errors?.confirmPassword,
-      hidden: isConfirmPwHidden,
-      toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
+			hidden: isConfirmPwHidden,
+			toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
+      disabled: false,
 		},
-	]
+	];
+  
+  const passwordField = formFields.find(f => f.name === "password");
+  const confirmPwField = formFields.find(f => f.name === "confirmPassword");
+  if (passwordField != null && confirmPwField != null) {
+    confirmPwField.disabled = passwordField.value === "";
+  }
 
 	return (
 		<OptionsLayout title="Account">
-				<h2 className="mb-6 self-center">EDIT PROFILE</h2>
+			<h2 className="mt-6 self-center">EDIT PROFILE</h2>
 
 			<form
-				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
+				className={`flex flex-col justify-center mx-0 lg:my-8`}
 				onSubmit={() => {}}
 			>
-      
-      <Form fields={formFields} handleChange={handleChange}  />
-
-      </form>
+				<Form fields={formFields} handleChange={handleChange} />
+				<div className="flex justify-end items-center gap-6">
+					<div>
+						<ButtonPrimary onClick={() => {}} style="transparent">
+              Cancel
+						</ButtonPrimary>
+					</div>
+					<div>
+						<ButtonPrimary onClick={() => {}} style="primary">
+              Save Profile
+						</ButtonPrimary>
+					</div>
+				</div>
+			</form>
 		</OptionsLayout>
 	);
 }

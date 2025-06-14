@@ -64,7 +64,7 @@ export default function LoginPage() {
 
 	return (
 		<div
-			className={`${styles.gridB} flex flex-col justify-center items-center lg:items-start mx-0 lg:ml-20 w-full`}
+			className={`${styles.gridB} flex flex-col justify-center items-center lg:items-start mx-0 lg:ml-20 w-full z-20`}
 		>
 			<form
 				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
@@ -92,6 +92,7 @@ export default function LoginPage() {
 					value={password}
 					onChange={(e) => handleChange(e)}
 					errorMessage={passwordErrorMessages}
+          autoComplete="current-password"
 				/>
 				<Link
 					href="/forgot-password"

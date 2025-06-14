@@ -23,7 +23,7 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 		<DashboardLayout styles="relative">
 			<DashboardHeader title={title} user={user} />
 			{/* Back Button */}
-			<div className="w-full flex sticky top-24 left-0 pt-4 lg:top-0 lg:relative max-w-lg ml-14 lg:max-w-md">
+			<div className="w-full flex sticky top-24 left-0 pt-4 lg:top-0 lg:relative ml-14 max-w-sm z-80">
 				<Button
 					className="w-16 h-16 bg-surface-400 rounded-full p-3"
 					onClick={() => router.back()}
@@ -31,7 +31,7 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 					<ArrowLeft className="text-fg-light -translate-x-0.5" />
 				</Button>
 			</div>
-			<DashboardMain styles="!max-w-lg">
+			<DashboardMain styles="!max-w-sm">
 				<div className="dashboard-main-content-layout relative">
 					<section className="w-full flex flex-col px-8 mx-4">
 						{children}

@@ -1,5 +1,5 @@
 import { Input, Field, Label, Button } from "@headlessui/react";
-import { ChangeEvent, MouseEvent } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useRef } from "react";
 import Eye from "@/public/icons/eye.svg";
 import EyeSlash from "@/public/icons/eye-slash.svg";
 import ButtonIcon from "@/components/ButtonIcon";
@@ -12,75 +12,85 @@ interface TextInputProps {
 	placeholder?: string;
 	type?: "password" | "text";
 	hidden?: boolean;
-  toggleHidden?: (e: MouseEvent<HTMLButtonElement>) => void;
-  errorMessage?: React.ReactNode;
+	toggleHidden?: (e: MouseEvent<HTMLButtonElement>) => void;
+	errorMessage?: React.ReactNode;
+	isDisabled?: boolean;
+	autoComplete?: "on" | "off" | "new-password" | "current-password";
 }
 
 export default function TextInput({
 	label,
 	name,
-	value,
+	value = "",
 	onChange,
 	placeholder,
-	type,
-	hidden,
-  toggleHidden,
-  errorMessage
+	type = "text",
+	hidden = true,
+	toggleHidden,
+	errorMessage,
+	isDisabled = false,
+	autoComplete = "on",
 }: TextInputProps) {
-	function renderEyeIcon() {
-    const iconStyle = `text-white absolute right-0 top-1/2 translate-y-[-57%] p-2`;
+	const inputRef = useRef<HTMLInputElement>(null);
 
-		if (type != "password" || toggleHidden == undefined) {
-			return null;
-		}
+	const iconStyle = `text-white absolute right-0 top-1/2 translate-y-[-57%] p-2`;
 
-		switch (hidden) {
-			case true:
-				return (
-          <ButtonIcon onClick={toggleHidden} styles={iconStyle}>
-						<EyeSlash />
-          </ButtonIcon>
-				);
-			case false:
-				return (
-          <ButtonIcon onClick={toggleHidden} styles={iconStyle}>
-						<Eye />
-          </ButtonIcon>
-				);
+	function getInputType() {
+		switch (type) {
+			case "password":
+				if (hidden) {
+					return "password";
+				}
+				return "text";
 			default:
-				return null;
+				return "text";
 		}
 	}
-  
-  function getInputType() {
-    switch (type) {
-      case "password":
-        if (hidden) {
-          return "password";
-        }
-        return "text";
-      default:
-        return "text";
-    }
-  }
+
+	useEffect(() => {
+		const handle = setTimeout(() => {
+			if (inputRef.current?.value !== value) {
+				const event = {
+					target: inputRef.current,
+				} as ChangeEvent<HTMLInputElement>;
+        onChange(event);
+			}
+		}, 100);
+    
+    return () => clearTimeout(handle);
+	}, []);
 
 	return (
-		<Field className="flex flex-col mb-2">
+		<Field className="flex flex-col mb-2" disabled={isDisabled}>
 			<Label className="mb-2 text-fg">{label}</Label>
-      <div className="max-w-xs">
-        {errorMessage}
-      </div>
+			<div className="max-w-xs">{errorMessage}</div>
 			<div className="relative">
-				<Input
-					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline pr-11`}
+				<input
+					ref={inputRef}
+					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline ${type === "password" && "pr-11"} ${
+						isDisabled && "opacity-50"
+					}`}
 					name={name}
 					type={getInputType()}
-          autoComplete="new-password"
+					autoComplete={autoComplete ?? "on"}
 					placeholder={placeholder ?? ""}
-					value={value}
+					value={value ?? ""}
 					onChange={onChange}
 				/>
-				{renderEyeIcon()}
+
+				<div className={`${type !== "password" && "hidden"}`}>
+					<ButtonIcon
+						onClick={toggleHidden}
+						styles={iconStyle}
+					>
+						<div className={`${!hidden && "hidden"}`}>
+							<Eye />
+						</div>
+						<div className={`${hidden && "hidden"}`}>
+							<EyeSlash />
+						</div>
+					</ButtonIcon>
+				</div>
 			</div>
 		</Field>
 	);

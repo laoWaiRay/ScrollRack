@@ -76,7 +76,7 @@ export default function RegisterPage() {
 	];
 
 	return (
-		<div className={`${styles.gridB}`}>
+		<div className={`${styles.gridB} z-20`}>
 			<form
 				onSubmit={(e) => handleSubmit(onSubmit, e)}
 				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}

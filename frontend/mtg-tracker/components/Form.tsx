@@ -9,6 +9,8 @@ export interface TextFormField {
 	label: string;
 	value: string;
 	errorMessages: ValidationError[] | undefined;
+  disabled?: boolean;
+  autoComplete?: "on" | "off";
 }
 
 export interface PasswordFormField {
@@ -19,6 +21,8 @@ export interface PasswordFormField {
 	errorMessages?: ValidationError[];
 	hidden: boolean;
 	toggleHidden: () => void;
+  disabled?: boolean;
+  autoComplete?: "on" | "off" | "new-password" | "current-password";
 }
 
 export type FormField = TextFormField | PasswordFormField;
@@ -40,6 +44,7 @@ export function Form({ fields, handleChange }: FormInterface) {
 						value={f.value}
 						onChange={(e) => handleChange(e)}
 						errorMessage={f.errorMessages && renderErrors(f.errorMessages)}
+            isDisabled={f.disabled ?? false}
 					/>
 				);
 			case "password":
@@ -54,6 +59,8 @@ export function Form({ fields, handleChange }: FormInterface) {
 						value={f.value}
 						onChange={(e) => handleChange(e)}
 						errorMessage={f.errorMessages && renderErrors(f.errorMessages)}
+            isDisabled={f.disabled ?? false}
+            autoComplete={f.autoComplete ?? "on"}
 					/>
 				);
 			default:

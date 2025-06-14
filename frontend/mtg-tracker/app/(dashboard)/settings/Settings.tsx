@@ -27,7 +27,7 @@ export default function Account() {
 			</div>
 			<div className="aspect-3/2 self-end my-8">
 				<ButtonPrimary onClick={() => {}} style="secondary">
-					Log out
+					LOG OUT
 				</ButtonPrimary>
 			</div>
 		</OptionsLayout>
