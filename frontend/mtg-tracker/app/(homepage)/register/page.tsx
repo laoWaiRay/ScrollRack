@@ -1,6 +1,5 @@
 "use client";
 import styles from "../styles.module.css";
-import TextInput from "@/components/TextInput";
 import { Dispatch, SetStateAction, useState } from "react";
 import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -10,7 +9,6 @@ import { isAxiosError } from "axios";
 import { BAD_REQUEST } from "@/constants/httpStatus";
 import useForm from "@/hooks/useForm";
 import {
-	ValidationError,
 	RegisterErrors as Errors,
 	RegisterFormData as FormData,
 	registerFormErrorFieldMap as errorFieldMap,
@@ -21,6 +19,7 @@ import {
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import { Form, FormField } from "@/components/Form";
+import { isValidationErrorArray, validationErrorArrayToErrors } from "@/helpers/validationHelpers";
 
 const initialValues: FormData = {
 	email: "",
@@ -61,8 +60,8 @@ export default function RegisterPage() {
 			label: "Password",
 			value: password,
 			errorMessages: errors?.password,
-      hidden: isPwHidden,
-      toggleHidden: () => setIsPwHidden(!isPwHidden),
+			hidden: isPwHidden,
+			toggleHidden: () => setIsPwHidden(!isPwHidden),
 		},
 		{
 			type: "password",
@@ -70,8 +69,8 @@ export default function RegisterPage() {
 			label: "Confirm Password",
 			value: confirmPassword,
 			errorMessages: errors?.confirmPassword,
-      hidden: isConfirmPwHidden,
-      toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
+			hidden: isConfirmPwHidden,
+			toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
 		},
 	];
 
@@ -86,7 +85,7 @@ export default function RegisterPage() {
 				</h1>
 				<div>{unknownErrorMessages}</div>
 
-        <Form fields={formFields} handleChange={handleChange}  />
+				<Form fields={formFields} handleChange={handleChange} />
 
 				<ButtonPrimary onClick={() => {}} type="submit">
 					Sign Up
@@ -149,8 +148,10 @@ async function onSubmit(
 				error.response?.data != null &&
 				isValidationErrorArray(error.response.data)
 			) {
-				const responseErrors = validationErrorArrayToErrors(
-					error.response.data
+				const responseErrors = validationErrorArrayToErrors<Errors>(
+					error.response.data,
+          errorFieldMap,
+          Errors
 				);
 				if (_setErrors) {
 					_setErrors({
@@ -163,48 +164,4 @@ async function onSubmit(
 			throw error;
 		}
 	}
-}
-
-function validationErrorArrayToErrors(errorArray: ValidationError[]) {
-	const errors = new Errors();
-	for (const validationError of errorArray) {
-		if (validationError.code in errorFieldMap) {
-			const errorField = errorFieldMap[validationError.code];
-			switch (errorField) {
-				case "email":
-					errors.email.push(validationError);
-					break;
-				case "username":
-					errors.username.push(validationError);
-					break;
-				case "password":
-					errors.password.push(validationError);
-					break;
-				case "confirmPassword":
-					errors.confirmPassword.push(validationError);
-					break;
-				default:
-					errors.unknown.push(validationError);
-					break;
-			}
-		} else {
-			errors.unknown.push(validationError);
-		}
-	}
-	return errors;
-}
-
-function isValidationErrorArray(data: unknown): data is ValidationError[] {
-	return (
-		Array.isArray(data) &&
-		data.every(
-			(item) =>
-				typeof item == "object" &&
-				item !== null &&
-				"code" in item &&
-				"description" in item &&
-				typeof item.code == "string" &&
-				typeof item.description == "string"
-		)
-	);
 }

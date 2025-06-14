@@ -6,10 +6,7 @@ using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using System.Data;
-using System.Text.Json;
-using System.Collections;
-using NuGet.Protocol;
+using Mtg_tracker.Models.Errors;
 
 namespace Mtg_tracker.Controllers;
 
@@ -118,7 +115,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     // Edit username / profile picture
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutUser(string id, UserWriteDTO userWriteDTO)
+    public async Task<ActionResult> PutUser(UserManager<ApplicationUser> userManager, string id, UserWriteDTO userWriteDTO)
     {
         var userId = User.GetUserId();
         if (userId is null || userId != id)
@@ -136,20 +133,63 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             return BadRequest();
         }
 
+        // Handle only changing username and profile picture
+        if (string.IsNullOrEmpty(userWriteDTO.CurrentPassword) || string.IsNullOrEmpty(userWriteDTO.NewPassword))
+        {
+            user.Profile = userWriteDTO.Profile;
+            user.UserName = userWriteDTO.UserName;
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+            return NoContent();
+        }
+
+
+        // Otherwise, need to handle changing password, username and profile picture atomically.
+        if (userWriteDTO.CurrentPassword == null)
+        {
+            return BadRequest();
+        }
+
+        // First check that the provided password is correct
+        var passwordVerified = await userManager.CheckPasswordAsync(user, userWriteDTO.CurrentPassword);
+        if (!passwordVerified)
+        {
+            var errors = new List<ErrorResponse> {
+                new() {
+                    Code = "IncorrectCurrentPassword",
+                    Description = "Current password is incorrect"
+                }
+            };
+            return BadRequest(errors);
+        }
+
+        // Check the new password passes validations
+        var passwordValidator = new PasswordValidator<ApplicationUser>();
+        var passwordResult = await passwordValidator.ValidateAsync(userManager, user, userWriteDTO.NewPassword);
+        if (!passwordResult.Succeeded)
+        {
+            return BadRequest(passwordResult.Errors);
+        }
+
+
+        // Attempt to update everything except password
         user.Profile = userWriteDTO.Profile;
         user.UserName = userWriteDTO.UserName;
 
-        try
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
         {
-            await _context.SaveChangesAsync();
+            return BadRequest(updateResult.Errors);
         }
-        catch (DbUpdateException)
+
+        // Finally, update the password with the new one that was already validated
+        var passwordChangeResult = await userManager.ChangePasswordAsync(user, userWriteDTO.CurrentPassword, userWriteDTO.NewPassword);
+        if (!passwordChangeResult.Succeeded)
         {
-            return Conflict("Username already exists");
-        }
-        catch (DBConcurrencyException)
-        {
-            return StatusCode(500, "Error updating user details");
+            return BadRequest(passwordChangeResult.Errors);
         }
 
         return NoContent();

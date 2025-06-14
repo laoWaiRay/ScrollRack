@@ -76,6 +76,7 @@ export default function TextInput({
 					placeholder={placeholder ?? ""}
 					value={value ?? ""}
 					onChange={onChange}
+          disabled={isDisabled}
 				/>
 
 				<div className={`${type !== "password" && "hidden"}`}>

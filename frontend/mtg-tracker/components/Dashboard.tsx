@@ -62,12 +62,12 @@ export function DashboardHeader({ user, title }: DashboardHeaderInterface) {
 						className="flex items-center justify-center gap-3 py-2 px-3 ml-1 rounded
             data-hover:cursor-pointer data-hover:bg-surface-500"
 					>
-						<div className="w-[1.5em] h-[1.5em] d overflow-hidden">
+						<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 							<Image
 								className="h-full w-full object-cover"
-								src="/mock/avatar.png"
-								height={32}
-								width={32}
+								src={`${user?.profile ?? "/images/fblthp.jpeg"}`}
+								height={64}
+								width={64}
 								alt="User avatar"
 							/>
 						</div>

@@ -12,7 +12,9 @@ public class UserReadDTO
 public class UserWriteDTO
 {
     public required string Id { get; set; }
-    public required string UserName { get; set; }
+    public required string  UserName { get; set; }
+    public string? CurrentPassword { get; set; }
+    public string? NewPassword { get; set; }
     public string? Profile { get; set; }
 }
 

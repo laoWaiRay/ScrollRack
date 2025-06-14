@@ -1,37 +1,53 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import OptionsLayout from "@/components/OptionsLayout";
 import useForm from "@/hooks/useForm";
 import { Form, FormField } from "@/components/Form";
 import {
-	RegisterErrors as Errors,
-	RegisterFormData as FormData,
+	UserUpdateErrors as Errors,
+	UserUpdateFormData as FormData,
 	requiredEmail,
 	requiredUsername,
 	requiredPassword,
 	passwordMismatch,
+	updateUserErrorFieldMap,
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import ButtonPrimary from "@/components/ButtonPrimary";
-
-const initialValues: FormData = {
-	email: "",
-	username: "",
-	password: "",
-	confirmPassword: "",
-};
+import Image from "next/image";
+import { api } from "@/generated/client";
+import { UserReadDTO, UserWriteDTO } from "@/types/client";
+import { useRouter } from "next/navigation";
+import { BAD_REQUEST } from "@/constants/httpStatus";
+import { isAxiosError } from "axios";
+import {
+	isValidationErrorArray,
+	validationErrorArrayToErrors,
+} from "@/helpers/validationHelpers";
+import { ActionType } from "@/context/AuthContext";
 
 export default function Account() {
-	const { user } = useAuth();
+	const { user, dispatch } = useAuth();
+	const router = useRouter();
+
+	const initialValues: FormData = {
+		email: user?.email ?? "",
+		username: user?.userName ?? "",
+		password: "",
+		newPassword: "",
+		confirmNewPassword: "",
+	};
+
 	const { values, errors, handleChange, handleSubmit } = useForm<
 		FormData,
 		Errors
 	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
-	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
+	const [isNewPwHidden, setIsNewPwHidden] = useState(true);
+	const [isConfirmNewPwHidden, setIsConfirmNewPwHidden] = useState(true);
 
-	const { email, username, password, confirmPassword } = values;
+	const { email, username, password, newPassword, confirmNewPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
 
 	const formFields: FormField[] = [
@@ -41,7 +57,7 @@ export default function Account() {
 			label: "Email",
 			value: email,
 			errorMessages: errors?.email,
-      disabled: false,
+			disabled: true,
 		},
 		{
 			type: "text",
@@ -49,55 +65,125 @@ export default function Account() {
 			label: "Username",
 			value: username,
 			errorMessages: errors?.username,
-      disabled: false,
+			disabled: false,
 		},
 		{
 			type: "password",
 			name: "password",
-			label: "Password",
+			label: "Current Password",
 			value: password,
 			errorMessages: errors?.password,
 			hidden: isPwHidden,
 			toggleHidden: () => setIsPwHidden(!isPwHidden),
-      disabled: false,
-      autoComplete: "current-password"
+			disabled: false,
+			autoComplete: "current-password",
 		},
 		{
 			type: "password",
-			name: "confirmPassword",
+			name: "newPassword",
+			label: "New Password",
+			value: newPassword,
+			errorMessages: errors?.newPassword,
+			hidden: isNewPwHidden,
+			toggleHidden: () => setIsNewPwHidden(!isNewPwHidden),
+			disabled: false,
+		},
+		{
+			type: "password",
+			name: "confirmNewPassword",
 			label: "Confirm New Password",
-			value: confirmPassword,
-			errorMessages: errors?.confirmPassword,
-			hidden: isConfirmPwHidden,
-			toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
-      disabled: false,
+			value: confirmNewPassword,
+			errorMessages: errors?.confirmNewPassword,
+			hidden: isConfirmNewPwHidden,
+			toggleHidden: () => setIsConfirmNewPwHidden(!isConfirmNewPwHidden),
+			disabled: false,
 		},
 	];
-  
-  const passwordField = formFields.find(f => f.name === "password");
-  const confirmPwField = formFields.find(f => f.name === "confirmPassword");
-  if (passwordField != null && confirmPwField != null) {
-    confirmPwField.disabled = passwordField.value === "";
-  }
+
+	async function onSubmit(
+		data: FormData,
+		_errors?: Partial<Errors>,
+		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
+	) {
+		if (user?.id == null) {
+			return;
+		}
+
+		const { email, username, password, newPassword } = data;
+
+		const userWriteDTO: UserWriteDTO = {
+			id: user.id,
+			email,
+			userName: username,
+			currentPassword: password,
+			newPassword,
+		};
+
+		try {
+			await api.putApiUserId(userWriteDTO, {
+				params: { id: user.id },
+				withCredentials: true,
+			});
+
+			const userReadDTO: UserReadDTO = {
+				id: user.id,
+				email,
+				userName: username,
+				profile: user.profile,
+			};
+
+			dispatch!({ type: ActionType.UPDATE, payload: userReadDTO });
+		} catch (error) {
+			if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
+        console.log(error.response.data);
+				if (isValidationErrorArray(error.response?.data)) {
+					const responseErrors = validationErrorArrayToErrors<Errors>(
+						error.response.data,
+						updateUserErrorFieldMap,
+						Errors
+					);
+					if (_setErrors) {
+						_setErrors({
+							...(_errors || {}),
+							...responseErrors,
+						});
+					}
+				}
+			}
+		}
+	}
 
 	return (
 		<OptionsLayout title="Account">
 			<h2 className="mt-6 self-center">EDIT PROFILE</h2>
 
+			<div className="flex justify-center mt-8 mb-4">
+				<div className="w-[64px] h-[64px] rounded-full overflow-hidden">
+					<Image
+						className="h-full w-full object-cover"
+						src={`${user?.profile ?? "/images/fblthp.jpeg"}`}
+						height={64}
+						width={64}
+						alt="User avatar"
+					/>
+				</div>
+			</div>
+
 			<form
-				className={`flex flex-col justify-center mx-0 lg:my-8`}
-				onSubmit={() => {}}
+				className={`flex flex-col justify-center mx-0`}
+				onSubmit={(e) => handleSubmit(onSubmit, e)}
 			>
+				<div>{unknownErrorMessages}</div>
 				<Form fields={formFields} handleChange={handleChange} />
 				<div className="flex justify-end items-center gap-6">
 					<div>
-						<ButtonPrimary onClick={() => {}} style="transparent">
-              Cancel
+						<ButtonPrimary onClick={() => router.back()} style="transparent">
+							Cancel
 						</ButtonPrimary>
 					</div>
 					<div>
-						<ButtonPrimary onClick={() => {}} style="primary">
-              Save Profile
+						<ButtonPrimary onClick={() => {}} style="primary" type="submit">
+							Save Profile
 						</ButtonPrimary>
 					</div>
 				</div>
@@ -108,21 +194,20 @@ export default function Account() {
 
 function validateForm(data: FormData) {
 	const errors = new Errors();
-	const { email, username, password, confirmPassword } = data;
-	if (!email || !username || !password) {
-		if (!email) {
-			errors.email.push(requiredEmail);
-		}
-		if (!username) {
-			errors.username.push(requiredUsername);
-		}
-		if (!password) {
-			errors.password.push(requiredPassword);
-		}
+	const { email, username, password, newPassword, confirmNewPassword } = data;
+	if (!email) {
+		errors.email.push(requiredEmail);
 	}
+	if (!username) {
+		errors.username.push(requiredUsername);
+	}
+  
+  if (password && (!newPassword)) {
+    errors.newPassword.push(requiredPassword);
+  }
 
-	if (!confirmPassword || password !== confirmPassword) {
-		errors.confirmPassword.push(passwordMismatch);
+	if ((newPassword || confirmNewPassword) && newPassword !== confirmNewPassword) {
+		errors.confirmNewPassword.push(passwordMismatch);
 	}
 
 	return errors;

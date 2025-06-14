@@ -155,6 +155,8 @@ const UserWriteDTO = z
   .object({
     id: z.string(),
     userName: z.string(),
+    currentPassword: z.string().nullish(),
+    newPassword: z.string().nullish(),
     profile: z.string().nullish(),
   })
   .passthrough();

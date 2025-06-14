@@ -2020,6 +2020,14 @@
           "userName": {
             "type": "string"
           },
+          "currentPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "nullable": true
+          },
           "profile": {
             "type": "string",
             "nullable": true

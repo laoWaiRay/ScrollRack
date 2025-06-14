@@ -15,11 +15,13 @@ type UserReadDTO = z.infer<typeof schemas.UserReadDTO>;
 export enum ActionType {
 	LOGIN,
 	LOGOUT,
+  UPDATE,
 }
 
 type Action =
 	| { type: ActionType.LOGIN; payload: UserReadDTO }
-	| { type: ActionType.LOGOUT };
+	| { type: ActionType.LOGOUT }
+	| { type: ActionType.UPDATE; payload: UserReadDTO };
 
 interface AuthContextType {
 	user: UserReadDTO | null;
@@ -46,5 +48,8 @@ const authReducer: Reducer<UserReadDTO | null, Action> = (state, action) => {
 		case ActionType.LOGOUT: {
 			return null;
 		}
+    case ActionType.UPDATE: {
+      return action.payload; 
+    }
 	}
 };
