@@ -20,6 +20,7 @@ import SidebarLink from "@/components/SidebarLink";
 import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Hamburger from "@/components/animations/Hamburger";
+import { getPath } from "@/helpers/url";
 
 interface HomepageLayoutProps {
 	children: ReactNode;
@@ -100,7 +101,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 					_offset={15}
 					styles="xl:hidden"
 				>
-					<SidebarLink href={data.href} isActive={pathname.includes(data.href)}>
+					<SidebarLink href={data.href} isActive={getPath(pathname) === data.href}>
 						<data.icon className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
 						<span className="hidden xl:inline">{data.name}</span>
 					</SidebarLink>
@@ -114,7 +115,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 			<li key={data.name}>
 				<SidebarLink
 					href={data.href}
-					isActive={pathname.includes(data.href)}
+					isActive={getPath(pathname) === data.href}
 					onClick={() => setIsDrawerOpen(false)}
 				>
 					<data.icon className="w-[2em] h-[2em]" />

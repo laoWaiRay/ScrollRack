@@ -1,9 +1,4 @@
 "use client";
-import {
-	DashboardLayout,
-	DashboardHeader,
-	DashboardMain,
-} from "@/components/Dashboard";
 import { Switch } from "@headlessui/react";
 import { useState } from "react";
 import ButtonPrimary from "@/components/ButtonPrimary";

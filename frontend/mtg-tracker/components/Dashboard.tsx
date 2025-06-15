@@ -26,7 +26,7 @@ interface DashboardHeaderInterface {
 export function DashboardLayout({ children, styles }: DashboardLayoutInterface) {
 	return (
 		<div
-			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3`}
+			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3 pb-8`}
 		>
       {/* Make room for the navbar on mobile */}
       <div className="pt-24 w-full lg:pt-0 grow flex flex-col items-center">

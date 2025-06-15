@@ -14,6 +14,10 @@ CSS Reset, inspired by: https://www.joshwcomeau.com/css/custom-css-reset/
 		margin: 0;
 		overflow-wrap: anywhere;
 	}
+    
+    h1,h2,h3,h4,h5 {
+        user-select: none;
+    }
 
 	body {
 		line-height: calc(1em + 0.5rem);
@@ -183,7 +187,11 @@ Global CSS
 }
 
 *:focus-visible {
-	@apply outline-0 ring-4 ring-primary-200;
+	@apply outline-0 ring-2 ring-primary-200;
+}
+
+*:focus-visible[role="combobox"] {
+	@apply outline-0 ring-2 ring-primary-200;
 }
 
 /* Change form input autofill style */
@@ -250,7 +258,7 @@ Tailwind Components
 		background-position: center center, 60% 50%;
 	}
 	.bg-primary-600.focus-outline[data-focus] {
-		@apply outline-0 !ring-4 !ring-primary-100;
+		@apply outline-0 !ring-1 !ring-primary-100;
 	}
 
 	.link {
