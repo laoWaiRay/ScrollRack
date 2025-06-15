@@ -13,6 +13,7 @@ import {
 	DashboardHeader,
 	DashboardMain,
 } from "@/components/Dashboard";
+import useToast from "@/hooks/useToast";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -36,6 +37,7 @@ export default function CommandZone({
 	decks,
 }: CommandZoneInterface) {
 	const { user } = useAuth();
+  const { toast } = useToast();
 
 	const statCardData: StatCardData[] = [
 		{
@@ -90,9 +92,7 @@ export default function CommandZone({
 		<DashboardLayout>
 			<DashboardHeader user={user} title="Command Zone" />
 			<DashboardMain>
-				<div
-					className={`dashboard-main-content-layout ${styles.gridLayout} `}
-				>
+				<div className={`dashboard-main-content-layout ${styles.gridLayout} `}>
 					{renderStatCards()}
 
 					{/* Line Chart */}

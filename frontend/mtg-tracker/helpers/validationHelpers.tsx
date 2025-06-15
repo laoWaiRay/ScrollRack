@@ -1,6 +1,10 @@
 import { ErrorFieldMap, ValidationError } from "@/types/formValidation";
+import { isAxiosError } from "axios";
+import { Dispatch, SetStateAction } from "react";
 
-export function isValidationErrorArray(data: unknown): data is ValidationError[] {
+export function isValidationErrorArray(
+	data: unknown
+): data is ValidationError[] {
 	return (
 		Array.isArray(data) &&
 		data.every(
@@ -15,7 +19,9 @@ export function isValidationErrorArray(data: unknown): data is ValidationError[]
 	);
 }
 
-export function validationErrorArrayToErrors<ErrorsT extends Record<string, ValidationError[]>>(
+export function validationErrorArrayToErrors<
+	ErrorsT extends Record<string, ValidationError[]>
+>(
 	errorArray: ValidationError[],
 	errorFieldMap: ErrorFieldMap<ErrorsT>,
 	ErrorsCtor: new () => ErrorsT
@@ -31,4 +37,38 @@ export function validationErrorArrayToErrors<ErrorsT extends Record<string, Vali
 		}
 	}
 	return errors;
+}
+
+export function handleAxiosErrors<
+	ErrorsT extends Record<string, ValidationError[]>
+>(
+  expectedResponseStatuses: number[],
+	error: unknown,
+	errorFieldMap: ErrorFieldMap<ErrorsT>,
+	ErrorsCtor: new () => ErrorsT,
+  setErrors: Dispatch<SetStateAction<Partial<ErrorsT>>> | undefined,
+  errors: Partial<ErrorsT> | undefined,
+) {
+	if (isAxiosError(error)) {
+		const status = error.response?.status;
+		if (
+			status &&
+			expectedResponseStatuses.includes(status) &&
+			isValidationErrorArray(error.response?.data)
+		) {
+			const responseErrors = validationErrorArrayToErrors<ErrorsT>(
+				error.response.data,
+				errorFieldMap,
+				ErrorsCtor
+			);
+			if (setErrors) {
+				setErrors({
+					...(errors || {}),
+					...responseErrors,
+				});
+			}
+		}
+	} else {
+		throw error;
+	}
 }

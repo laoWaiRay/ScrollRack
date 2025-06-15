@@ -13,27 +13,14 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 		<div className="bg-gradient-hero">
 			<main
 				id="main-wrapper"
-				className={`min-h-dvh ${styles.gridLayout} z-0 relative`}
+				className={`lg:min-h-screen min-h-dvh ${styles.gridLayout} z-0 relative`}
 			>
-				{/* <video
-					className="w-full h-full absolute top-0 left-0 object-cover z-0 object-[top_top]"
-					src="/background.mp4"
-					autoPlay
-					loop
-					muted
-					preload="auto"
-					playsInline
-					width="1920"
-					height="1080"
-				></video>
-				<div className="absolute top-0 left-0 w-full h-full bg-black opacity-80 z-10"></div> */}
-
 				{/* Left side of page is the Hero image */}
 				<div
 					className={`${styles.gridA} flex flex-col justify-center items-center lg:items-end mx-0 lg:mr-20 w-full z-20`}
 				>
 					<div
-						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mb-8 mt-12`}
+						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mt-8`}
 					>
 						<div className="flex flex-col">
 							<div className="flex items-center text-[3.75rem] lg:text-3xl text-white">

@@ -1,7 +1,7 @@
 "use client";
 import Footer from "@/components/Footer";
 import styles from "./styles.module.css";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import LogoImage from "@/public/icons/scroll.svg";
 import Tower from "@/public/icons/tower.svg";
 import LogScroll from "@/public/icons/log-scroll.svg";
@@ -75,23 +75,21 @@ const linkData: LinkData[] = [
 ];
 
 const mobileOnlyLinkData: LinkData[] = [
-  {
-    href: "/friends/add",
-    name: "Add Friend",
-    icon: UserAdd,
-  },
-  {
-    href: "/notifications",
-    name: "Notifications",
-    icon: Bell,
-  },
+	{
+		href: "/friends/add",
+		name: "Add Friend",
+		icon: UserAdd,
+	},
+	{
+		href: "/notifications",
+		name: "Notifications",
+		icon: Bell,
+	},
 ];
 
 export default function HomepageLayout({ children }: HomepageLayoutProps) {
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const openDrawer = () => setIsDrawerOpen(true);
-  const closeDrawer = () => setIsDrawerOpen(false);
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (
@@ -114,13 +112,29 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 	function renderMobileLinks(links: LinkData[]) {
 		return links.map((data) => (
 			<li key={data.name}>
-				<SidebarLink href={data.href} isActive={pathname.includes(data.href)} onClick={closeDrawer}>
+				<SidebarLink
+					href={data.href}
+					isActive={pathname.includes(data.href)}
+					onClick={() => setIsDrawerOpen(false)}
+				>
 					<data.icon className="w-[2em] h-[2em]" />
 					<span className="ml-4">{data.name}</span>
 				</SidebarLink>
 			</li>
 		));
 	}
+  
+  useEffect(() => {
+  if (isDrawerOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [isDrawerOpen]);
 
 	return (
 		<div className="bg-surface-600">
@@ -185,25 +199,26 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 				</header>
 
 				<div className="lg:hidden">
-					<Hamburger onClick={() => setIsDrawerOpen(!isDrawerOpen)} isActive={isDrawerOpen} />
+					<Hamburger
+						onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+						isActive={isDrawerOpen}
+					/>
 				</div>
 
 				{/* Hidden Drawer */}
 				<div
-					className={`w-screen h-dvh overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-all duration-700 ease-in-out flex flex-col
-          justify-center ${!isDrawerOpen && "translate-x-[300%]"}`}
+					className={`w-screen h-dvh overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-transform duration-700 ease-in-out flex flex-col
+          justify-center pt-8 pb-20 ${!isDrawerOpen && "translate-x-[300%]"}`}
 				>
 					<div className="flex flex-col h-full mt-[80px]">
-						<h2 className="text-fg-dark mb-2 flex justify-center">
-							MAIN MENU
-						</h2>
+						<h2 className="text-fg-dark mb-2 flex justify-center">MAIN MENU</h2>
 						<ul className="flex flex-col gap-2">
 							{renderMobileLinks(
 								linkData.filter(
 									(data) => !["Account", "Settings"].includes(data.name)
 								)
 							)}
-              {renderMobileLinks(mobileOnlyLinkData)}
+							{renderMobileLinks(mobileOnlyLinkData)}
 						</ul>
 
 						<h2 className="text-fg-dark mt-4 mb-2 flex justify-center">
@@ -211,8 +226,8 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 						</h2>
 						<ul className="flex flex-col gap-2">
 							{renderMobileLinks(
-								linkData.filter(
-									(data) => ["Account", "Settings"].includes(data.name)
+								linkData.filter((data) =>
+									["Account", "Settings"].includes(data.name)
 								)
 							)}
 						</ul>

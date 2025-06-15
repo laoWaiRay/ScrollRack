@@ -25,7 +25,7 @@ export function useLogin() {
       dispatch!({ type: ActionType.LOGIN, payload: user });
       router.push("/commandzone");
     } catch (error) {
-      throw new AppError("LOGIN_ERROR", "Invalid Username or Password");
+      throw error;
     }
   }
 

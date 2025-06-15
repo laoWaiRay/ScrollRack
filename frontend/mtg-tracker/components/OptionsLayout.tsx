@@ -20,10 +20,10 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 	const router = useRouter();
 
 	return (
-		<DashboardLayout styles="relative">
+		<DashboardLayout>
 			<DashboardHeader title={title} user={user} />
 			{/* Back Button */}
-			<div className="w-full flex sticky top-24 left-0 pt-4 lg:top-0 lg:relative ml-14 max-w-sm z-80">
+			<div className="w-full flex sticky top-24 left-0 pt-4 lg:top-0 ml-14 max-w-sm z-80">
 				<Button
 					className="w-16 h-16 bg-surface-400 rounded-full p-3"
 					onClick={() => router.back()}

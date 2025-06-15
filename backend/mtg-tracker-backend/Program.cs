@@ -31,12 +31,19 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy.WithOrigins("https://localhost:3000", "http://localhost:3000")
+        policy.WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.66:3000", "http://192.168.1.66:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
+
+// Cookies
+// builder.Services.ConfigureApplicationCookie(options =>
+// {
+//     options.Cookie.SameSite = SameSiteMode.Lax;
+//     options.Cookie.HttpOnly = true;
+// });
 
 var app = builder.Build();
 

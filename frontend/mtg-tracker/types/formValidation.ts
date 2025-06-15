@@ -60,6 +60,8 @@ export interface LoginFormData {
 }
 
 export class LoginErrors {
+	[key: string]: ValidationError[];
+
 	constructor(
 		public invalidUsernameOrPassword: ValidationError[] = [],
 		public email: ValidationError[] = [],
@@ -67,6 +69,22 @@ export class LoginErrors {
 		public unknown: ValidationError[] = []
 	) {}
 }
+export const loginFormErrorFieldMap: ErrorFieldMap<LoginErrors> =
+	{
+    InvalidLoginCredentials: "invalidUsernameOrPassword",
+
+		InvalidEmail: "email",
+		DuplicateEmail: "email",
+		RequiredEmail: "email",
+
+		PasswordTooShort: "password",
+		PasswordRequiresDigit: "password",
+		PasswordRequiresLower: "password",
+		PasswordRequiresUpper: "password",
+		PasswordRequiresNonAlphanumeric: "password",
+		PasswordRequiresUniqueChars: "password",
+		RequiredPassword: "password",
+	}
 
 // -------------------------------------------------------------------------------------------------
 // Update User Form

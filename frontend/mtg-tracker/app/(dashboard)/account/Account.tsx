@@ -11,7 +11,7 @@ import {
 	requiredUsername,
 	requiredPassword,
 	passwordMismatch,
-	updateUserErrorFieldMap,
+	updateUserErrorFieldMap as errorFieldMap,
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -19,17 +19,15 @@ import Image from "next/image";
 import { api } from "@/generated/client";
 import { UserReadDTO, UserWriteDTO } from "@/types/client";
 import { useRouter } from "next/navigation";
-import { BAD_REQUEST } from "@/constants/httpStatus";
-import { isAxiosError } from "axios";
-import {
-	isValidationErrorArray,
-	validationErrorArrayToErrors,
-} from "@/helpers/validationHelpers";
+import { handleAxiosErrors } from "@/helpers/validationHelpers";
 import { ActionType } from "@/context/AuthContext";
+import useToast from "@/hooks/useToast";
+import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
 
 export default function Account() {
 	const { user, dispatch } = useAuth();
 	const router = useRouter();
+	const { toast } = useToast();
 
 	const initialValues: FormData = {
 		email: user?.email ?? "",
@@ -58,6 +56,7 @@ export default function Account() {
 			value: email,
 			errorMessages: errors?.email,
 			disabled: true,
+			autoComplete: "off",
 		},
 		{
 			type: "text",
@@ -66,6 +65,7 @@ export default function Account() {
 			value: username,
 			errorMessages: errors?.username,
 			disabled: false,
+			autoComplete: "off",
 		},
 		{
 			type: "password",
@@ -133,23 +133,17 @@ export default function Account() {
 			};
 
 			dispatch!({ type: ActionType.UPDATE, payload: userReadDTO });
+			toast("Updated Profile", "success");
+			router.push("/commandzone");
 		} catch (error) {
-			if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
-        console.log(error.response.data);
-				if (isValidationErrorArray(error.response?.data)) {
-					const responseErrors = validationErrorArrayToErrors<Errors>(
-						error.response.data,
-						updateUserErrorFieldMap,
-						Errors
-					);
-					if (_setErrors) {
-						_setErrors({
-							...(_errors || {}),
-							...responseErrors,
-						});
-					}
-				}
-			}
+			handleAxiosErrors<Errors>(
+        [UNAUTHORIZED, BAD_REQUEST],
+				error,
+				errorFieldMap,
+				Errors,
+				_setErrors,
+				_errors
+			);
 		}
 	}
 
@@ -201,12 +195,15 @@ function validateForm(data: FormData) {
 	if (!username) {
 		errors.username.push(requiredUsername);
 	}
-  
-  if (password && (!newPassword)) {
-    errors.newPassword.push(requiredPassword);
-  }
 
-	if ((newPassword || confirmNewPassword) && newPassword !== confirmNewPassword) {
+	if (password && !newPassword) {
+		errors.newPassword.push(requiredPassword);
+	}
+
+	if (
+		(newPassword || confirmNewPassword) &&
+		newPassword !== confirmNewPassword
+	) {
 		errors.confirmNewPassword.push(passwordMismatch);
 	}
 

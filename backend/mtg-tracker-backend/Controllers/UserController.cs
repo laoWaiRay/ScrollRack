@@ -272,16 +272,23 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     public async Task<ActionResult<UserReadDTO>> Login(SignInManager<ApplicationUser> signInManager, UserLoginDTO loginDTO)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
+        List<ErrorResponse> errors = [
+            new ErrorResponse
+            {
+                Code = "InvalidLoginCredentials",
+                Description = "Invalid Email or Password"
+            },
+        ];
+
         if (user is null || user.UserName is null)
         {
-            return Unauthorized();
+            return Unauthorized(errors);
         }
 
         var result = await signInManager.PasswordSignInAsync(user.UserName, loginDTO.Password, true, false);
-
         if (!result.Succeeded)
         {
-            return Unauthorized();
+            return Unauthorized(errors);
         }
 
         return _mapper.Map<UserReadDTO>(user);

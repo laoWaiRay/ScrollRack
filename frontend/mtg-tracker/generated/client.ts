@@ -845,7 +845,7 @@ const endpoints = makeApi([
   },
 ]);
 
-export const api = new Zodios("https://localhost:7165", endpoints);
+export const api = new Zodios("https://localhost:7165", endpoints, { axiosConfig: { withCredentials: true } } );
 
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);

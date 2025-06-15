@@ -5,8 +5,7 @@ import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { api } from "@/generated/client";
-import { isAxiosError } from "axios";
-import { BAD_REQUEST } from "@/constants/httpStatus";
+import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
 import useForm from "@/hooks/useForm";
 import {
 	RegisterErrors as Errors,
@@ -19,7 +18,9 @@ import {
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import { Form, FormField } from "@/components/Form";
-import { isValidationErrorArray, validationErrorArrayToErrors } from "@/helpers/validationHelpers";
+import {
+	handleAxiosErrors,
+} from "@/helpers/validationHelpers";
 
 const initialValues: FormData = {
 	email: "",
@@ -143,25 +144,13 @@ async function onSubmit(
 	try {
 		await api.postApiUserregister({ userName: username, email, password });
 	} catch (error) {
-		if (isAxiosError(error) && error.response?.status == BAD_REQUEST) {
-			if (
-				error.response?.data != null &&
-				isValidationErrorArray(error.response.data)
-			) {
-				const responseErrors = validationErrorArrayToErrors<Errors>(
-					error.response.data,
-          errorFieldMap,
-          Errors
-				);
-				if (_setErrors) {
-					_setErrors({
-						...(_errors || {}),
-						...responseErrors,
-					});
-				}
-			}
-		} else {
-			throw error;
-		}
+		handleAxiosErrors<Errors>(
+      [UNAUTHORIZED, BAD_REQUEST],
+			error,
+			errorFieldMap,
+			Errors,
+			_setErrors,
+			_errors
+		);
 	}
 }

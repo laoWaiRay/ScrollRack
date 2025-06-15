@@ -6,16 +6,19 @@ import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { useLogin } from "@/hooks/useLogin";
-import { AppError } from "@/errors";
 import {
 	LoginFormData as FormData,
 	LoginErrors as Errors,
+	loginFormErrorFieldMap as errorFieldMap,
 	requiredEmail,
 	requiredPassword,
-	invalidLoginCredentials,
 } from "@/types/formValidation";
 import useForm from "@/hooks/useForm";
 import { renderErrors } from "@/helpers/renderErrors";
+import { UNAUTHORIZED } from "@/constants/httpStatus";
+import {
+	handleAxiosErrors,
+} from "@/helpers/validationHelpers";
 
 const initialValues: FormData = {
 	email: "",
@@ -42,15 +45,14 @@ export default function LoginPage() {
 				_setErrors({});
 			}
 		} catch (error) {
-			if (error instanceof AppError && error.name == "LOGIN_ERROR") {
-				if (_setErrors) {
-					_setErrors({
-						invalidUsernameOrPassword: [invalidLoginCredentials],
-					});
-				}
-			} else {
-				throw error;
-			}
+			handleAxiosErrors<Errors>(
+        [UNAUTHORIZED],
+				error,
+				errorFieldMap,
+				Errors,
+				_setErrors,
+				_errors
+			);
 		}
 	}
 
@@ -92,7 +94,7 @@ export default function LoginPage() {
 					value={password}
 					onChange={(e) => handleChange(e)}
 					errorMessage={passwordErrorMessages}
-          autoComplete="current-password"
+					autoComplete="current-password"
 				/>
 				<Link
 					href="/forgot-password"
