@@ -1,5 +1,6 @@
 "use client"
 
+import { UserReadDTO } from "@/types/client";
 import {
 	createContext,
 	ReactNode,
@@ -7,10 +8,6 @@ import {
 	Reducer,
 	Dispatch,
 } from "react";
-import { schemas } from "@/generated/client";
-import { z } from "zod";
-
-type UserReadDTO = z.infer<typeof schemas.UserReadDTO>;
 
 export enum ActionType {
 	LOGIN,
@@ -25,10 +22,12 @@ type Action =
 
 interface AuthContextType {
 	user: UserReadDTO | null;
-  dispatch: Dispatch<Action> | undefined;
+  dispatch: Dispatch<Action>;
 }
 
-export const AuthContext = createContext<AuthContextType>({ user: null, dispatch: undefined });
+export const AuthContext = createContext<AuthContextType>({ user: null, dispatch: () => {
+    throw new Error("dispatch must be used within an AuthProvider");
+} });
 
 export function AuthProvider({ children, initialUser }: { children: ReactNode, initialUser: UserReadDTO | null }) {
 	const [user, dispatch] = useReducer(authReducer, initialUser);

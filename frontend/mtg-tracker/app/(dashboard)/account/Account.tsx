@@ -24,7 +24,11 @@ import { ActionType } from "@/context/AuthContext";
 import useToast from "@/hooks/useToast";
 import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
 
-export default function Account() {
+interface AccountInterface {
+
+}
+
+export default function Account({}: AccountInterface) {
 	const { user, dispatch } = useAuth();
 	const router = useRouter();
 	const { toast } = useToast();

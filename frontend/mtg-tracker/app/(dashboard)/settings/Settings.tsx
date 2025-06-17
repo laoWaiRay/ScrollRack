@@ -4,7 +4,10 @@ import { useState } from "react";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import OptionsLayout from "@/components/OptionsLayout";
 
-export default function Account() {
+interface SettingsInterface {
+}
+
+export default function Settings({}: SettingsInterface) {
 	const [enabled, setEnabled] = useState(false);
 
 	return (

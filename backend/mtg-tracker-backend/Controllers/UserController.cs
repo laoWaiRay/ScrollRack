@@ -55,13 +55,30 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         return _mapper.Map<UserReadDTO>(user);
     }
 
-    // GET: api/User
-    // Get a list of all users
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers()
+    // // GET: api/User
+    // // Get a list of all users
+    // [HttpGet]
+    // public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers()
+    // {
+    //     var users = await _context.Users.ToListAsync();
+    //     return _mapper.Map<List<UserReadDTO>>(users);
+    // }
+
+    // POST: api/User
+    // Get a list of all users corresponding to the given ids
+    [HttpPost]
+    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers(UserMultipleDTO userMultipleDTO)
     {
-        var users = await _context.Users.ToListAsync();
-        return _mapper.Map<List<UserReadDTO>>(users);
+        List<ApplicationUser> userData = [];
+        foreach (var userId in userMultipleDTO.Ids)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user != null)
+            {
+                userData.Add(user);
+            }
+        }
+        return _mapper.Map<List<UserReadDTO>>(userData);
     }
 
     // GET: api/User/id/{id}

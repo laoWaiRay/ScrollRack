@@ -40,7 +40,7 @@
           <FrontendRootDir>/Users/raymondly/repos/mtg-tracker/frontend/mtg-tracker</FrontendRootDir>
           <OutputPath>$(FrontendRootDir)</OutputPath>
       </PropertyGroup>
-      <Copy DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" SourceFiles="$(MSBuildProjectDirectory)/$(OpenApiFileName).json"></Copy>
+      <Copy DestinationFolder="$(OutputPath)" SkipUnchangedFiles="false" SourceFiles="$(MSBuildProjectDirectory)/$(OpenApiFileName).json"></Copy>
       <Message Text="Wrote OpenApi to $(OutputPath)/$(OpenApiFileName)" Importance="High"></Message>
   </Target>
 

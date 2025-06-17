@@ -5,14 +5,14 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { useAuth } from "@/hooks/useAuth";
-import { UserReadDTO } from "@/types/client";
+import { useFriend } from "@/hooks/useFriend";
 
 interface JoinPodInterface {
-	friends: UserReadDTO[] | null;
 }
 
-export default function JoinPod({ friends }: JoinPodInterface) {
+export default function JoinPod({}: JoinPodInterface) {
 	const { user } = useAuth();
+  const { friends } = useFriend();
 
 	return (
 		<DashboardLayout>

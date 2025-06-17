@@ -48,6 +48,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors(MyAllowSpecificOrigins);
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

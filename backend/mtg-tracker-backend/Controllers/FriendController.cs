@@ -41,10 +41,10 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
     }
 
     // POST: api/friend
-    // Adds a friend
+    // Adds a friend (optionally with/without needing to send/accept a request)
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostFriend(string friendId)
+    public async Task<ActionResult> PostFriend(UserFriendAddDTO userFriendAddDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -59,7 +59,7 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
 
         var friendUser = await _context.Users
             .Include(u => u.Friends)
-            .FirstOrDefaultAsync(u => u.Id == friendId);
+            .FirstOrDefaultAsync(u => u.Id == userFriendAddDTO.Id);
 
         if (user is null)
         {
@@ -69,20 +69,33 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
         {
             return NotFound();
         }
-
-        // A friend request must exist with current user as receiver to add friend
-        var friendRequest = user.ReceivedFriendRequests.FirstOrDefault(fr =>
-            fr.ReceiverId == userId && fr.SenderId == friendId);
-
-        if (friendRequest is null)
-        {
-            return BadRequest();
+        
+        if (user.Friends.Contains(friendUser)) {
+            return Conflict("Already friends");
         }
 
-        // Add friend to Friends table and remove request from the Requests table
-        user.Friends.Add(friendUser);
-        friendUser.Friends.Add(user);
-        _context.FriendRequests.Remove(friendRequest);
+        if (userFriendAddDTO.RequiresPermission)
+        {
+            // A friend request must exist with current user as receiver to add friend
+            var friendRequest = user.ReceivedFriendRequests.FirstOrDefault(fr =>
+                fr.ReceiverId == userId && fr.SenderId == userFriendAddDTO.Id);
+
+            if (friendRequest is null)
+            {
+                return BadRequest("Required friend permission");
+            }
+
+            // Add friend to Friends table and remove request from the Requests table
+            user.Friends.Add(friendUser);
+            friendUser.Friends.Add(user);
+            _context.FriendRequests.Remove(friendRequest);
+        }
+        else
+        {
+            // Add friend to Friends table
+            user.Friends.Add(friendUser);
+            friendUser.Friends.Add(user);
+        }
 
         try
         {

@@ -31,3 +31,15 @@ public class UserLoginDTO
     public required string Email { get; set; }
     public required string Password { get; set; }
 }
+
+// Used for adding friends without request
+public class UserFriendAddDTO
+{
+    public required string Id { get; set; }
+    public required bool RequiresPermission { get; set; } 
+}
+
+public class UserMultipleDTO
+{
+    public required string[] Ids { get; set; }
+}

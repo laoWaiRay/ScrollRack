@@ -577,15 +577,26 @@
         "tags": [
           "Friend"
         ],
-        "parameters": [
-          {
-            "name": "friendId",
-            "in": "query",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserFriendAddDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserFriendAddDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserFriendAddDTO"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -691,14 +702,14 @@
         }
       }
     },
-    "/api/FriendRequest/{receiverId}": {
+    "/api/FriendRequest/{userName}": {
       "post": {
         "tags": [
           "FriendRequest"
         ],
         "parameters": [
           {
-            "name": "receiverId",
+            "name": "userName",
             "in": "path",
             "required": true,
             "schema": {
@@ -1190,10 +1201,30 @@
       }
     },
     "/api/User": {
-      "get": {
+      "post": {
         "tags": [
           "User"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMultipleDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMultipleDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMultipleDTO"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -1950,6 +1981,21 @@
           }
         }
       },
+      "UserFriendAddDTO": {
+        "required": [
+          "id",
+          "requiresPermission"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "requiresPermission": {
+            "type": "boolean"
+          }
+        }
+      },
       "UserLoginDTO": {
         "required": [
           "email",
@@ -1962,6 +2008,20 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "UserMultipleDTO": {
+        "required": [
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

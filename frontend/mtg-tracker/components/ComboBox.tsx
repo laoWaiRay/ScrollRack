@@ -63,7 +63,7 @@ export default function ComboBox<
 					"w-(--input-width) rounded-xl border border-white/5 bg-white/5 p-1 [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-96"
 				}
 			>
-				{list.map((listItem) => (
+				{filteredList.sort((a, b) => a.userName.localeCompare(b.userName)).map((listItem) => (
 					<ComboboxOption
 						key={listItem.id}
 						value={listItem}

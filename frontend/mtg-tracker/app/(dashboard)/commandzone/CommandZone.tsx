@@ -2,7 +2,7 @@
 import styles from "./styles.module.css";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
-import { DeckReadDTO, StatSnapshotDTO } from "@/types/client";
+import { DeckReadDTO, StatSnapshotDTO, UserReadDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -17,7 +17,7 @@ import useToast from "@/hooks/useToast";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
-	decks: DeckReadDTO[] | null;
+	decks: DeckReadDTO[];
 }
 
 interface StatCardData {

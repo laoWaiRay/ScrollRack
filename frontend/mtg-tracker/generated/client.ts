@@ -99,6 +99,9 @@ const UserReadDTO: z.ZodType<UserReadDTO> = z
     profile: z.string().nullish(),
   })
   .passthrough();
+const UserFriendAddDTO = z
+  .object({ id: z.string(), requiresPermission: z.boolean() })
+  .passthrough();
 const FriendRequestDTO = z
   .object({
     id: z.number().int().optional(),
@@ -151,6 +154,7 @@ const StatSnapshotDTO = z
   })
   .partial()
   .passthrough();
+const UserMultipleDTO = z.object({ ids: z.array(z.string()) }).passthrough();
 const UserWriteDTO = z
   .object({
     id: z.string(),
@@ -193,6 +197,7 @@ export const schemas = {
   DeckReadDTO,
   DeckWriteDTO,
   UserReadDTO,
+  UserFriendAddDTO,
   FriendRequestDTO,
   GameDTO,
   GameParticipationReadDTO,
@@ -200,6 +205,7 @@ export const schemas = {
   RoomDTO,
   AddPlayerDTO,
   StatSnapshotDTO,
+  UserMultipleDTO,
   UserWriteDTO,
   UserRegisterDTO,
   UserLoginDTO,
@@ -289,9 +295,9 @@ const endpoints = makeApi([
     requestFormat: "json",
     parameters: [
       {
-        name: "friendId",
-        type: "Query",
-        schema: z.string().optional(),
+        name: "body",
+        type: "Body",
+        schema: UserFriendAddDTO,
       },
     ],
     response: z.void(),
@@ -326,12 +332,12 @@ const endpoints = makeApi([
   },
   {
     method: "post",
-    path: "/api/FriendRequest/:receiverId",
-    alias: "postApiFriendRequestReceiverId",
+    path: "/api/FriendRequest/:userName",
+    alias: "postApiFriendRequestUserName",
     requestFormat: "json",
     parameters: [
       {
-        name: "receiverId",
+        name: "userName",
         type: "Path",
         schema: z.string(),
       },
@@ -517,10 +523,17 @@ const endpoints = makeApi([
     response: z.void(),
   },
   {
-    method: "get",
+    method: "post",
     path: "/api/User",
-    alias: "getApiUser",
+    alias: "postApiUser",
     requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: UserMultipleDTO,
+      },
+    ],
     response: z.array(UserReadDTO),
   },
   {
@@ -845,7 +858,7 @@ const endpoints = makeApi([
   },
 ]);
 
-export const api = new Zodios("https://localhost:7165", endpoints, { axiosConfig: { withCredentials: true } } );
+export const api = new Zodios("https://localhost:7165", endpoints);
 
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);

@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import z from "zod";
 import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
-import { AppError } from "@/errors";
 
 type LoginRequest = z.infer<typeof schemas.LoginRequest>;
 
@@ -22,7 +21,7 @@ export function useLogin() {
         withCredentials: true
       });
       
-      dispatch!({ type: ActionType.LOGIN, payload: user });
+      dispatch({ type: ActionType.LOGIN, payload: user });
       router.push("/commandzone");
     } catch (error) {
       throw error;

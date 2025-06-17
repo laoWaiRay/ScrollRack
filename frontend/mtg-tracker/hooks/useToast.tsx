@@ -1,4 +1,4 @@
-import { Bounce, Slide, ToastContentProps, ToastOptions, toast as toasty } from "react-toastify";
+import { Slide, ToastOptions, toast as toasty } from "react-toastify";
 
 export default function useToast() {
   const toastOptions: ToastOptions = {
@@ -13,10 +13,13 @@ export default function useToast() {
 			transition: Slide,
 		};
 
-	const toast = (message: string, type: "success" | "error" | "default") => {
+	const toast = (message: string, type: "success" | "error" | "warn" | "default") => {
     switch (type) {
       case "success":
         toasty.success(message, toastOptions);
+        break;
+      case "warn":
+        toasty.warn(message, toastOptions);
         break;
       case "error":
         toasty.error(message, toastOptions);

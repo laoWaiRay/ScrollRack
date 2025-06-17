@@ -5,14 +5,14 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { useAuth } from "@/hooks/useAuth";
-import { UserReadDTO } from "@/types/client";
+import { useFriend } from "@/hooks/useFriend";
 
 interface CreatePodInterface {
-	friends: UserReadDTO[] | null;
 }
 
-export default function CreatePod({ friends }: CreatePodInterface) {
+export default function CreatePod({}: CreatePodInterface) {
 	const { user } = useAuth();
+  const { friends, dispatch } = useFriend();
 
 	return (
 		<DashboardLayout>
