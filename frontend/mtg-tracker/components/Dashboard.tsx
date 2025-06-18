@@ -29,6 +29,9 @@ interface DashboardMainInterface {
 interface DashboardHeaderInterface {
 	user: UserReadDTO | null;
 	title: string;
+  align?: "left" | "right";
+	children?: ReactNode;
+	childrenStyles?: string;
 }
 
 export function DashboardLayout({
@@ -50,14 +53,25 @@ export function DashboardLayout({
 export function DashboardHeader({
 	user,
 	title,
+	children,
+	childrenStyles,
+  align = "left"
 }: DashboardHeaderInterface) {
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
-  const { friendRequests } = useFriendRequest();
+	const { friendRequests } = useFriendRequest();
 
 	return (
 		<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
 			<div className="flex justify-between items-center mx-4">
-				<div className="text-lg font-semibold select-none">{title}</div>
+				<div className="flex gap-4">
+					<div className="text-lg font-semibold select-none">{title}</div>
+          {align === "left" &&
+            <div className={childrenStyles}>{children}</div>
+          }
+				</div>
+        {align === "right" &&
+          <div className={childrenStyles}>{children}</div>
+        }
 				<div className="text-lg items-center justify-between hidden lg:flex">
 					{/* User Controls */}
 					<ButtonIcon onClick={() => {}} styles={buttonIconStyle}>
@@ -83,10 +97,7 @@ export function DashboardHeader({
 							<div className="flex flex-col gap-2">
 								{friendRequests.length ? (
 									friendRequests.map((request) => (
-										<FriendRequestCard
-											key={request.id}
-											user={request}
-										/>
+										<FriendRequestCard key={request.id} user={request} />
 									))
 								) : (
 									<div className="flex flex-col gap-3 bg-black/20 px-4 py-3 rounded-lg">

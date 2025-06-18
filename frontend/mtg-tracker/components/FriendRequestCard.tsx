@@ -7,6 +7,7 @@ import useToast from "@/hooks/useToast";
 import { FriendRequestDTO, UserFriendAddDTO, UserReadDTO } from "@/types/client";
 import { Button } from "@headlessui/react";
 import Image from "next/image";
+import UserCard from "./UserCard";
 
 interface FriendRequestCardInterface {
 	user: UserReadDTO;
@@ -48,18 +49,7 @@ export default function FriendRequestCard({
 	return (
 		<div className="flex flex-col gap-3 bg-black/20 px-4 py-3 rounded-lg">
 			<h3 className="self-start">Friend Request</h3>
-			<div className="flex gap-2 items-center ml-4">
-				<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
-					<Image
-						className="h-full w-full object-cover"
-						src={`${user?.profile ?? "/images/fblthp.jpeg"}`}
-						height={64}
-						width={64}
-						alt="User avatar"
-					/>
-				</div>
-				<span className="font-semibold text-fg-light">{user.userName}</span>
-			</div>
+      <UserCard user={user} styles={"pl-4"} />
 			<div className="flex gap-2">
 				<Button
 					className="w-32 rounded-lg border border-error hover:bg-error text-error hover:text-white py-1 hover:cursor-pointer hover:saturate-200 font-semibold"

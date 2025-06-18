@@ -1,23 +1,214 @@
 "use client";
+import ButtonIcon from "@/components/ButtonIcon";
+import ButtonPrimary from "@/components/ButtonPrimary";
+import ComboBox from "@/components/ComboBox";
 import {
 	DashboardLayout,
 	DashboardHeader,
 	DashboardMain,
 } from "@/components/Dashboard";
+import UserCard from "@/components/UserCard";
+import { ActionType } from "@/context/RoomContext";
+import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriend } from "@/hooks/useFriend";
+import { useRoom } from "@/hooks/useRoom";
+import useToast from "@/hooks/useToast";
+import UserRemove from "@/public/icons/user-remove.svg";
+import UserAdd from "@/public/icons/user-add.svg";
+import Exit from "@/public/icons/exit.svg";
+import { AddPlayerDTO, UserReadDTO } from "@/types/client";
+import { useState } from "react";
+import Dialog from "@/components/Dialog";
 
-interface CreatePodInterface {
-}
+interface CreatePodInterface {}
 
 export default function CreatePod({}: CreatePodInterface) {
+	const { toast } = useToast();
 	const { user } = useAuth();
-  const { friends, dispatch } = useFriend();
+	const { friends } = useFriend();
+	const { rooms, dispatch } = useRoom();
+	const [selected, setSelected] = useState<UserReadDTO | null>(null);
+	const [query, setQuery] = useState("");
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+	async function handleCreateRoom() {
+		try {
+			await api.postApiRoom(undefined, { withCredentials: true });
+			const rooms = await api.getApiRoom({ withCredentials: true });
+			const room = rooms.find((r) => r.roomOwnerId === user?.id);
+			if (!room) {
+				toast("Error creating pod", "warn");
+			} else {
+				dispatch({ type: ActionType.UPDATE, payload: rooms });
+			}
+		} catch (error) {
+			console.log(error);
+			toast("Error creating pod", "warn");
+		}
+	}
+
+	async function handleLeaveRoom() {
+		const currentRoom = rooms.find((r) => r.roomOwnerId == user?.id);
+		if (rooms.length === 0 || !currentRoom) {
+			toast("Already closed pod", "warn");
+			return;
+		}
+
+		try {
+			await api.deleteApiRoom(undefined, { withCredentials: true });
+			dispatch({ type: ActionType.UPDATE, payload: [] });
+		} catch (error) {
+			toast("Error closing pod", "warn");
+		}
+	}
+
+	async function handleAddPlayer() {
+		if (!hostedRoom) {
+			toast("Error adding friend", "warn");
+			return;
+		}
+
+		const friend = friends.find((f) => f === selected);
+		if (!friend) {
+			toast("Error adding friend", "warn");
+			return;
+		}
+
+		try {
+			const addPlayerDTO: AddPlayerDTO = { id: friend.id };
+			const updatedRoom = await api.postApiRoomRoomCodeplayers(addPlayerDTO, {
+				params: { roomCode: hostedRoom.code },
+				withCredentials: true,
+			});
+			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
+		} catch (error) {
+			console.log(error);
+			toast("Error adding friend", "warn");
+		}
+	}
+
+	async function handleRemovePlayer(id: string) {
+		if (!hostedRoom) {
+			toast("Error removing player", "warn");
+			return;
+		}
+
+		try {
+			const updatedRoom = await api.deleteApiRoomRoomCodeplayersId(undefined, {
+				params: { id, roomCode: hostedRoom.code },
+				withCredentials: true,
+			});
+			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
+		} catch (error) {
+			console.log(error);
+			toast("Error removing player", "warn");
+		}
+	}
+
+	async function handleStartGame() {}
+
+	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
 
 	return (
 		<DashboardLayout>
-			<DashboardHeader title="Create Pod" user={user}></DashboardHeader>
-			<DashboardMain>{JSON.stringify(friends, null, 3)}</DashboardMain>
+			<DashboardHeader title="Create Pod" user={user} align="left">
+				<ButtonIcon
+					styles={`size-[2em] active:text-white hover:text-white ${
+						!hostedRoom && "hidden"
+					}`}
+					onClick={() => setIsDialogOpen(true)}
+				>
+					<Exit />
+				</ButtonIcon>
+			</DashboardHeader>
+			<DashboardMain>
+				<div className={`dashboard-main-content-layout gap-8 !max-w-lg`}>
+					{rooms.length == 0 ? (
+						<div>
+							<ButtonPrimary onClick={handleCreateRoom}>
+								Create new pod
+							</ButtonPrimary>
+						</div>
+					) : hostedRoom ? (
+						<>
+							{/* Warning Modal for Leaving Room */}
+							<Dialog
+								title="Leave Pod"
+								description="Leaving as host will close the pod"
+								isDialogOpen={isDialogOpen}
+								setIsDialogOpen={setIsDialogOpen}
+								onConfirm={() => handleLeaveRoom()}
+							/>
+
+							{/* Room Code Display */}
+							<div className="flex flex-col items-center mb-2">
+								<span className="text-xl">Room Code:</span>
+								<span className="text-xl uppercase font-bold tracking-wide text-white px-3 py-3 bg-primary-400 rounded-xl my-2">
+									{hostedRoom.code.slice(0, 3) + " " + hostedRoom.code.slice(3)}
+								</span>
+							</div>
+
+							{/* Player List */}
+							<div className="flex flex-col self-start px-6 w-full">
+								<h3 className="uppercase self-start mb-2">Players</h3>
+								<div className="flex flex-col gap-2">
+									{hostedRoom?.players?.length &&
+										hostedRoom.players.map((player) => (
+											<div
+												className="flex justify-between items-center bg-white/5 border border-surface-500 py-2 px-4 w-full rounded-lg"
+												key={player.id}
+											>
+												<UserCard user={player} />
+												{player.id !== user?.id && (
+													<ButtonIcon
+														styles="size-[2em] active:text-white"
+														onClick={() => handleRemovePlayer(player.id)}
+													>
+														<UserRemove />
+													</ButtonIcon>
+												)}
+											</div>
+										))}
+								</div>
+							</div>
+
+							{/* Friend List */}
+							<div className="flex flex-col self-start px-6 w-full">
+								<h3 className="uppercase self-start mb-2">Add Friends</h3>
+								<div className="flex flex-col items-center justify-between relative">
+									<ComboBox
+										list={friends.filter(f => f.id !== user?.id)}
+										query={query}
+										setQuery={setQuery}
+										selected={selected}
+										setSelected={setSelected}
+									/>
+
+									<div className="self-end">
+										<ButtonPrimary onClick={handleAddPlayer}>
+											<span>Add</span>
+											<div className="size-[1.8em]">
+												<UserAdd />
+											</div>
+										</ButtonPrimary>
+									</div>
+								</div>
+							</div>
+
+							<div className="flex justify-center w-full border-t border-surface-500 -mb-8 lg:-mb-12 mt-8">
+								<div className="mt-2 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
+									<ButtonPrimary onClick={handleStartGame} style="primary">
+										Start Game
+									</ButtonPrimary>
+								</div>
+							</div>
+						</>
+					) : (
+						<div>Already joined room</div>
+					)}
+				</div>
+			</DashboardMain>
 		</DashboardLayout>
 	);
 }

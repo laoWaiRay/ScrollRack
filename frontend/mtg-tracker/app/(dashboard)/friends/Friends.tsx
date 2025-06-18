@@ -25,7 +25,7 @@ export default function Friends() {
 			<DashboardMain>
 				<div>
 					<ComboBox
-						list={friends ?? []}
+						list={friends}
 						query={query}
 						setQuery={setQuery}
 						selected={selected}

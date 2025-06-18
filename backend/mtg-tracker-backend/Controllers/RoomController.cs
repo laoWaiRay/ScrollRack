@@ -18,14 +18,25 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     private readonly IMapper _mapper = mapper;
     private const int ROOM_CODE_NUM_DIGITS = 6;
 
-    // TODO: Change this to only return the current user's hosted or joined rooms for production
     // GET: api/room
     // Returns all rooms
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
     {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+        var user = await _context.Users.FindAsync(userId);
+        if (user is null)
+        {
+            return BadRequest();
+        }
+
         var rooms = await _context.Rooms
             .Include(r => r.Players)
+            .Where(r => r.Players.Contains(user))
             .ToListAsync();
 
         return _mapper.Map<List<RoomDTO>>(rooms);
@@ -49,7 +60,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     // Create a new room
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostRoom()
+    [ProducesResponseType(typeof(RoomDTO), StatusCodes.Status201Created)]
+    public async Task<ActionResult<RoomDTO>> PostRoom()
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -168,7 +180,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     // Add a player to the room (Host-only)
     [Authorize]
     [HttpPost("{roomCode}/players")]
-    public async Task<ActionResult> AddPlayer(string roomCode, AddPlayerDTO addPlayerDTO)
+    public async Task<ActionResult<RoomDTO>> AddPlayer(string roomCode, AddPlayerDTO addPlayerDTO)
     {
         string playerId = addPlayerDTO.Id;
         var userId = User.GetUserId();
@@ -217,7 +229,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             host.Friends is null ||
             host.Friends.Contains(playerToAdd) is false)
         {
-            return Unauthorized("Can only add users in host's friend list");         
+            return Unauthorized("Can only add users in host's friend list");
         }
 
         room.Players.Add(playerToAdd);
@@ -237,7 +249,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     // Removes a player from the room (Host only)
     [Authorize]
     [HttpDelete("{roomCode}/players/{id}")]
-    public async Task<ActionResult> RemovePlayer(string roomCode, string id)
+    public async Task<ActionResult<RoomDTO>> RemovePlayer(string roomCode, string id)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -302,11 +314,24 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        if (user.HostedRoom is not null || user.JoinedRoom is not null)
+        if (user.HostedRoom is not null)
         {
+            _context.Rooms.Remove(user.HostedRoom);
             user.HostedRoom = null;
+        }
+
+        if (user.JoinedRoom is not null)
+        {
             user.JoinedRoom = null;
+        }
+        
+        try
+        {
             await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(500, "Something went wrong");
         }
 
         return NoContent();

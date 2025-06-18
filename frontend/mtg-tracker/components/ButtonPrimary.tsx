@@ -19,7 +19,7 @@ const buttonStyles: {[style: string]: ButtonStyle} = {
   primary: {
     color: 'bg-primary-400',
     hover: 'data-hover:bg-primary-300',
-    active: 'data-hover:data-active:bg-primary-400',
+    active: 'data-hover:data-active:bg-primary-500',
     textColor: 'text-white'    
   },
   secondary: {
@@ -51,7 +51,7 @@ export default function ButtonPrimary({ onClick, children, style = 'primary', ty
 	return (
 		<Button
       type={type}
-			className={`${color} ${hover} ${active} ${textColor} ${padding} ${border} ${textStyles} my-4 w-full`}
+			className={`${color} ${hover} ${active} ${textColor} ${padding} ${border} ${textStyles} my-4 w-full flex justify-center gap-2 items-center`}
 			onClick={onClick}
 		>
       {children}
