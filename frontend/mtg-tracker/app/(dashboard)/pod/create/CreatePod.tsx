@@ -21,6 +21,7 @@ import { AddPlayerDTO, UserReadDTO } from "@/types/client";
 import { useState } from "react";
 import Dialog from "@/components/Dialog";
 import { useRouter } from "next/navigation";
+import { useRoomConnection } from "@/hooks/useRoomConnection";
 
 interface CreatePodInterface {}
 
@@ -33,8 +34,8 @@ export default function CreatePod({}: CreatePodInterface) {
 	const [query, setQuery] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const router = useRouter();
-
 	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
+  const { connection } = useRoomConnection(hostedRoom?.code ?? null, () => {}, () => {}, () => {}, () => {});
 
 	async function handleCreateRoom() {
 		try {

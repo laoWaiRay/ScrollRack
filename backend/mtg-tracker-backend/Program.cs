@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Mtg_tracker.Models;
 using Mtg_tracker.MappingProfiles;
 using Microsoft.AspNetCore.Identity;
+using Mtg_tracker.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Cookies
 // builder.Services.ConfigureApplicationCookie(options =>
 // {
@@ -70,5 +74,6 @@ app.UseHttpsRedirection();
 
 app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
+app.MapHub<RoomHub>("/hub");
 
 app.Run();

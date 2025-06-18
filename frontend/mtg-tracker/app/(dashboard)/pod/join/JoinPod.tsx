@@ -9,7 +9,6 @@ import {
 import RoomCodeInput from "@/components/RoomCodeInput";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useFriend } from "@/hooks/useFriend";
 import { useRoom } from "@/hooks/useRoom";
 import useToast from "@/hooks/useToast";
 import Exit from "@/public/icons/exit.svg";
@@ -25,7 +24,6 @@ interface JoinPodInterface {}
 export default function JoinPod({}: JoinPodInterface) {
 	const { toast } = useToast();
 	const { user } = useAuth();
-	const { friends } = useFriend();
 	const { rooms, dispatch } = useRoom();
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [roomCode, setRoomCode] = useState(Array(6).fill(""));
