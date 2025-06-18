@@ -22,7 +22,7 @@ import Tooltip from "@/components/Tooltip";
 import Hamburger from "@/components/animations/Hamburger";
 import { getPath } from "@/helpers/url";
 
-interface HomepageLayoutProps {
+interface DashboardRootLayoutProps {
 	children: ReactNode;
 }
 
@@ -88,7 +88,7 @@ const mobileOnlyLinkData: LinkData[] = [
 	},
 ];
 
-export default function HomepageLayout({ children }: HomepageLayoutProps) {
+export default function DashboardRootLayout({ children }: DashboardRootLayoutProps) {
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -208,7 +208,7 @@ export default function HomepageLayout({ children }: HomepageLayoutProps) {
 
 				{/* Hidden Drawer */}
 				<div
-					className={`w-screen h-dvh overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-transform duration-700 ease-in-out flex flex-col
+					className={`w-screen h-dvh overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-transform duration-300 ease-in-out flex flex-col
           justify-center pt-8 pb-20 ${!isDrawerOpen && "translate-x-[300%]"}`}
 				>
 					<div className="flex flex-col h-full mt-[80px]">

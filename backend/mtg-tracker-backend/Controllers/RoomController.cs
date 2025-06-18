@@ -127,7 +127,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     // Join a room
     [Authorize]
     [HttpPost("{roomCode}")]
-    public async Task<ActionResult> JoinRoom(string roomCode)
+    public async Task<ActionResult<RoomDTO>> JoinRoom(string roomCode)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -173,7 +173,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return StatusCode(500, "Error joining room");
         }
 
-        return Ok();
+        return Ok(_mapper.Map<RoomDTO>(room));
     }
 
     // POST: api/room/{roomCode}/players

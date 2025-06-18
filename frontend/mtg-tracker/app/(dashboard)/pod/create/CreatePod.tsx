@@ -20,6 +20,7 @@ import Exit from "@/public/icons/exit.svg";
 import { AddPlayerDTO, UserReadDTO } from "@/types/client";
 import { useState } from "react";
 import Dialog from "@/components/Dialog";
+import { useRouter } from "next/navigation";
 
 interface CreatePodInterface {}
 
@@ -31,6 +32,9 @@ export default function CreatePod({}: CreatePodInterface) {
 	const [selected, setSelected] = useState<UserReadDTO | null>(null);
 	const [query, setQuery] = useState("");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const router = useRouter();
+
+	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
 
 	async function handleCreateRoom() {
 		try {
@@ -44,13 +48,12 @@ export default function CreatePod({}: CreatePodInterface) {
 			}
 		} catch (error) {
 			console.log(error);
-			toast("Error creating pod", "warn");
+			toast(JSON.stringify(error), "warn");
 		}
 	}
 
 	async function handleLeaveRoom() {
-		const currentRoom = rooms.find((r) => r.roomOwnerId == user?.id);
-		if (rooms.length === 0 || !currentRoom) {
+		if (rooms.length === 0 || !hostedRoom) {
 			toast("Already closed pod", "warn");
 			return;
 		}
@@ -107,8 +110,6 @@ export default function CreatePod({}: CreatePodInterface) {
 	}
 
 	async function handleStartGame() {}
-
-	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
 
 	return (
 		<DashboardLayout>
@@ -178,7 +179,7 @@ export default function CreatePod({}: CreatePodInterface) {
 								<h3 className="uppercase self-start mb-2">Add Friends</h3>
 								<div className="flex flex-col items-center justify-between relative">
 									<ComboBox
-										list={friends.filter(f => f.id !== user?.id)}
+										list={friends.filter((f) => f.id !== user?.id)}
 										query={query}
 										setQuery={setQuery}
 										selected={selected}
@@ -205,7 +206,20 @@ export default function CreatePod({}: CreatePodInterface) {
 							</div>
 						</>
 					) : (
-						<div>Already joined room</div>
+						<div className="flex flex-col gap-2">
+							<div className="text-base mt-4">
+								Cannot create a pod while currently in one
+							</div>
+
+							<div className="w-fit self-center">
+								<ButtonPrimary
+									onClick={() => router.push("/pod/join")}
+									uppercase={false}
+								>
+									Go to Joined Pod
+								</ButtonPrimary>
+							</div>
+						</div>
 					)}
 				</div>
 			</DashboardMain>

@@ -461,7 +461,7 @@ const endpoints = makeApi([
         schema: z.string(),
       },
     ],
-    response: z.void(),
+    response: RoomDTO,
   },
   {
     method: "post",

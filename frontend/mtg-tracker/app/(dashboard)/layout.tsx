@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import HomepageLayout from "./HomepageLayout";
+import DashboardRootLayout from "./DashboardRootLayout";
 import { FriendRequestProvider } from "@/context/FriendRequestContext";
 import { FriendProvider } from "@/context/FriendContext";
 import { getFriends } from "@/actions/friends";
@@ -13,12 +13,12 @@ export default async function layout({ children }: { children: ReactNode }) {
 	const rooms = await getRooms();
 
 	return (
-		<HomepageLayout>
-			<FriendProvider initialFriends={friends}>
-				<FriendRequestProvider initialFriendRequests={friendRequests}>
-					<RoomProvider initialRooms={rooms}>{children}</RoomProvider>
-				</FriendRequestProvider>
-			</FriendProvider>
-		</HomepageLayout>
+		<FriendProvider initialFriends={friends}>
+			<FriendRequestProvider initialFriendRequests={friendRequests}>
+				<RoomProvider initialRooms={rooms}>
+					<DashboardRootLayout>{children}</DashboardRootLayout>
+				</RoomProvider>
+			</FriendRequestProvider>
+		</FriendProvider>
 	);
 }
