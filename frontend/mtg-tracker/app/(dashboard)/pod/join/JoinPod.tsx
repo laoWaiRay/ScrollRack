@@ -40,12 +40,6 @@ export default function JoinPod({}: JoinPodInterface) {
 			r.players?.find((player) => player.id === user.id)
 	);
 
-	const handleReceiveUpdatePlayers = () => {};
-
-	const handleReceivePlayerJoin = (conn: HubConnection | null) => {};
-
-	const handleReceivePlayerLeave = (conn: HubConnection | null) => {};
-
 	const handleReceivePlayerAdd = async () => {
 		const updatedRooms = await getRooms();
 		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
@@ -61,21 +55,11 @@ export default function JoinPod({}: JoinPodInterface) {
 		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
 	};
 
-	const handleReceiveGameStart = () => {};
-
-	const handleReceiveGameEnd = () => {};
-
-	const { connectionRef } = useRoomConnection(
-		joinedRoom?.code ?? null,
-		handleReceiveUpdatePlayers,
-		handleReceivePlayerJoin,
-		handleReceivePlayerLeave,
+	const { connectionRef } = useRoomConnection(joinedRoom?.code ?? null, {
 		handleReceivePlayerAdd,
 		handleReceivePlayerRemove,
 		handleReceiveCloseRoom,
-		handleReceiveGameStart,
-		handleReceiveGameEnd
-	);
+	});
 
 	async function handleJoin() {
 		if (hostedRoom || joinedRoom) {

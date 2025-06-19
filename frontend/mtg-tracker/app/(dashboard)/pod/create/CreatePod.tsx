@@ -23,7 +23,7 @@ import Dialog from "@/components/Dialog";
 import { useRouter } from "next/navigation";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
 import { getRooms } from "@/actions/rooms";
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 
 interface CreatePodInterface {}
 
@@ -43,40 +43,29 @@ export default function CreatePod({}: CreatePodInterface) {
 	};
 
 	const handleReceivePlayerJoin = async (conn: HubConnection | null) => {
-		const updatedRoom = (await getRooms()).find(r => r.code === hostedRoom?.code);
-    if (updatedRoom) {
-      await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
-    }
+		console.log("received player join");
+		const updatedRoom = (await getRooms()).find(
+			(r) => r.code === hostedRoom?.code
+		);
+		if (updatedRoom && conn?.state === HubConnectionState.Connected) {
+			await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
+		}
 	};
 
 	const handleReceivePlayerLeave = async (conn: HubConnection | null) => {
-		const updatedRoom = (await getRooms()).find(r => r.code === hostedRoom?.code);
-    if (updatedRoom) {
-      await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
-    }
+		const updatedRoom = (await getRooms()).find(
+			(r) => r.code === hostedRoom?.code
+		);
+		if (updatedRoom && conn?.state === HubConnectionState.Connected) {
+			await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
+		}
 	};
 
-	const handleReceivePlayerAdd = () => {};
-
-	const handleReceivePlayerRemove = () => {};
-
-	const handleReceiveCloseRoom = () => {};
-
-	const handleReceiveGameStart = () => {};
-
-	const handleReceiveGameEnd = () => {};
-
-	const { connectionRef } = useRoomConnection(
-		hostedRoom?.code ?? null,
+	const { connectionRef } = useRoomConnection(hostedRoom?.code ?? null, {
 		handleReceiveUpdateRoom,
 		handleReceivePlayerJoin,
 		handleReceivePlayerLeave,
-    handleReceivePlayerAdd,
-    handleReceivePlayerRemove,
-		handleReceiveCloseRoom,
-		handleReceiveGameStart,
-		handleReceiveGameEnd
-	);
+	});
 
 	async function handleCreateRoom() {
 		try {
@@ -102,11 +91,11 @@ export default function CreatePod({}: CreatePodInterface) {
 
 		try {
 			await api.deleteApiRoom(undefined, { withCredentials: true });
-      if (connectionRef.current) {
-        connectionRef.current.invoke("closeRoom", hostedRoom.code);
-      } else {
-        console.log("ERROR: NO CONNECTION REF");
-      }
+			if (connectionRef.current) {
+				connectionRef.current.invoke("closeRoom", hostedRoom.code);
+			} else {
+				console.log("ERROR: NO CONNECTION REF");
+			}
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
 			toast("Error closing pod", "warn");
@@ -134,11 +123,15 @@ export default function CreatePod({}: CreatePodInterface) {
 
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
 
-      if (connectionRef.current) {
-        await connectionRef.current.invoke("playerAdd", friend.id, hostedRoom.code);
-      } else {
-        console.log("ERROR: NO CONNECTION REF")
-      }
+			if (connectionRef.current) {
+				await connectionRef.current.invoke(
+					"playerAdd",
+					friend.id,
+					hostedRoom.code
+				);
+			} else {
+				console.log("ERROR: NO CONNECTION REF");
+			}
 		} catch (error) {
 			console.log(error);
 			toast("Error adding friend", "warn");
@@ -158,12 +151,12 @@ export default function CreatePod({}: CreatePodInterface) {
 			});
 
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
-      
-      if (connectionRef.current) {
-        await connectionRef.current.invoke("playerRemove", id);
-      } else {
+
+			if (connectionRef.current) {
+				await connectionRef.current.invoke("playerRemove", id);
+			} else {
 				console.log("ERROR: NO CONNECTION REF");
-      }
+			}
 		} catch (error) {
 			console.log(error);
 			toast("Error removing player", "warn");
