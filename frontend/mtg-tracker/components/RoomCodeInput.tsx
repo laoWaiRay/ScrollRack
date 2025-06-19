@@ -78,8 +78,8 @@ export default function RoomCodeInput({ roomCode, setRoomCode, onSubmit }: RoomC
 
 	const handlePaste: ClipboardEventHandler<HTMLInputElement> = (e) => {
 		e.preventDefault();
-		const text = e.clipboardData.getData("text").replaceAll("/\s+/", "").toUpperCase();
-		if (!new RegExp(`^[a-zA-Z0-9]{${roomCode.length}}$`).test(text)) {
+		const text = e.clipboardData.getData("text").replaceAll(" ", "").toUpperCase();
+		if (!new RegExp(`^[a-zA-Z0-9]*$`).test(text)) {
 			return;
 		}
 		const digits = text.split("");

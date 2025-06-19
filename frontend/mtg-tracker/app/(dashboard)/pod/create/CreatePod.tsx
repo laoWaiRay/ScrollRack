@@ -17,11 +17,13 @@ import useToast from "@/hooks/useToast";
 import UserRemove from "@/public/icons/user-remove.svg";
 import UserAdd from "@/public/icons/user-add.svg";
 import Exit from "@/public/icons/exit.svg";
-import { AddPlayerDTO, UserReadDTO } from "@/types/client";
+import { AddPlayerDTO, RoomDTO, UserReadDTO } from "@/types/client";
 import { useState } from "react";
 import Dialog from "@/components/Dialog";
 import { useRouter } from "next/navigation";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
+import { getRooms } from "@/actions/rooms";
+import { HubConnection } from "@microsoft/signalr";
 
 interface CreatePodInterface {}
 
@@ -35,7 +37,46 @@ export default function CreatePod({}: CreatePodInterface) {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const router = useRouter();
 	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
-  const { connection } = useRoomConnection(hostedRoom?.code ?? null, () => {}, () => {}, () => {}, () => {});
+
+	const handleReceiveUpdateRoom = (room: RoomDTO) => {
+		dispatch({ type: ActionType.UPDATE, payload: [room] });
+	};
+
+	const handleReceivePlayerJoin = async (conn: HubConnection | null) => {
+		const updatedRoom = (await getRooms()).find(r => r.code === hostedRoom?.code);
+    if (updatedRoom) {
+      await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
+    }
+	};
+
+	const handleReceivePlayerLeave = async (conn: HubConnection | null) => {
+		const updatedRoom = (await getRooms()).find(r => r.code === hostedRoom?.code);
+    if (updatedRoom) {
+      await conn?.invoke("updateRoom", updatedRoom.code, updatedRoom);
+    }
+	};
+
+	const handleReceivePlayerAdd = () => {};
+
+	const handleReceivePlayerRemove = () => {};
+
+	const handleReceiveCloseRoom = () => {};
+
+	const handleReceiveGameStart = () => {};
+
+	const handleReceiveGameEnd = () => {};
+
+	const { connectionRef } = useRoomConnection(
+		hostedRoom?.code ?? null,
+		handleReceiveUpdateRoom,
+		handleReceivePlayerJoin,
+		handleReceivePlayerLeave,
+    handleReceivePlayerAdd,
+    handleReceivePlayerRemove,
+		handleReceiveCloseRoom,
+		handleReceiveGameStart,
+		handleReceiveGameEnd
+	);
 
 	async function handleCreateRoom() {
 		try {
@@ -61,6 +102,11 @@ export default function CreatePod({}: CreatePodInterface) {
 
 		try {
 			await api.deleteApiRoom(undefined, { withCredentials: true });
+      if (connectionRef.current) {
+        connectionRef.current.invoke("closeRoom", hostedRoom.code);
+      } else {
+        console.log("ERROR: NO CONNECTION REF");
+      }
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
 			toast("Error closing pod", "warn");
@@ -85,7 +131,14 @@ export default function CreatePod({}: CreatePodInterface) {
 				params: { roomCode: hostedRoom.code },
 				withCredentials: true,
 			});
+
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
+
+      if (connectionRef.current) {
+        await connectionRef.current.invoke("playerAdd", friend.id, hostedRoom.code);
+      } else {
+        console.log("ERROR: NO CONNECTION REF")
+      }
 		} catch (error) {
 			console.log(error);
 			toast("Error adding friend", "warn");
@@ -103,14 +156,24 @@ export default function CreatePod({}: CreatePodInterface) {
 				params: { id, roomCode: hostedRoom.code },
 				withCredentials: true,
 			});
+
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
+      
+      if (connectionRef.current) {
+        await connectionRef.current.invoke("playerRemove", id);
+      } else {
+				console.log("ERROR: NO CONNECTION REF");
+      }
 		} catch (error) {
 			console.log(error);
 			toast("Error removing player", "warn");
 		}
 	}
 
-	async function handleStartGame() {}
+	async function handleUpdatePlayers() {}
+	async function handleCloseRoom() {}
+	async function handleGameStart() {}
+	async function handleGameEnd() {}
 
 	return (
 		<DashboardLayout>
@@ -200,7 +263,7 @@ export default function CreatePod({}: CreatePodInterface) {
 
 							<div className="flex justify-center w-full border-t border-surface-500 -mb-8 lg:-mb-12 mt-8">
 								<div className="mt-2 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
-									<ButtonPrimary onClick={handleStartGame} style="primary">
+									<ButtonPrimary onClick={() => {}} style="primary">
 										Start Game
 									</ButtonPrimary>
 								</div>

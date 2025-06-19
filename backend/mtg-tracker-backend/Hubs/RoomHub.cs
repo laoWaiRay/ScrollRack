@@ -1,21 +1,59 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Models;
 using Mtg_tracker.Models.DTOs;
 
 namespace Mtg_tracker.Hubs;
 
 public interface IRoomClient
 {
-    Task ReceiveUpdatePlayers(UserReadDTO[] players);
+    Task ReceiveUpdateRoom(RoomDTO room);
+    Task ReceivePlayerJoin();
+    Task ReceivePlayerLeave();
+    Task ReceivePlayerAdd();
+    Task ReceivePlayerRemove();
     Task ReceiveCloseRoom();
     Task ReceiveGameStart();
     Task ReceiveGameEnd();
 }
 
-public class RoomHub : Hub<IRoomClient>
+[Authorize]
+public class RoomHub(MtgContext dbContext) : Hub<IRoomClient>
 {
-    public async Task UpdatePlayers(string roomCode, UserReadDTO[] players)
+    private readonly MtgContext _dbContext = dbContext;
+
+    // Broadcast by the host to synchronize all players in the room
+    public async Task UpdateRoom(string roomCode, RoomDTO room)
     {
-        await Clients.Group(ToGroupName(roomCode)).ReceiveUpdatePlayers(players);
+        await Clients.Group(ToGroupName(roomCode)).ReceiveUpdateRoom(room);
+    }
+
+    // Used by host and players to notify the host that a new player has joined
+    public async Task PlayerJoin(string roomCode)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, ToGroupName(roomCode));
+        await Clients.Group(ToGroupName(roomCode)).ReceivePlayerJoin();
+    }
+
+    // Used by host and players to notify the host that a player has left
+    public async Task PlayerLeave(string roomCode)
+    {
+        await Clients.Group(ToGroupName(roomCode)).ReceivePlayerLeave();
+    }
+
+    // Used by host to inform a player that they have been added to a room
+    public async Task PlayerAdd(string userId, string roomCode)
+    {
+        Console.WriteLine(userId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, ToGroupName(roomCode));
+        await Clients.User(userId).ReceivePlayerAdd();
+    }
+
+    // Used by host to inform a player that they have been removed from a room
+    public async Task PlayerRemove(string userId)
+    {
+        await Clients.User(userId).ReceivePlayerRemove();
     }
 
     public async Task CloseRoom(string roomCode)
@@ -33,14 +71,10 @@ public class RoomHub : Hub<IRoomClient>
         await Clients.Group(ToGroupName(roomCode)).ReceiveGameEnd();
     }
 
-    public async Task JoinRoomGroup(string roomCode)
+    // Just for logging
+    public override async Task OnConnectedAsync()
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, ToGroupName(roomCode));
-    }
-
-    public async Task LeaveRoomGroup(string roomCode)
-    {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, ToGroupName(roomCode));
+        await base.OnConnectedAsync();
     }
 
     private static string ToGroupName(string roomCode)

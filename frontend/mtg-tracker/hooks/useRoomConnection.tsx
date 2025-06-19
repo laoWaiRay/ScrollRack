@@ -1,58 +1,100 @@
 import {
 	HubConnection,
 	HubConnectionBuilder,
+	HubConnectionState,
 	LogLevel,
 } from "@microsoft/signalr";
-import { UserReadDTO } from "@/types/client";
-import { useEffect, useState } from "react";
+import { RoomDTO } from "@/types/client";
+import { useEffect, useRef } from "react";
 
 export function useRoomConnection(
 	roomCode: string | null,
-	handleUpdatePlayers: (players: UserReadDTO[]) => void,
-	handleCloseRoom: () => void,
-	handleGameStart: () => void,
-	handleGameEnd: () => void
+	handleReceiveUpdateRoom: (players: RoomDTO) => void,
+	handleReceivePlayerJoin: (conn: HubConnection | null) => void,
+	handleReceivePlayerLeave: (conn: HubConnection | null) => void,
+	handleReceivePlayerAdd: () => void,
+	handleReceivePlayerRemove: () => void,
+	handleReceiveCloseRoom: () => void,
+	handleReceiveGameStart: () => void,
+	handleReceiveGameEnd: () => void
 ) {
-	const [connection, setConnection] = useState<HubConnection | null>(null);
+	const connectionRef = useRef<HubConnection | null>(null);
 
 	useEffect(() => {
-    if (!roomCode) {
-      console.log("No room code");
-      return;
-    }
-
 		const conn = new HubConnectionBuilder()
 			.withUrl("https://localhost:7165/hub", {
 				logger: LogLevel.Information,
-        withCredentials: true,
+				withCredentials: true,
 			})
 			.withAutomaticReconnect()
 			.build();
 
-		setConnection(conn);
-    
-    conn.on("receiveUpdatePlayers", handleUpdatePlayers);
-		conn.on("receiveCloseRoom", handleCloseRoom);
-		conn.on("receiveGameStart", handleGameStart);
-		conn.on("receiveGameEnd", handleGameEnd);
-    
-    async function start() {
-      try {
-        console.log("attempting to start")
-        await conn.start(); 
-        console.log("SignalR Connected");
-        await conn.invoke("JoinRoomGroup", roomCode);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    
-    start();
-    
-    return () => {
-      conn.stop();
-    }
+		// Register handlers
+		conn.on("receiveUpdateRoom", (room: RoomDTO) => {
+			handleReceiveUpdateRoom(room);
+		});
+
+		conn.on("receivePlayerJoin", () => {
+			handleReceivePlayerJoin(connectionRef.current);
+		});
+
+		conn.on("receivePlayerLeave", () => {
+			handleReceivePlayerLeave(connectionRef.current);
+		});
+
+		conn.on("receivePlayerAdd", () => {
+			handleReceivePlayerAdd();
+		});
+
+		conn.on("receivePlayerRemove", () => {
+			handleReceivePlayerRemove();
+		});
+
+		conn.on("receiveCloseRoom", () => {
+			handleReceiveCloseRoom();
+		});
+
+		conn.on("receiveGameStart", () => {
+			handleReceiveGameStart();
+		});
+
+		conn.on("receiveGameEnd", () => {
+			handleReceiveGameEnd();
+		});
+
+		async function start() {
+			try {
+				await conn.start();
+				connectionRef.current = conn;
+
+        // If the user is in a room, add them to the SignalR group
+				if (roomCode) {
+					await conn.invoke("playerJoin", roomCode);
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		}
+
+		start();
+
+		return () => {
+			async function stop() {
+				const { current: connection } = connectionRef;
+				if (
+					connection &&
+					connection.state !== HubConnectionState.Disconnected
+				) {
+					// if (roomCode) {
+					// 	await connection.invoke("playerLeave", roomCode);
+					// }
+
+					await connection.stop();
+				}
+			}
+			stop();
+		};
 	}, [roomCode]);
 
-	return { connection };
+	return { connectionRef };
 }

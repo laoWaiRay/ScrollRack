@@ -18,6 +18,9 @@ import { isAxiosError } from "axios";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { ActionType } from "@/context/RoomContext";
 import Dialog from "@/components/Dialog";
+import { useRoomConnection } from "@/hooks/useRoomConnection";
+import { HubConnection } from "@microsoft/signalr";
+import { getRooms } from "@/actions/rooms";
 
 interface JoinPodInterface {}
 
@@ -31,7 +34,47 @@ export default function JoinPod({}: JoinPodInterface) {
 
 	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
 	const joinedRoom = rooms.find(
-		(r) => user && r.players?.find((player) => player.id === user.id)
+		(r) =>
+			user &&
+			r.roomOwnerId !== user.id &&
+			r.players?.find((player) => player.id === user.id)
+	);
+
+	const handleReceiveUpdatePlayers = () => {};
+
+	const handleReceivePlayerJoin = (conn: HubConnection | null) => {};
+
+	const handleReceivePlayerLeave = (conn: HubConnection | null) => {};
+
+	const handleReceivePlayerAdd = async () => {
+		const updatedRooms = await getRooms();
+		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+	};
+
+	const handleReceivePlayerRemove = async () => {
+		const updatedRooms = await getRooms();
+		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+	};
+
+	const handleReceiveCloseRoom = async () => {
+		const updatedRooms = await getRooms();
+		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+	};
+
+	const handleReceiveGameStart = () => {};
+
+	const handleReceiveGameEnd = () => {};
+
+	const { connectionRef } = useRoomConnection(
+		joinedRoom?.code ?? null,
+		handleReceiveUpdatePlayers,
+		handleReceivePlayerJoin,
+		handleReceivePlayerLeave,
+		handleReceivePlayerAdd,
+		handleReceivePlayerRemove,
+		handleReceiveCloseRoom,
+		handleReceiveGameStart,
+		handleReceiveGameEnd
 	);
 
 	async function handleJoin() {
@@ -68,6 +111,11 @@ export default function JoinPod({}: JoinPodInterface) {
 		}
 
 		try {
+			if (connectionRef.current) {
+				await connectionRef.current.invoke("playerLeave", joinedRoom.code);
+			} else {
+				console.log("ERROR: NO CONNECTION REF");
+			}
 			await api.deleteApiRoom(undefined, { withCredentials: true });
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
@@ -113,12 +161,23 @@ export default function JoinPod({}: JoinPodInterface) {
 							setIsDialogOpen={setIsDialogOpen}
 							onConfirm={() => handleLeaveRoom()}
 						/>
-						<div>Joined Room</div>
+						<div>
+							<div className="flex flex-col items-center mb-2 mt-6">
+								<span className="text-xl">Joined Pod:</span>
+								<span className="text-xl uppercase font-bold tracking-wide text-white px-3 py-3 bg-primary-400 rounded-xl my-2">
+									{joinedRoom.code.slice(0, 3) + " " + joinedRoom.code.slice(3)}
+								</span>
+							</div>
+						</div>
 					</>
 				) : (
 					<div className="flex flex-col gap-4 mt-4">
 						<h3 className="text-xl">Enter Room Code</h3>
-						<RoomCodeInput roomCode={roomCode} setRoomCode={setRoomCode} onSubmit={() => handleJoin()} />
+						<RoomCodeInput
+							roomCode={roomCode}
+							setRoomCode={setRoomCode}
+							onSubmit={() => handleJoin()}
+						/>
 						<div className="mt-2 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
 							<ButtonPrimary onClick={handleJoin} style="primary">
 								Join Pod
