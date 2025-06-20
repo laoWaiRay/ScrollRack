@@ -175,12 +175,12 @@ export default function Account({}: AccountInterface) {
 				<Form fields={formFields} handleChange={handleChange} />
 				<div className="flex justify-end items-center gap-6">
 					<div>
-						<ButtonPrimary onClick={() => router.back()} style="transparent">
+						<ButtonPrimary onClick={() => router.back()} style="transparent" uppercase={false}>
 							Cancel
 						</ButtonPrimary>
 					</div>
 					<div>
-						<ButtonPrimary onClick={() => {}} style="primary" type="submit">
+						<ButtonPrimary onClick={() => {}} style="primary" type="submit" uppercase={false}>
 							Save Profile
 						</ButtonPrimary>
 					</div>

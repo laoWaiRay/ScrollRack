@@ -157,7 +157,7 @@ export default function Lobby({
 					/>
 
 					<div className="self-end">
-						<ButtonPrimary onClick={handleAddPlayer} style="transparent">
+						<ButtonPrimary onClick={handleAddPlayer} style="transparent" uppercase={false}>
 							<span>Add</span>
 							<div className="size-[1.8em]">
 								<UserAdd />
@@ -169,7 +169,7 @@ export default function Lobby({
 
 			<div className="flex justify-center w-full border-t border-surface-500 -mb-8 lg:-mb-12 mt-8">
 				<div className="mt-2 flex w-full justify-center items-center gap-4 px-16 max-w-sm">
-					<ButtonPrimary onClick={handleStartGame} style="primary">
+					<ButtonPrimary onClick={handleStartGame} style="primary" uppercase={false}>
 						Start Game
 					</ButtonPrimary>
 				</div>

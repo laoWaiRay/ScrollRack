@@ -122,6 +122,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 						href="/decks"
 						style="transparent"
 						styles="border border-surface-500 py-4"
+            uppercase={false}
 					>
 						View Decks
 					</ButtonLink>
@@ -131,6 +132,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 							style="primary"
 							onClick={() => {}}
 							disabled={!selected}
+              uppercase={false}
 						>
 							Save Changes
 						</ButtonPrimary>

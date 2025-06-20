@@ -163,7 +163,7 @@ export default function JoinPod({}: JoinPodInterface) {
 							onSubmit={() => handleJoin()}
 						/>
 						<div className="mt-2 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
-							<ButtonPrimary onClick={handleJoin} style="primary">
+							<ButtonPrimary onClick={handleJoin} style="primary" uppercase={false}>
 								Join Pod
 							</ButtonPrimary>
 						</div>

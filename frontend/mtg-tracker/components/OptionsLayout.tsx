@@ -23,7 +23,7 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 		<DashboardLayout>
 			<DashboardHeader title={title} user={user} />
 			{/* Back Button */}
-			<div className="w-fit self-start flex sticky top-24 left-0 pt-4 lg:top-0 ml-10 max-w-sm z-80">
+			<div className="w-fit self-start flex sticky top-24 left-0 pt-4 lg:top-0 ml-10 max-w-sm z-50">
 				<Button
 					className="w-16 h-16 bg-surface-400 rounded-full p-3"
 					onClick={() => router.back()}

@@ -193,7 +193,7 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 					<div className="flex items-center justify-center ml-4">
 						<LogoImage
 							title="Scroll with quill writing"
-							className="text-white w-[1em] h-[1em]"
+							className="text-white w-[1em] h-[1em] mr-[4px]"
 						/>
 						<span className="">ScrollRack</span>
 					</div>

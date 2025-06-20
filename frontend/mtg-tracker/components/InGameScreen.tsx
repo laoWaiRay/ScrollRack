@@ -129,12 +129,13 @@ export default function InGameScreen({
 						<ButtonPrimary
 							onClick={handleAbortGame}
 							style="transparent"
+              uppercase={false}
 						>
 							Cancel
 						</ButtonPrimary>
 					</div>
 					<div className="grow-4">
-						<ButtonPrimary onClick={handleSaveGame} disabled={!winner}>
+						<ButtonPrimary onClick={handleSaveGame} disabled={!winner} uppercase={false}>
 							Save
 						</ButtonPrimary>
 					</div>

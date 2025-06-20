@@ -24,8 +24,8 @@ export default function Settings({}: SettingsInterface) {
 				</Switch>
 			</div>
 			<div className="aspect-3/2 self-end my-8">
-				<ButtonPrimary onClick={() => {}} style="secondary">
-					LOG OUT
+				<ButtonPrimary onClick={() => {}} style="secondary" uppercase={false}>
+					Log Out
 				</ButtonPrimary>
 			</div>
 		</OptionsLayout>

@@ -65,15 +65,11 @@ export function DashboardHeader({
 	return (
 		<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
 			<div className="flex justify-between items-center mx-4">
-				<div className="flex gap-4">
+				<div className="flex gap-8 items-center">
 					<div className="text-lg font-semibold select-none">{title}</div>
-          {align === "left" &&
-            <div className={childrenStyles}>{children}</div>
-          }
+          <div className={`${childrenStyles} hidden lg:block`}>{children}</div>
 				</div>
-        {align === "right" &&
-          <div className={childrenStyles}>{children}</div>
-        }
+        <div className={`${childrenStyles} block lg:hidden`}>{children}</div>
 				<div className="text-lg items-center justify-between hidden lg:flex">
 					{/* User Controls */}
 					<ButtonIcon onClick={() => router.push("/friends/add")} styles={buttonIconStyle}>

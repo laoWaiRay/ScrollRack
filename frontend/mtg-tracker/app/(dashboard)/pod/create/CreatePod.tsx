@@ -120,7 +120,7 @@ export default function CreatePod({}: CreatePodInterface) {
 		<DashboardLayout>
 			<DashboardHeader title="Create Pod" user={user} align="left">
 				<ButtonIcon
-					styles={`size-[2em] active:text-white hover:text-white ${
+					styles={`size-[2em] active:text-white hover:text-white translate-y-0.5 ${
 						!hostedRoom && "hidden"
 					}`}
 					onClick={() => setIsDialogOpen(true)}
@@ -132,8 +132,8 @@ export default function CreatePod({}: CreatePodInterface) {
 				<div className={`dashboard-main-content-layout gap-8 !max-w-lg`}>
 					{rooms.length == 0 ? (
 						<div>
-							<ButtonPrimary onClick={handleCreateRoom}>
-								Create new pod
+							<ButtonPrimary onClick={handleCreateRoom} uppercase={false}>
+								Create pod
 							</ButtonPrimary>
 						</div>
 					) : hostedRoom ? (

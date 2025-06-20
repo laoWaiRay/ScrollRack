@@ -86,7 +86,7 @@ CSS VARIABLES
 
 html,
 body {
-	height: 100%;
+	/* height: 100%; */
 	overflow-x: hidden;
 }
 
@@ -167,7 +167,7 @@ Tailwind CSS Theme
 	--color-success: var(--success);
 
 	/* Font size changes */
-	--text-sm: 0.875rem;
+	--text-sm: 0.9rem;
 	--text-base: 1rem;
 	--text-lg: 1.25rem;
 	--text-xl: 2rem;

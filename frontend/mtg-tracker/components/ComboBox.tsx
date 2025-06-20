@@ -67,7 +67,7 @@ function handleClick() {
         modal={true}
 				transition
 				className={
-					"w-(--input-width) flex flex-col gap-1 rounded-lg border border-white/5 bg-surface-500 [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full"
+					"w-(--input-width) flex flex-col gap-1 rounded-lg border border-white/5 bg-surface-500 [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full z-60"
 				}
 			>
 				{filteredList
