@@ -86,8 +86,13 @@ CSS VARIABLES
 
 html,
 body {
-	/* height: 100%; */
 	overflow-x: hidden;
+}
+
+@media screen and (min-width: 1024px) {
+    html, body {
+        height: 100%;
+    }
 }
 
 /* Dark mode variants */

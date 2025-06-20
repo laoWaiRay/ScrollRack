@@ -91,7 +91,7 @@ export default function CommandZone({
 	return (
 		<DashboardLayout>
 			<DashboardHeader user={user} title="Command Zone" />
-			<DashboardMain>
+			<DashboardMain styles="!items-center">
 				<div className={`dashboard-main-content-layout ${styles.gridLayout} `}>
 					{renderStatCards()}
 

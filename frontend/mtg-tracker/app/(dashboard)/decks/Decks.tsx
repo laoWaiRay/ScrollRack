@@ -52,7 +52,7 @@ export default function Decks({ decks }: DecksInterface) {
 				</div>
 			</DashboardHeader>
 			<DashboardMain>
-				<div className={`dashboard-main-content-layout !max-w-lg`}>
+				<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
 					<div className="flex flex-col w-full gap-4">
 						<section className="flex w-full mt-2 justify-between items-center gap-2 px-2">
 							<SearchBar

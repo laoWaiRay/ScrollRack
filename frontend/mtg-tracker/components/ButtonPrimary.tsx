@@ -7,6 +7,7 @@ interface ButtonPrimaryProps {
 	type?: "submit" | "button";
 	uppercase?: boolean;
 	disabled?: boolean;
+  styles?: string;
 }
 
 interface ButtonStyle {
@@ -57,6 +58,7 @@ export default function ButtonPrimary({
 	type = "button",
 	uppercase = true,
 	disabled = false,
+  styles,
 }: ButtonPrimaryProps) {
 	const { color, hover, active, textColor } = buttonStyles[style];
 	// const padding = style === "transparent" ? "py-1 px-0.5" : "p-4 lg:py-3";
@@ -72,7 +74,7 @@ export default function ButtonPrimary({
 			className={`${color} ${hover} ${active} ${textColor} ${border} ${textStyles} p-4 lg-py-3 rounded-lg
       ${disabled && "opacity-50"} ${
 				style === "danger" && "border border-error/50"
-			} my-4 w-full flex justify-center gap-2 items-center`}
+			} my-4 w-full flex justify-center gap-2 items-center ${styles}`}
 			onClick={onClick}
 			disabled={disabled}
 		>

@@ -139,7 +139,7 @@ export function DashboardHeader({
 export function DashboardMain({ children, styles }: DashboardMainInterface) {
 	return (
 		<div
-			className={`lg:h-full w-full lg:max-w-[1480px] flex justify-center items-start grow ${styles}`}
+			className={`lg:h-full w-full lg:max-w-[96rem] flex justify-center items-start grow ${styles}`}
 		>
 			{children}
 		</div>
