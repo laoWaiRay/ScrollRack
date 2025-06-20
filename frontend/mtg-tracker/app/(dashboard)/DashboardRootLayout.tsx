@@ -102,7 +102,7 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 					styles="xl:hidden"
 				>
 					<SidebarLink href={data.href} isActive={getPath(pathname) === data.href}>
-						<data.icon className="w-[2em] h-[2em] stroke-2 xl:mr-2" />
+						<data.icon className="size-[2em] xl:size-[1.5em] stroke-2 xl:mr-2" />
 						<span className="hidden xl:inline">{data.name}</span>
 					</SidebarLink>
 				</Tooltip>

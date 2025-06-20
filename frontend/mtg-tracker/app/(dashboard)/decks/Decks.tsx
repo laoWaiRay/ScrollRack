@@ -9,20 +9,42 @@ import {
 import SearchBar from "@/components/SearchBar";
 import { useAuth } from "@/hooks/useAuth";
 import { DeckReadDTO } from "@/types/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sort from "@/public/icons/sort.svg";
 import Filter from "@/public/icons/filter.svg";
 import Add from "@/public/icons/add.svg";
 import Edit from "@/public/icons/edit.svg";
 import DeckCard from "@/components/DeckCard";
+import Fuse from "fuse.js";
 
 interface DecksInterface {
-	decks: DeckReadDTO[] | null;
+	decks: DeckReadDTO[];
 }
 
 export default function Decks({ decks }: DecksInterface) {
 	const { user } = useAuth();
 	const [filter, setFilter] = useState("");
+	const [filtered, setFiltered] = useState(decks);
+
+	useEffect(() => {
+		if (filter === "") {
+			return;
+		}
+
+		const fuse = new Fuse(decks, {
+			keys: ["commander"],
+		});
+
+		setFiltered(fuse.search(filter).map((result) => result.item));
+	}, [filter]);
+  
+  function renderDeckCards() {
+    if (filter !== "" && filtered.length > 0) {
+      return filtered.map(deck => <DeckCard key={deck.id} deck={deck} />);
+    } else {
+      return decks.map(deck => <DeckCard key={deck.id} deck={deck} />);
+    }
+  }
 
 	return (
 		<DashboardLayout>
@@ -54,7 +76,7 @@ export default function Decks({ decks }: DecksInterface) {
 			<DashboardMain>
 				<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
 					<div className="flex flex-col w-full gap-4">
-						<section className="flex w-full mt-2 justify-between items-center gap-2 px-2">
+						<section className="flex w-full mt-2 justify-between items-center gap-2 px-2 max-w-md">
 							<SearchBar
 								value={filter}
 								onChange={(e) => setFilter(e.target.value)}
@@ -74,9 +96,7 @@ export default function Decks({ decks }: DecksInterface) {
 						</section>
 
 						<section className="w-full flex flex-col gap-2">
-							{decks &&
-								decks.length > 0 &&
-								decks.map((deck) => <DeckCard key={deck.id} deck={deck} />)}
+							{ renderDeckCards() }
 						</section>
 					</div>
 				</div>
