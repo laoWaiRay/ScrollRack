@@ -412,7 +412,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckReadDTO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckReadDTO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckReadDTO"
+                }
+              }
+            }
           }
         }
       }
@@ -1641,8 +1658,13 @@
       },
       "DeckReadDTO": {
         "required": [
+          "id",
+          "userId",
           "commander",
-          "moxfield"
+          "moxfield",
+          "scryfallId",
+          "numGames",
+          "numWins"
         ],
         "type": "object",
         "properties": {
@@ -1659,6 +1681,9 @@
           "moxfield": {
             "type": "string"
           },
+          "scryfallId": {
+            "type": "string"
+          },
           "numGames": {
             "type": "integer",
             "format": "int32"
@@ -1671,8 +1696,12 @@
       },
       "DeckWriteDTO": {
         "required": [
+          "userId",
           "commander",
-          "moxfield"
+          "moxfield",
+          "scryfallId",
+          "numGames",
+          "numWins"
         ],
         "type": "object",
         "properties": {
@@ -1683,6 +1712,9 @@
             "type": "string"
           },
           "moxfield": {
+            "type": "string"
+          },
+          "scryfallId": {
             "type": "string"
           },
           "numGames": {
@@ -1728,10 +1760,6 @@
       "GameDTO": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
           "numPlayers": {
             "type": "integer",
             "format": "int32"
@@ -1740,7 +1768,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "minutes": {
+          "seconds": {
             "type": "integer",
             "format": "int32"
           },

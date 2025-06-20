@@ -74,7 +74,14 @@ public class RoomHub(MtgContext dbContext) : Hub<IRoomClient>
     // Just for logging
     public override async Task OnConnectedAsync()
     {
+        // Console.WriteLine($"Connected: ${Context.UserIdentifier} <===> ${Context.ConnectionId}");
         await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        // Console.WriteLine($"Disconnected: ${Context.UserIdentifier} <===> ${Context.ConnectionId}");
+        await base.OnDisconnectedAsync(exception);
     }
 
     private static string ToGroupName(string roomCode)

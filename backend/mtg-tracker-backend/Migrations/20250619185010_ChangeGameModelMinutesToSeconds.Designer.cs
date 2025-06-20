@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mtg_tracker.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mtg_tracker.Migrations
 {
     [DbContext(typeof(MtgContext))]
-    partial class MtgContextModelSnapshot : ModelSnapshot
+    [Migration("20250619185010_ChangeGameModelMinutesToSeconds")]
+    partial class ChangeGameModelMinutesToSeconds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,11 +328,6 @@ namespace Mtg_tracker.Migrations
                     b.Property<int>("NumWins")
                         .HasColumnType("integer")
                         .HasColumnName("num_wins");
-
-                    b.Property<string>("ScryfallId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("scryfall_id");
 
                     b.Property<string>("UserId")
                         .IsRequired()

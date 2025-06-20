@@ -55,12 +55,26 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
     // Creates a new deck for the current user
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostDeck(DeckWriteDTO deckDTO)
+    public async Task<ActionResult<DeckReadDTO>> PostDeck(DeckWriteDTO deckDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
         {
             return Unauthorized();
+        }
+
+        var user = await _context.Users
+            .Include(u => u.Decks)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        if (user.Decks.Any(deck => deck.Commander == deckDTO.Commander))
+        {
+            return Conflict();
         }
 
         var deck = _mapper.Map<Deck>(deckDTO);
@@ -113,7 +127,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
 
         return Ok(_mapper.Map<DeckReadDTO>(deck));
     }
-    
+
     // DELETE api/deck/{id}
     // Deletes a deck
     [Authorize]

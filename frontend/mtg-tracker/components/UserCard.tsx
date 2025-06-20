@@ -4,9 +4,10 @@ import Image from "next/image";
 interface UserCardInterface {
   user: UserReadDTO;
   styles?: string;
+  textColor?: string;
 }
 
-export default function UserCard({ user, styles }: UserCardInterface) {
+export default function UserCard({ user, styles, textColor = "" }: UserCardInterface) {
 	return (
 		<div className={`flex gap-2 items-center ${styles}`}>
 			<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
@@ -18,7 +19,7 @@ export default function UserCard({ user, styles }: UserCardInterface) {
 					alt="User avatar"
 				/>
 			</div>
-			<span className="font-semibold text-fg-light">{user?.userName}</span>
+			<span className={`font-semibold ${textColor}`}>{user?.userName}</span>
 		</div>
 	);
 }

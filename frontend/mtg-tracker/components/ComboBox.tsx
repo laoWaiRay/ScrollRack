@@ -10,10 +10,10 @@ import { Dispatch, SetStateAction, useRef } from "react";
 import AngleDown from "@/public/icons/angle-down.svg";
 import Check from "@/public/icons/check.svg";
 
-interface ComboBoxInterface<SelectT extends { id: string; userName: string }> {
-	list: SelectT[];
-	selected: SelectT | null;
-	setSelected: Dispatch<SetStateAction<SelectT | null>>;
+interface ComboBoxInterface {
+	list: string[];
+	selected: string | null;
+	setSelected: Dispatch<SetStateAction<string | null>>;
 	query: string;
 	setQuery: Dispatch<SetStateAction<string>>;
 	inputStyle?: string;
@@ -22,45 +22,43 @@ interface ComboBoxInterface<SelectT extends { id: string; userName: string }> {
 // Expected Parent Usage:
 // const [selected, setSelected] = useState<Person | null>(null);
 // const [query, setQuery] = useState("");
-export default function ComboBox<
-	SelectT extends { id: string; userName: string }
->({
+export default function ComboBox({
 	list,
 	selected,
 	setSelected,
 	query,
 	setQuery,
 	inputStyle,
-}: ComboBoxInterface<SelectT>) {
+}: ComboBoxInterface) {
 	const comboBoxRef = useRef<HTMLDivElement | null>(null);
 
 	const filteredList =
 		query === ""
 			? list
 			: list.filter((listItem) => {
-					return listItem.userName.toLowerCase().includes(query.toLowerCase());
+					return listItem.toLowerCase().includes(query.toLowerCase());
 			  });
   
 function handleClick() {
   if (comboBoxRef.current && window.innerWidth <= 768) {
-    comboBoxRef.current.scrollIntoView({behavior: "smooth", "block": "start"})
+    comboBoxRef.current.scrollIntoView({behavior: "smooth", "block": "nearest"})
   }
 }
 
 	return (
-		<Combobox<SelectT>
+		<Combobox
 			value={selected!}
 			onChange={(value) => setSelected(value ?? null)}
 			onClose={() => setQuery("")}
 		>
 			<div className="relative w-full" ref={comboBoxRef} onClick={handleClick}>
 				<ComboboxInput
-					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light focus-outline ${inputStyle}`}
-					displayValue={(person: SelectT | null) => person?.userName ?? ""}
+					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
+					displayValue={(item: string | null) => item ?? ""}
 					onChange={(event) => setQuery(event.target.value)}
 				/>
 				<ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
-					<AngleDown className="size-4 fill-white/60 group-data-hover:fill-white" />
+					<AngleDown className="size-4 fill-fg group-data-hover:fill-white" />
 				</ComboboxButton>
 			</div>
 
@@ -73,15 +71,15 @@ function handleClick() {
 				}
 			>
 				{filteredList
-					.sort((a, b) => a.userName.localeCompare(b.userName))
+					.sort((a, b) => a.localeCompare(b))
 					.map((listItem) => (
 						<ComboboxOption
-							key={listItem.id}
+							key={listItem}
 							value={listItem}
 							className="group w-full bg-white/[2%] px-4 py-2 rounded-md text-fg-light focus-outline flex gap-2 items-center select-none data-focus:bg-white/20"
 						>
 							<Check className="invisible size-4 fill-white group-data-selected:visible" />
-							<div className="text-base text-white">{listItem.userName}</div>
+							<div className="text-base text-white">{listItem}</div>
 						</ComboboxOption>
 					))}
 			</ComboboxOptions>

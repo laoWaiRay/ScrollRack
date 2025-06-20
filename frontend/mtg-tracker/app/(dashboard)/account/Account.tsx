@@ -153,7 +153,7 @@ export default function Account({}: AccountInterface) {
 
 	return (
 		<OptionsLayout title="Account">
-			<h2 className="mt-6 self-center">EDIT PROFILE</h2>
+			<h2 className="self-center">EDIT PROFILE</h2>
 
 			<div className="flex justify-center mt-8 mb-4">
 				<div className="w-[64px] h-[64px] rounded-full overflow-hidden">

@@ -15,6 +15,7 @@ import UserAdd from "@/public/icons/user-add.svg";
 import { UserReadDTO } from "@/types/client";
 import FriendRequestCard from "./FriendRequestCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
+import { useRouter } from "next/navigation";
 
 interface DashboardLayoutInterface {
 	children: ReactNode;
@@ -59,6 +60,7 @@ export function DashboardHeader({
 }: DashboardHeaderInterface) {
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 	const { friendRequests } = useFriendRequest();
+  const router = useRouter();
 
 	return (
 		<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
@@ -74,7 +76,7 @@ export function DashboardHeader({
         }
 				<div className="text-lg items-center justify-between hidden lg:flex">
 					{/* User Controls */}
-					<ButtonIcon onClick={() => {}} styles={buttonIconStyle}>
+					<ButtonIcon onClick={() => router.push("/friends/add")} styles={buttonIconStyle}>
 						<UserAdd className="w-[1.5em] h-[1.5em] stroke-1" />
 					</ButtonIcon>
 

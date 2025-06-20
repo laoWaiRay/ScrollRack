@@ -19,7 +19,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     private const int ROOM_CODE_NUM_DIGITS = 6;
 
     // GET: api/room
-    // Returns all rooms
+    // Returns all rooms for current user
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
     {

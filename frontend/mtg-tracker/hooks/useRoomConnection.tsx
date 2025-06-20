@@ -8,119 +8,129 @@ import { RoomDTO } from "@/types/client";
 import { useEffect, useRef } from "react";
 
 export interface RoomConnectionHandlers {
-  handleReceiveUpdateRoom?: (players: RoomDTO) => void;
-  handleReceivePlayerJoin?: (conn: HubConnection | null) => void;
-  handleReceivePlayerLeave?: (conn: HubConnection | null) => void;
-  handleReceivePlayerAdd?: () => void;
-  handleReceivePlayerRemove?: () => void;
-  handleReceiveCloseRoom?: () => void;
-  handleReceiveGameStart?: () => void;
-  handleReceiveGameEnd?: () => void;
+	handleReceiveUpdateRoom?: (players: RoomDTO) => void;
+	handleReceivePlayerJoin?: (conn: HubConnection | null) => void;
+	handleReceivePlayerLeave?: (conn: HubConnection | null) => void;
+	handleReceivePlayerAdd?: () => void;
+	handleReceivePlayerRemove?: () => void;
+	handleReceiveCloseRoom?: () => void;
+	handleReceiveGameStart?: () => void;
+	handleReceiveGameEnd?: () => void;
 }
 
 export function useRoomConnection(
-  roomCode: string | null,
-  handlers: RoomConnectionHandlers
+	roomCode: string | null,
+	handlers: RoomConnectionHandlers
 ) {
-  const connectionRef = useRef<HubConnection | null>(null);
+	const connectionRef = useRef<HubConnection | null>(null);
 
-  useEffect(() => {
-    const conn = new HubConnectionBuilder()
-      .withUrl("https://localhost:7165/hub", {
-        logger: LogLevel.Information,
-        withCredentials: true,
-      })
-      .withAutomaticReconnect()
-      .build();
-      
-    const {
-      handleReceiveUpdateRoom,
-      handleReceivePlayerJoin,
-      handleReceivePlayerLeave,
-      handleReceivePlayerAdd,
-      handleReceivePlayerRemove,
-      handleReceiveCloseRoom,
-      handleReceiveGameStart,
-      handleReceiveGameEnd,
-    } = handlers;
-      
-    if (handleReceiveUpdateRoom) {
-      conn.on("receiveUpdateRoom", (room: RoomDTO) => {
-        handlers.handleReceiveUpdateRoom?.(room);
-      });
-    }
-    if (handleReceivePlayerJoin) {
-      conn.on("receivePlayerJoin", () => {
-        if (connectionRef.current && connectionRef.current.state === HubConnectionState.Connected) {
-          handleReceivePlayerJoin(connectionRef.current);
-        }
-      });
-    }
-    if (handleReceivePlayerLeave) {
-      conn.on("receivePlayerLeave", () => {
-        if (connectionRef.current && connectionRef.current.state === HubConnectionState.Connected) {
-          handleReceivePlayerLeave(connectionRef.current);
-        }
-      });
-    }
-    if (handleReceivePlayerAdd) {
-      conn.on("receivePlayerAdd", () => {
-        handleReceivePlayerAdd();
-      });
-    }
-    if (handleReceivePlayerRemove) {
-      conn.on("receivePlayerRemove", () => {
-        handleReceivePlayerRemove();
-      });
-    }
-    if (handleReceiveCloseRoom) {
-      conn.on("receiveCloseRoom", () => {
-        handleReceiveCloseRoom();
-      });
-    }
-    if (handleReceiveGameStart) {
-      conn.on("receiveGameStart", () => {
-        handleReceiveGameStart();
-      });
-    }
-    if (handleReceiveGameEnd) {
-      conn.on("receiveGameEnd", () => {
-        handleReceiveGameEnd();
-      });
-    }
+	useEffect(() => {
+		const conn = new HubConnectionBuilder()
+			.withUrl("https://localhost:7165/hub", {
+				logger: LogLevel.Information,
+				withCredentials: true,
+			})
+			.withAutomaticReconnect()
+			.build();
 
-    async function start() {
-      try {
-        await conn.start();
-        console.log("started connection");
-        connectionRef.current = conn;
+		const {
+			handleReceiveUpdateRoom,
+			handleReceivePlayerJoin,
+			handleReceivePlayerLeave,
+			handleReceivePlayerAdd,
+			handleReceivePlayerRemove,
+			handleReceiveCloseRoom,
+			handleReceiveGameStart,
+			handleReceiveGameEnd,
+		} = handlers;
 
-        // If the user is in a room, add them to the SignalR group
-        if (roomCode) {
-          await conn.invoke("playerJoin", roomCode);
-        }
-      } catch (err) {
-        connectionRef.current = null;
-        console.error(err);
-      }
-    }
+		if (handleReceiveUpdateRoom) {
+			conn.on("receiveUpdateRoom", (room: RoomDTO) => {
+				handleReceiveUpdateRoom?.(room);
+			});
+		}
+		if (handleReceivePlayerJoin) {
+			conn.on("receivePlayerJoin", () => {
+				if (
+					connectionRef.current &&
+					connectionRef.current.state === HubConnectionState.Connected
+				) {
+					handleReceivePlayerJoin(connectionRef.current);
+				}
+			});
+		}
+		if (handleReceivePlayerLeave) {
+			conn.on("receivePlayerLeave", () => {
+				if (
+					connectionRef.current &&
+					connectionRef.current.state === HubConnectionState.Connected
+				) {
+					handleReceivePlayerLeave(connectionRef.current);
+				}
+			});
+		}
+		if (handleReceivePlayerAdd) {
+			conn.on("receivePlayerAdd", () => {
+				handleReceivePlayerAdd();
+			});
+		}
+		if (handleReceivePlayerRemove) {
+			conn.on("receivePlayerRemove", () => {
+				handleReceivePlayerRemove();
+			});
+		}
+		if (handleReceiveCloseRoom) {
+			conn.on("receiveCloseRoom", () => {
+				handleReceiveCloseRoom();
+			});
+		}
+		if (handleReceiveGameStart) {
+			conn.on("receiveGameStart", () => {
+				handleReceiveGameStart();
+			});
+		}
+		if (handleReceiveGameEnd) {
+			conn.on("receiveGameEnd", () => {
+				handleReceiveGameEnd();
+			});
+		}
 
-    start();
+		async function start() {
+			try {
+				console.log("starting connection...");
+				await conn.start();
+				console.log("started connection");
+				connectionRef.current = conn;
 
-    return () => {
-      async function stop() {
-        const { current: connection } = connectionRef;
-        if (
-          connection &&
-          connection.state !== HubConnectionState.Disconnected
-        ) {
-          await connection.stop();
-          console.log("stopped connection");
-        }
-      }
-      stop();
-    };
-  }, [roomCode]);
+				// If the user is in a room, add them to the SignalR group
+				if (roomCode) {
+					await connectionRef.current.invoke("playerJoin", roomCode);
+				}
+			} catch (err) {
+				connectionRef.current = null;
+				console.error(err);
+			}
+		}
 
-  return { connectionRef };
+		start();
+
+    const { current: connection } = connectionRef;
+
+		return () => {
+			async function stop() {
+				if (
+					connection &&
+					connection.state !== HubConnectionState.Disconnected &&
+					connection.state !== HubConnectionState.Connecting
+				) {
+					console.log("stopping connection...");
+					await connection.stop();
+					console.log("stopped connection");
+				}
+			}
+			stop();
+		};
+	}, [roomCode]);
+
+	return { connectionRef };
 }

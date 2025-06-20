@@ -16,6 +16,7 @@ import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { isValidationErrorArray } from "@/helpers/validationHelpers";
 import { useFriend } from "@/hooks/useFriend";
 import { ActionType } from "@/context/FriendContext";
+import UserAdd from "@/public/icons/user-add.svg";
 
 interface AddFriendsInterface {}
 
@@ -131,8 +132,16 @@ export default function AddFriends({}: AddFriendsInterface) {
 				/>
 
 				<div className="-mt-3 lg:w-fit self-end">
-					<ButtonPrimary type="submit" onClick={() => {}}>
-						ADD FRIEND
+					<ButtonPrimary
+						type="submit"
+						onClick={() => {}}
+						style="transparent"
+						uppercase={true}
+					>
+						Add
+						<div className="size-[1.8em]">
+							<UserAdd />
+						</div>
 					</ButtonPrimary>
 				</div>
 			</form>
@@ -170,15 +179,18 @@ export default function AddFriends({}: AddFriendsInterface) {
 				</div>
 
 				<div className="w-40 self-center -mt-3">
-					<ButtonPrimary onClick={handleToggleVideoContainer}>
+					<ButtonPrimary
+						onClick={handleToggleVideoContainer}
+						style="transparent"
+					>
 						{isScanning ? (
 							"STOP"
 						) : (
 							<div className="text-white flex justify-center items-center gap-2">
+								<span className="">SCAN</span>
 								<div className="size-[1em]">
 									<QrCodeScan />
 								</div>
-								<span className="">SCAN</span>
 							</div>
 						)}
 					</ButtonPrimary>
@@ -191,8 +203,8 @@ export default function AddFriends({}: AddFriendsInterface) {
 		const updateFriendsList = async () => {
 			setResult("");
 			try {
-				const updatedFriends = await getFriends() ?? [];
-        dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
+				const updatedFriends = (await getFriends()) ?? [];
+				dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
 			} catch (error) {
 				console.log(error);
 			}

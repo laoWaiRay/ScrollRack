@@ -74,21 +74,23 @@ const InfoRequest = z
   .passthrough();
 const DeckReadDTO = z
   .object({
-    id: z.number().int().optional(),
-    userId: z.string().optional(),
+    id: z.number().int(),
+    userId: z.string(),
     commander: z.string(),
     moxfield: z.string(),
-    numGames: z.number().int().optional(),
-    numWins: z.number().int().optional(),
+    scryfallId: z.string(),
+    numGames: z.number().int(),
+    numWins: z.number().int(),
   })
   .passthrough();
 const DeckWriteDTO = z
   .object({
-    userId: z.string().optional(),
+    userId: z.string(),
     commander: z.string(),
     moxfield: z.string(),
-    numGames: z.number().int().optional(),
-    numWins: z.number().int().optional(),
+    scryfallId: z.string(),
+    numGames: z.number().int(),
+    numWins: z.number().int(),
   })
   .passthrough();
 const UserReadDTO: z.ZodType<UserReadDTO> = z
@@ -111,10 +113,9 @@ const FriendRequestDTO = z
   .passthrough();
 const GameDTO = z
   .object({
-    id: z.number().int(),
     numPlayers: z.number().int(),
     numTurns: z.number().int(),
-    minutes: z.number().int(),
+    seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
   })
   .partial()
@@ -232,7 +233,7 @@ const endpoints = makeApi([
         schema: DeckWriteDTO,
       },
     ],
-    response: z.void(),
+    response: DeckReadDTO,
   },
   {
     method: "get",
