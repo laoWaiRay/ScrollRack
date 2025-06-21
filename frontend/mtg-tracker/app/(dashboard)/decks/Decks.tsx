@@ -39,6 +39,12 @@ export default function Decks({ decks }: DecksInterface) {
 	}, [filter]);
   
   function renderDeckCards() {
+    if (decks.length === 0) {
+      return <div className="mt-4 w-full flex justify-center">
+        No Decks
+      </div>
+    }
+
     if (filter !== "" && filtered.length > 0) {
       return filtered.map(deck => <DeckCard key={deck.id} deck={deck} />);
     } else {

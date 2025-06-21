@@ -191,12 +191,9 @@ Global CSS
 	scrollbar-color: var(--surface-300) var(--surface-600);
 }
 
-*:focus-visible {
-	@apply outline-0 ring-2 ring-primary-200;
-}
-
-*:focus-visible[role="combobox"] {
-	@apply outline-0 ring-2 ring-primary-200;
+*:focus-visible
+{
+	@apply outline-0 ring-2 ring-surface-100;
 }
 
 /* Change form input autofill style */

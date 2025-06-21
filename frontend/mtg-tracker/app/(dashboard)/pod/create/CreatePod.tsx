@@ -7,13 +7,13 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { ActionType } from "@/context/RoomContext";
-import { api } from "@/generated/client";
+import { api, schemas } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriend } from "@/hooks/useFriend";
 import { useRoom } from "@/hooks/useRoom";
 import useToast from "@/hooks/useToast";
 import Exit from "@/public/icons/exit.svg";
-import { RoomDTO, UserReadDTO } from "@/types/client";
+import { DeckReadDTO, RoomDTO, UserReadDTO } from "@/types/client";
 import { useEffect, useState } from "react";
 import Dialog from "@/components/Dialog";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,11 @@ export interface CurrentGameData {
 	winner: UserReadDTO | null;
 }
 
+export interface UserDeckData {
+	id: string;
+	deckData: DeckReadDTO;
+}
+
 interface CreatePodInterface {}
 
 export default function CreatePod({}: CreatePodInterface) {
@@ -38,11 +43,22 @@ export default function CreatePod({}: CreatePodInterface) {
 	const { rooms, dispatch } = useRoom();
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const router = useRouter();
-	const [localStorageValue, setLocalStorageValue] =
+	const [localStorageGameData, setLocalStorageGameData] =
 		useLocalStorage<CurrentGameData>("game_in_progress_data");
 	const [currentGameData, setCurrentGameData] =
 		useState<CurrentGameData | null>(null);
+	const [playerIdToDeck, setPlayerIdToDeck] = useState<
+		Record<string, DeckReadDTO | null>
+	>({});
+
 	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
+  const playerIds = hostedRoom?.players?.map(p => p.id) ?? [];
+	const canStartGame =
+		!!hostedRoom &&
+		!!hostedRoom.players &&
+		hostedRoom.players.length > 1 &&
+		!!playerIdToDeck  &&
+    playerIds.every(id => Object.keys(playerIdToDeck).includes(id));
 
 	const handleReceiveUpdateRoom = (room: RoomDTO) => {
 		dispatch({ type: ActionType.UPDATE, payload: [room] });
@@ -97,8 +113,8 @@ export default function CreatePod({}: CreatePodInterface) {
 
 		try {
 			await api.deleteApiRoom(undefined, { withCredentials: true });
-      setLocalStorageValue(null);
-      setCurrentGameData(null);
+			setLocalStorageGameData(null);
+			setCurrentGameData(null);
 			if (connectionRef.current) {
 				connectionRef.current.invoke("closeRoom", hostedRoom.code);
 			} else {
@@ -110,9 +126,49 @@ export default function CreatePod({}: CreatePodInterface) {
 		}
 	}
 
+	// Attempt to get User Deck selection data from localstorage
 	useEffect(() => {
-		if (localStorageValue) {
-			setCurrentGameData(localStorageValue);
+		if (hostedRoom && hostedRoom.players) {
+			for (const player of hostedRoom.players) {
+				const playerDeckDataString = window.localStorage.getItem(player.id);
+
+				if (playerDeckDataString != null) {
+					try {
+						const playerDeckDataParsed: unknown =
+							JSON.parse(playerDeckDataString);
+						if (
+							playerDeckDataParsed &&
+							typeof playerDeckDataParsed === "object" &&
+							"deckData" in playerDeckDataParsed &&
+							"id" in playerDeckDataParsed &&
+							typeof playerDeckDataParsed["id"] === "string"
+						) {
+							const playerId = playerDeckDataParsed["id"];
+							const playerDeckData = schemas.DeckReadDTO.parse(
+								playerDeckDataParsed["deckData"]
+							);
+							setPlayerIdToDeck((prev) => ({
+								...prev,
+								[playerId]: playerDeckData,
+							}));
+						} else {
+							throw Error("Invalid localStorage data");
+						}
+					} catch (error) {
+						console.log("Zod Error parsing DeckReadDTO", error);
+						setLocalStorageGameData(null);
+						setCurrentGameData(null);
+					}
+				} else {
+					// No valid deck for some player -> abort game
+					setLocalStorageGameData(null);
+					setCurrentGameData(null);
+				}
+			}
+
+			if (localStorageGameData) {
+				setCurrentGameData(localStorageGameData);
+			}
 		}
 	}, []);
 
@@ -129,7 +185,7 @@ export default function CreatePod({}: CreatePodInterface) {
 				</ButtonIcon>
 			</DashboardHeader>
 			<DashboardMain>
-				<div className={`dashboard-main-content-layout gap-8 !max-w-lg`}>
+				<div className={`dashboard-main-content-layout gap-4 !max-w-lg`}>
 					{rooms.length == 0 ? (
 						<div>
 							<ButtonPrimary onClick={handleCreateRoom} uppercase={false}>
@@ -154,15 +210,19 @@ export default function CreatePod({}: CreatePodInterface) {
 									hostedRoom={hostedRoom}
 									connectionRef={connectionRef}
 									setCurrentGameData={setCurrentGameData}
-									setLocalStorageValue={setLocalStorageValue}
+									setLocalStorageValue={setLocalStorageGameData}
+									playerIdToDeck={playerIdToDeck}
+									setPlayerIdToDeck={setPlayerIdToDeck}
+                  canStartGame={canStartGame}
 								/>
 							) : (
 								<InGameScreen
 									startTime={currentGameData.startTime}
-                  user={user}
-                  players={hostedRoom.players ?? []}
+									user={user}
+									players={hostedRoom.players ?? []}
 									setCurrentGameData={setCurrentGameData}
-									setLocalStorageValue={setLocalStorageValue}
+									setLocalStorageValue={setLocalStorageGameData}
+									playerIdToDeck={playerIdToDeck}
 								/>
 							)}
 						</>
@@ -176,7 +236,7 @@ export default function CreatePod({}: CreatePodInterface) {
 								<ButtonPrimary
 									onClick={() => router.push("/pod/join")}
 									uppercase={false}
-                  style="transparent"
+									style="transparent"
 								>
 									Go to Joined Pod
 								</ButtonPrimary>

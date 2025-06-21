@@ -1,8 +1,6 @@
 "use client";
 import { CurrentGameData } from "@/app/(dashboard)/pod/create/CreatePod";
-import {
-	UserReadDTO,
-} from "@/types/client";
+import { DeckReadDTO, UserReadDTO } from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
 import UserCard from "./UserCard";
@@ -15,6 +13,7 @@ interface InGameScreenInterface {
 	players: UserReadDTO[];
 	setLocalStorageValue: (value: CurrentGameData | null) => void;
 	setCurrentGameData: (value: CurrentGameData | null) => void;
+	playerIdToDeck: Record<string, DeckReadDTO | null>;
 }
 
 export default function InGameScreen({
@@ -23,6 +22,7 @@ export default function InGameScreen({
 	players,
 	setLocalStorageValue,
 	setCurrentGameData,
+	playerIdToDeck,
 }: InGameScreenInterface) {
 	const [elapsedTimeInSeconds, setElapsedTimeInSeconds] = useState(() => {
 		// startTime is an epoch timestamp
@@ -97,27 +97,29 @@ export default function InGameScreen({
 
 			{/* Player List */}
 			<div className="flex flex-col self-start px-6 w-full">
-				<h3 className="uppercase self-start mb-2">Winner</h3>
 				<div className="flex flex-col gap-2">
 					{players.map((player) => (
 						<Button
 							className={`${
-								player === winner && "!border-primary-200/50"
-							} flex justify-between items-center bg-white/5 border border-surface-500 py-2 px-4 w-full rounded-lg`}
+								player === winner && "!border-primary-100 !border"
+							} flex justify-between items-center w-full rounded-lg relative overflow-hidden bg-white/5`}
 							key={player.id}
 							onClick={() => setWinner(player)}
 						>
 							<UserCard
 								user={player}
 								textColor={player === winner ? "text-primary-100" : ""}
+								useCommanderDisplay
 							/>
-							<div
-								className={`size-[1.5em] ${
-									player === winner && "text-primary-200"
-								}`}
-							>
-								<Crown />
-							</div>
+							{player === winner && (
+								<div className="w-full absolute flex justify-center top-0 mt-4">
+									<div
+										className={`size-[1.5em] ${"text-primary-200"}`}
+									>
+										<Crown />
+									</div>
+								</div>
+							)}
 						</Button>
 					))}
 				</div>
@@ -129,13 +131,17 @@ export default function InGameScreen({
 						<ButtonPrimary
 							onClick={handleAbortGame}
 							style="transparent"
-              uppercase={false}
+							uppercase={false}
 						>
 							Cancel
 						</ButtonPrimary>
 					</div>
 					<div className="grow-4">
-						<ButtonPrimary onClick={handleSaveGame} disabled={!winner} uppercase={false}>
+						<ButtonPrimary
+							onClick={handleSaveGame}
+							disabled={!winner}
+							uppercase={false}
+						>
 							Save
 						</ButtonPrimary>
 					</div>

@@ -6,7 +6,7 @@ import {
 	ComboboxOption,
 	ComboboxOptions,
 } from "@headlessui/react";
-import { Dispatch, SetStateAction, useRef } from "react";
+import { Dispatch, SetStateAction } from "react";
 import AngleDown from "@/public/icons/angle-down.svg";
 import Check from "@/public/icons/check.svg";
 
@@ -30,20 +30,12 @@ export default function ComboBox({
 	setQuery,
 	inputStyle,
 }: ComboBoxInterface) {
-	const comboBoxRef = useRef<HTMLDivElement | null>(null);
-
 	const filteredList =
 		query === ""
 			? list
 			: list.filter((listItem) => {
 					return listItem.toLowerCase().includes(query.toLowerCase());
 			  });
-  
-function handleClick() {
-  if (comboBoxRef.current && window.innerWidth <= 768) {
-    comboBoxRef.current.scrollIntoView({behavior: "smooth", "block": "nearest"})
-  }
-}
 
 	return (
 		<Combobox
@@ -51,11 +43,12 @@ function handleClick() {
 			onChange={(value) => setSelected(value ?? null)}
 			onClose={() => setQuery("")}
 		>
-			<div className="relative w-full" ref={comboBoxRef} onClick={handleClick}>
+			<div className="relative w-full">
 				<ComboboxInput
 					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
 					displayValue={(item: string | null) => item ?? ""}
 					onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search..."
 				/>
 				<ComboboxButton className="group absolute inset-y-0 right-0 px-2.5">
 					<AngleDown className="size-4 fill-fg group-data-hover:fill-white" />

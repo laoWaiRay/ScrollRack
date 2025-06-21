@@ -36,6 +36,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
         var rooms = await _context.Rooms
             .Include(r => r.Players)
+            .ThenInclude(player => player.Decks)
+            .AsSplitQuery()
             .Where(r => r.Players.Contains(user))
             .ToListAsync();
 
@@ -46,8 +48,15 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     // Returns details for a specific room
     [HttpGet("{roomCode}")]
     public async Task<ActionResult<RoomDTO>> GetRoom(string roomCode)
-    {
-        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Code == roomCode);
+    {   var rooms = await _context.Rooms
+            .Include(r => r.Players)
+            .ThenInclude(player => player.Decks)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        // var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Code == roomCode);
+        var room = rooms.FirstOrDefault(r => r.Code == roomCode);
+
         if (room is null)
         {
             return NotFound();
@@ -148,6 +157,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
         var room = await _context.Rooms
             .Include(r => r.Players)
+            .ThenInclude(p => p.Decks)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(r => r.Code == roomCode);
 
         if (room is null)
@@ -155,7 +166,9 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return NotFound();
         }
 
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users
+            .Include(u => u.Decks)
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
         {
@@ -191,6 +204,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
         var room = await _context.Rooms
             .Include(r => r.Players)
+            .ThenInclude(p => p.Decks)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(r => r.Code == roomCode);
 
         if (room is null)
@@ -208,6 +223,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         var playerToAdd = await _context.Users
             .Include(u => u.HostedRoom)
             .Include(u => u.JoinedRoom)
+            .Include(u => u.Decks)
             .FirstOrDefaultAsync(u => u.Id == playerId);
 
         if (playerToAdd is null)
@@ -268,6 +284,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         var user = await _context.Users
             .Include(u => u.HostedRoom)
             .ThenInclude(r => r!.Players)
+            .ThenInclude(p => p.Decks)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         // Only the Host can remove a player from the room

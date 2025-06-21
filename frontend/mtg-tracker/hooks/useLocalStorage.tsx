@@ -3,6 +3,10 @@ import { useState } from "react"
 
 export function useLocalStorage<ValueT>(key: string): [ValueT | null, (value: ValueT | null) => void] {
   const [state, setState] = useState<ValueT | null>(() => {
+    if (typeof window == "undefined") {
+      return null;
+    }
+
     try {
       const value = window.localStorage.getItem(key);
       return value ? JSON.parse(value) : null;

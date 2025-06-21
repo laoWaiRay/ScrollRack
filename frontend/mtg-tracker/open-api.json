@@ -621,6 +621,44 @@
         }
       }
     },
+    "/api/Friend/detailed": {
+      "get": {
+        "tags": [
+          "Friend"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadDTO"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadDTO"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Friend/{id}": {
       "delete": {
         "tags": [
@@ -2125,7 +2163,9 @@
         "required": [
           "id",
           "userName",
-          "email"
+          "email",
+          "decks",
+          "gameParticipations"
         ],
         "type": "object",
         "properties": {
@@ -2141,6 +2181,18 @@
           "profile": {
             "type": "string",
             "nullable": true
+          },
+          "decks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeckReadDTO"
+            }
+          },
+          "gameParticipations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameParticipationReadDTO"
+            }
           }
         }
       },

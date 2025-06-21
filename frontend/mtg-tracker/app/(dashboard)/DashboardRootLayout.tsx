@@ -112,11 +112,12 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 
 	function renderMobileLinks(links: LinkData[]) {
 		return links.map((data) => (
-			<li key={data.name}>
+			<li key={data.name} tabIndex={-1}>
 				<SidebarLink
 					href={data.href}
 					isActive={getPath(pathname) === data.href}
 					onClick={() => setIsDrawerOpen(false)}
+          isTabbable={false}
 				>
 					<data.icon className="w-[2em] h-[2em]" />
 					<span className="ml-4">{data.name}</span>

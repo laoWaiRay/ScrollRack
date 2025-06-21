@@ -6,6 +6,8 @@ using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using AutoMapper.QueryableExtensions;
+using System.Text.Json;
 
 namespace Mtg_tracker.Controllers;
 
@@ -37,8 +39,40 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        return _mapper.Map<List<UserReadDTO>>(currentUser.Friends);
+        return _mapper.Map<UserReadDTO[]>(currentUser.Friends);
     }
+    
+    // GET: api/friend/detailed
+    // Returns all friends of current user, including details such as decklists, ...
+    [Authorize]
+    [HttpGet("detailed")]
+    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetFriendsDetailed()
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var currentUser = await _context.Users
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        var friendIds = currentUser.Friends.Select(f => f.Id).ToList();
+
+        var friendsWithDecks = await _context.Users
+            .Where(f => friendIds.Contains(f.Id))
+            .Include(f => f.Decks)
+            .AsSplitQuery()
+            .ToListAsync();
+
+        return _mapper.Map<List<UserReadDTO>>(friendsWithDecks);
+    } 
 
     // POST: api/friend
     // Adds a friend (optionally with/without needing to send/accept a request)
@@ -69,8 +103,9 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
         {
             return NotFound();
         }
-        
-        if (user.Friends.Contains(friendUser)) {
+
+        if (user.Friends.Contains(friendUser))
+        {
             return Conflict("Already friends");
         }
 

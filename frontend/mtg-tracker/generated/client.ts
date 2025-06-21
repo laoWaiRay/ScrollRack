@@ -13,7 +13,22 @@ type UserReadDTO = {
   userName: string;
   email: string;
   profile?: (string | null) | undefined;
+  decks: Array<DeckReadDTO>;
+  gameParticipations: Array<GameParticipationReadDTO>;
 };
+type DeckReadDTO = {
+  id: number;
+  userId: string;
+  commander: string;
+  moxfield: string;
+  scryfallId: string;
+  numGames: number;
+  numWins: number;
+};
+type GameParticipationReadDTO = Partial<{
+  id: number;
+  won: boolean;
+}>;
 
 const RegisterRequest = z
   .object({ email: z.string(), password: z.string() })
@@ -72,7 +87,7 @@ const InfoRequest = z
   })
   .partial()
   .passthrough();
-const DeckReadDTO = z
+const DeckReadDTO: z.ZodType<DeckReadDTO> = z
   .object({
     id: z.number().int(),
     userId: z.string(),
@@ -93,12 +108,18 @@ const DeckWriteDTO = z
     numWins: z.number().int(),
   })
   .passthrough();
+const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
+  .object({ id: z.number().int(), won: z.boolean() })
+  .partial()
+  .passthrough();
 const UserReadDTO: z.ZodType<UserReadDTO> = z
   .object({
     id: z.string(),
     userName: z.string(),
     email: z.string(),
     profile: z.string().nullish(),
+    decks: z.array(DeckReadDTO),
+    gameParticipations: z.array(GameParticipationReadDTO),
   })
   .passthrough();
 const UserFriendAddDTO = z
@@ -118,10 +139,6 @@ const GameDTO = z
     seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
   })
-  .partial()
-  .passthrough();
-const GameParticipationReadDTO = z
-  .object({ id: z.number().int(), won: z.boolean() })
   .partial()
   .passthrough();
 const GameParticipationWriteDTO = z
@@ -197,11 +214,11 @@ export const schemas = {
   InfoRequest,
   DeckReadDTO,
   DeckWriteDTO,
+  GameParticipationReadDTO,
   UserReadDTO,
   UserFriendAddDTO,
   FriendRequestDTO,
   GameDTO,
-  GameParticipationReadDTO,
   GameParticipationWriteDTO,
   RoomDTO,
   AddPlayerDTO,
@@ -316,6 +333,13 @@ const endpoints = makeApi([
       },
     ],
     response: z.void(),
+  },
+  {
+    method: "get",
+    path: "/api/Friend/detailed",
+    alias: "getApiFrienddetailed",
+    requestFormat: "json",
+    response: z.array(UserReadDTO),
   },
   {
     method: "delete",
