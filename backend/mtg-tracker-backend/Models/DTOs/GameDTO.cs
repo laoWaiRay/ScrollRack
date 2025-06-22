@@ -6,7 +6,12 @@ public class GameReadDTO
     public required int NumPlayers { get; set; }
     public required int NumTurns { get; set; }
     public required int Seconds { get; set; }
+
     public required DateTime CreatedAt { get; set; }
+    public string? CreatedByUserId { get; set; }
+
+    public UserReadDTO Winner { get; set; } = null!;
+    public string? WinnerId { get; set; }
 }
 
 public class GameWriteDTO
@@ -15,4 +20,8 @@ public class GameWriteDTO
     public required int NumTurns { get; set; }
     public required int Seconds { get; set; }
     public required DateTime CreatedAt { get; set; }
+    public required int RoomId { get; set; }
+
+    public required string CreatedByUserId { get; set; }
+    public required string WinnerId { get; set; }
 }

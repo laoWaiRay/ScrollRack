@@ -6,6 +6,7 @@ import {
 	GameWriteDTO,
 	GameParticipationWriteDTO,
 	UserReadDTO,
+	GameParticipationReadDTO,
 } from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
@@ -14,6 +15,11 @@ import Crown from "@/public/icons/crown.svg";
 import { Button } from "@headlessui/react";
 import { api } from "@/generated/client";
 import useToast from "@/hooks/useToast";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { useGame } from "@/hooks/useGame";
+import { ActionType as GameActionType } from "@/context/GameContext";
+import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
+import { formatTime } from "@/helpers/time";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -22,6 +28,7 @@ interface InGameScreenInterface {
 	setLocalStorageValue: (value: CurrentGameData | null) => void;
 	setCurrentGameData: (value: CurrentGameData | null) => void;
 	playerIdToDeck: Record<string, DeckReadDTO | null>;
+  roomId: number;
 }
 
 export default function InGameScreen({
@@ -31,6 +38,7 @@ export default function InGameScreen({
 	setLocalStorageValue,
 	setCurrentGameData,
 	playerIdToDeck,
+  roomId,
 }: InGameScreenInterface) {
 	const [elapsedTimeInSeconds, setElapsedTimeInSeconds] = useState(() => {
 		// startTime is an epoch timestamp
@@ -39,6 +47,9 @@ export default function InGameScreen({
 	});
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
 	const { toast } = useToast();
+	const { games, dispatch: dispatchGame } = useGame();
+	const { gameParticipations, dispatch: dispatchGameParticipation } =
+		useGameParticipation();
 
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
@@ -46,20 +57,28 @@ export default function InGameScreen({
 	}
 
 	async function handleSaveGame() {
+		if (!user) {
+			console.log("Cannot save game - host user data missing");
+			return;
+		}
+
 		if (!winner || !players.some((p) => p.id === winner.id)) {
 			toast("Must select a winner", "warn");
 			return;
 		}
 
 		let gameSaved = false;
-    let gameSavedId = 0;
+		let gameSavedId = 0;
 
 		try {
 			const gameWriteDTO: GameWriteDTO = {
+        roomId,
 				numPlayers: players.length,
 				numTurns: 0,
 				seconds: elapsedTimeInSeconds,
-				createdAt: (new Date(startTime)).toISOString(),
+				createdAt: new Date(startTime).toISOString(),
+				createdByUserId: user.id,
+        winnerId: winner.id,
 			};
 
 			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
@@ -67,7 +86,7 @@ export default function InGameScreen({
 			});
 
 			gameSaved = true;
-      gameSavedId = gameReadDTO.id;
+			gameSavedId = gameReadDTO.id;
 
 			const gameParticipationWriteDTOs: GameParticipationWriteDTO[] = [];
 
@@ -88,22 +107,42 @@ export default function InGameScreen({
 				gameParticipationWriteDTOs.push(gameParticipationWriteDTO);
 			}
 
+			let hostGpReadDTO: GameParticipationReadDTO | null = null;
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
-				await api.postApiGameParticipation(gameParticipationWriteDTO, {
-					withCredentials: true,
-				});
+				const gpReadDTO = await api.postApiGameParticipation(
+					gameParticipationWriteDTO,
+					{
+						withCredentials: true,
+					}
+				);
+				if (gpReadDTO.userId === user.id) {
+					hostGpReadDTO = gpReadDTO;
+				}
 			}
 
 			toast("Game saved", "success");
-      setLocalStorageValue(null);
-      setCurrentGameData(null);
+			dispatchGame({
+				type: GameActionType.UPDATE,
+				payload: [...games, gameReadDTO],
+			});
+			if (hostGpReadDTO) {
+				dispatchGameParticipation({
+					type: GameParticipationActionType.UPDATE,
+					payload: [...gameParticipations, hostGpReadDTO],
+				});
+			}
+			setLocalStorageValue(null);
+			setCurrentGameData(null);
 		} catch (error) {
 			if (gameSaved) {
 				// Revert, delete game data
-        await api.deleteApiGameId(undefined, { params: { id: gameSavedId }, withCredentials: true });
+				await api.deleteApiGameId(undefined, {
+					params: { id: gameSavedId },
+					withCredentials: true,
+				});
 			}
-      console.log(error)
-      toast("Error saving game", "warn");
+			console.log(error);
+			toast("Error saving game", "warn");
 		}
 	}
 
@@ -118,19 +157,6 @@ export default function InGameScreen({
 			clearInterval(handle);
 		};
 	}, []);
-
-	function formatTime(seconds: number) {
-		const hours = Math.floor(seconds / 3600)
-			.toString()
-			.padStart(2, "0");
-		const minutes = Math.floor((seconds % 3600) / 60)
-			.toString()
-			.padStart(2, "0");
-		const secs = Math.floor(seconds % 60)
-			.toString()
-			.padStart(2, "0");
-		return `${hours}:${minutes}:${secs}`;
-	}
 
 	return (
 		<div className="w-full max-w-lg flex flex-col">

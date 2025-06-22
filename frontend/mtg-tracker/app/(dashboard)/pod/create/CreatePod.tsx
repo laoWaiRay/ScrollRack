@@ -223,6 +223,7 @@ export default function CreatePod({}: CreatePodInterface) {
 									setCurrentGameData={setCurrentGameData}
 									setLocalStorageValue={setLocalStorageGameData}
 									playerIdToDeck={playerIdToDeck}
+                  roomId={hostedRoom.id}
 								/>
 							)}
 						</>

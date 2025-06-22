@@ -12,4 +12,10 @@ public class Game
     public int NumTurns { get; set; }
     public int Seconds { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public string? CreatedByUserId { get; set; }
+    public ApplicationUser? CreatedBy { get; set; } = null!;
+
+    public string? WinnerId { get; set; } = null!;
+    public ApplicationUser? Winner { get; set; } = null!;
 }

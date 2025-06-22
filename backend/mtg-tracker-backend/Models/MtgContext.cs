@@ -97,6 +97,23 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             }
         );
 
+        modelBuilder.Entity<Game>(
+            nestedBuilder =>
+            {
+                nestedBuilder
+                    .HasOne(e => e.CreatedBy)
+                    .WithMany()
+                    .HasForeignKey(e => e.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                nestedBuilder
+                    .HasOne(e => e.Winner)
+                    .WithMany()
+                    .HasForeignKey(e => e.WinnerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            }
+        );
+
         modelBuilder.Entity<Deck>(
             nestedBuilder =>
             {

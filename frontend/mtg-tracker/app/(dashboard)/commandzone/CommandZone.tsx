@@ -14,10 +14,10 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import useToast from "@/hooks/useToast";
+import { useDeck } from "@/hooks/useDeck";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
-	decks: DeckReadDTO[];
 }
 
 interface StatCardData {
@@ -34,10 +34,10 @@ const statCardNumberStyles = {
 
 export default function CommandZone({
 	statSnapshot,
-	decks,
 }: CommandZoneInterface) {
 	const { user } = useAuth();
-  const { toast } = useToast();
+  const { decks, dispatch: dispatchDeck } = useDeck();
+	const { toast } = useToast();
 
 	const statCardData: StatCardData[] = [
 		{
@@ -172,10 +172,14 @@ export default function CommandZone({
 								<GameLogCard
 									key={i}
 									gameData={{
-										date: "Feb 1, 2025",
-										commander: "Atraxa, Praetor's Voice",
-										players: "4",
-										winner: "WORD_WRONG",
+										gameParticipationId: "some id",
+										deck: decks[0],
+										won: true,
+                    winner: user!,
+										numPlayers: 4,
+										seconds: 180,
+										createdAt: "some timestamp",
+										createdByUserId: "some id",
 									}}
 								/>
 							))}

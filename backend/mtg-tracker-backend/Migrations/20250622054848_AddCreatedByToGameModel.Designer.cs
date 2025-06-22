@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mtg_tracker.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mtg_tracker.Migrations
 {
     [DbContext(typeof(MtgContext))]
-    partial class MtgContextModelSnapshot : ModelSnapshot
+    [Migration("20250622054848_AddCreatedByToGameModel")]
+    partial class AddCreatedByToGameModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -431,11 +434,6 @@ namespace Mtg_tracker.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("seconds");
 
-                    b.Property<string>("WinnerId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("winner_id");
-
                     b.HasKey("Id")
                         .HasName("pk_games");
 
@@ -444,9 +442,6 @@ namespace Mtg_tracker.Migrations
 
                     b.HasIndex("RoomId")
                         .HasDatabaseName("ix_games_room_id");
-
-                    b.HasIndex("WinnerId")
-                        .HasDatabaseName("ix_games_winner_id");
 
                     b.ToTable("games", (string)null);
                 });
@@ -735,18 +730,9 @@ namespace Mtg_tracker.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_games_rooms_room_id");
 
-                    b.HasOne("Mtg_tracker.Models.ApplicationUser", "Winner")
-                        .WithMany()
-                        .HasForeignKey("WinnerId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
-                        .HasConstraintName("fk_games_users_winner_id");
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Room");
-
-                    b.Navigation("Winner");
                 });
 
             modelBuilder.Entity("Mtg_tracker.Models.GameParticipation", b =>

@@ -32,6 +32,8 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             .ToListAsync();
 
         var games = await _context.Games
+            .Include(g => g.CreatedBy)
+            .Include(g => g.Winner)
             .Where(g => participatedInGameIds.Contains(g.Id))
             .ToListAsync();
 
@@ -56,7 +58,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
     // Create a new game
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<GameReadDTO>> PostGame(GameWriteDTO gameDTO)
+    public async Task<ActionResult<GameReadDTO>> PostGame(GameWriteDTO gameWriteDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -79,11 +81,19 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return BadRequest("Only room host can create a game");
         }
 
-        Game game = _mapper.Map<Game>(gameDTO);
-        game.RoomId = user.HostedRoom.Id;
+        Game? game = _mapper.Map<Game>(gameWriteDTO);
 
         _context.Games.Add(game);
         await _context.SaveChangesAsync();
+
+        game = await _context.Games
+            .Include(g => g.Winner)
+            .FirstOrDefaultAsync(g => g.Id == game.Id);
+
+        if (game is null)
+        {
+            return StatusCode(500);
+        }
 
         return CreatedAtAction(
             nameof(GetGame),

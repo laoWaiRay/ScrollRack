@@ -1852,12 +1852,20 @@
       },
       "GameParticipationReadDTO": {
         "required": [
+          "id",
+          "userId",
           "gameId",
           "deckId",
           "won"
         ],
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
           "gameId": {
             "type": "integer",
             "format": "int32"
@@ -1925,6 +1933,17 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "winner": {
+            "$ref": "#/components/schemas/UserReadDTO"
+          },
+          "winnerId": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -1933,7 +1952,10 @@
           "numPlayers",
           "numTurns",
           "seconds",
-          "createdAt"
+          "createdAt",
+          "roomId",
+          "createdByUserId",
+          "winnerId"
         ],
         "type": "object",
         "properties": {
@@ -1952,6 +1974,16 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "roomId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdByUserId": {
+            "type": "string"
+          },
+          "winnerId": {
+            "type": "string"
           }
         }
       },
@@ -2103,6 +2135,7 @@
       },
       "RoomDTO": {
         "required": [
+          "id",
           "roomOwnerId",
           "code"
         ],

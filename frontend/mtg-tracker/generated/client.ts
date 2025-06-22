@@ -1,12 +1,15 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
-type RoomDTO = {
-  id?: number | undefined;
-  roomOwnerId: string;
-  code: string;
-  createdAt?: string | undefined;
-  players?: Array<UserReadDTO> | undefined;
+type GameReadDTO = {
+  id: number;
+  numPlayers: number;
+  numTurns: number;
+  seconds: number;
+  createdAt: string;
+  createdByUserId?: (string | null) | undefined;
+  winner?: UserReadDTO | undefined;
+  winnerId?: (string | null) | undefined;
 };
 type UserReadDTO = {
   id: string;
@@ -26,9 +29,18 @@ type DeckReadDTO = {
   numWins: number;
 };
 type GameParticipationReadDTO = {
+  id: string;
+  userId: string;
   gameId: number;
   deckId: number;
   won: boolean;
+};
+type RoomDTO = {
+  id: number;
+  roomOwnerId: string;
+  code: string;
+  createdAt?: string | undefined;
+  players?: Array<UserReadDTO> | undefined;
 };
 
 const RegisterRequest = z
@@ -111,6 +123,8 @@ const DeckWriteDTO = z
   .passthrough();
 const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
   .object({
+    id: z.string(),
+    userId: z.string(),
     gameId: z.number().int(),
     deckId: z.number().int(),
     won: z.boolean(),
@@ -136,13 +150,16 @@ const FriendRequestDTO = z
     receiverId: z.string(),
   })
   .passthrough();
-const GameReadDTO = z
+const GameReadDTO: z.ZodType<GameReadDTO> = z
   .object({
     id: z.number().int(),
     numPlayers: z.number().int(),
     numTurns: z.number().int(),
     seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
+    createdByUserId: z.string().nullish(),
+    winner: UserReadDTO.optional(),
+    winnerId: z.string().nullish(),
   })
   .passthrough();
 const GameWriteDTO = z
@@ -151,6 +168,9 @@ const GameWriteDTO = z
     numTurns: z.number().int(),
     seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
+    roomId: z.number().int(),
+    createdByUserId: z.string(),
+    winnerId: z.string(),
   })
   .passthrough();
 const GameParticipationWriteDTO = z
@@ -163,7 +183,7 @@ const GameParticipationWriteDTO = z
   .passthrough();
 const RoomDTO: z.ZodType<RoomDTO> = z
   .object({
-    id: z.number().int().optional(),
+    id: z.number().int(),
     roomOwnerId: z.string(),
     code: z.string(),
     createdAt: z.string().datetime({ offset: true }).optional(),

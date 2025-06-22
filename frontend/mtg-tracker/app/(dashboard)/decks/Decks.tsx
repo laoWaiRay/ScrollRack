@@ -17,13 +17,13 @@ import Edit from "@/public/icons/edit.svg";
 import DeckCard from "@/components/DeckCard";
 import Fuse from "fuse.js";
 import { useDeck } from "@/hooks/useDeck";
+import FilterSortBar from "@/components/FilterSortBar";
 
-interface DecksInterface {
-}
+interface DecksInterface {}
 
 export default function Decks({}: DecksInterface) {
 	const { user } = useAuth();
-  const { decks, dispatch } = useDeck();
+	const { decks, dispatch } = useDeck();
 	const [filter, setFilter] = useState("");
 	const [filtered, setFiltered] = useState(decks);
 
@@ -38,20 +38,18 @@ export default function Decks({}: DecksInterface) {
 
 		setFiltered(fuse.search(filter).map((result) => result.item));
 	}, [filter]);
-  
-  function renderDeckCards() {
-    if (decks.length === 0) {
-      return <div className="mt-4 w-full flex justify-center">
-        No Decks
-      </div>
-    }
 
-    if (filter !== "" && filtered.length > 0) {
-      return filtered.map(deck => <DeckCard key={deck.id} deck={deck} />);
-    } else {
-      return decks.map(deck => <DeckCard key={deck.id} deck={deck} />);
-    }
-  }
+	function renderDeckCards() {
+		if (decks.length === 0) {
+			return <div className="mt-4 w-full flex justify-center">No Decks</div>;
+		}
+
+		if (filter !== "" && filtered.length > 0) {
+			return filtered.map((deck) => <DeckCard key={deck.id} deck={deck} />);
+		} else {
+			return decks.map((deck) => <DeckCard key={deck.id} deck={deck} />);
+		}
+	}
 
 	return (
 		<DashboardLayout>
@@ -83,27 +81,10 @@ export default function Decks({}: DecksInterface) {
 			<DashboardMain>
 				<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
 					<div className="flex flex-col w-full gap-4">
-						<section className="flex w-full mt-2 justify-between items-center gap-2 px-2 max-w-md">
-							<SearchBar
-								value={filter}
-								onChange={(e) => setFilter(e.target.value)}
-								onClick={() => setFilter("")}
-							/>
+						<FilterSortBar filter={filter} setFilter={setFilter} />
 
-							<ButtonIcon>
-								<div className="w-[2.5em] border border-surface-500 rounded p-1">
-									<Sort />
-								</div>
-							</ButtonIcon>
-							<ButtonIcon>
-								<div className="w-[2.5em] border border-surface-500 rounded p-2">
-									<Filter />
-								</div>
-							</ButtonIcon>
-						</section>
-
-						<section className="w-full flex flex-col gap-2">
-							{ renderDeckCards() }
+						<section className="w-full flex flex-col gap-2 px-2">
+							{renderDeckCards()}
 						</section>
 					</div>
 				</div>
