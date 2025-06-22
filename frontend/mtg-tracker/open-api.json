@@ -815,7 +815,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/GameDTO"
+                    "$ref": "#/components/schemas/GameReadDTO"
                   }
                 }
               },
@@ -823,7 +823,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/GameDTO"
+                    "$ref": "#/components/schemas/GameReadDTO"
                   }
                 }
               },
@@ -831,7 +831,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/GameDTO"
+                    "$ref": "#/components/schemas/GameReadDTO"
                   }
                 }
               }
@@ -847,17 +847,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GameDTO"
+                "$ref": "#/components/schemas/GameWriteDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/GameDTO"
+                "$ref": "#/components/schemas/GameWriteDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/GameDTO"
+                "$ref": "#/components/schemas/GameWriteDTO"
               }
             }
           },
@@ -865,7 +865,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameReadDTO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameReadDTO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameReadDTO"
+                }
+              }
+            }
           }
         }
       }
@@ -892,20 +909,41 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/GameDTO"
+                  "$ref": "#/components/schemas/GameReadDTO"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GameDTO"
+                  "$ref": "#/components/schemas/GameReadDTO"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GameDTO"
+                  "$ref": "#/components/schemas/GameReadDTO"
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Game"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -973,7 +1011,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameParticipationReadDTO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameParticipationReadDTO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameParticipationReadDTO"
+                }
+              }
+            }
           }
         }
       }
@@ -1795,9 +1850,66 @@
           }
         }
       },
-      "GameDTO": {
+      "GameParticipationReadDTO": {
+        "required": [
+          "gameId",
+          "deckId",
+          "won"
+        ],
         "type": "object",
         "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deckId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "won": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GameParticipationWriteDTO": {
+        "required": [
+          "userId",
+          "gameId",
+          "deckId",
+          "won"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "gameId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deckId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "won": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GameReadDTO": {
+        "required": [
+          "id",
+          "numPlayers",
+          "numTurns",
+          "seconds",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
           "numPlayers": {
             "type": "integer",
             "format": "int32"
@@ -1816,37 +1928,30 @@
           }
         }
       },
-      "GameParticipationReadDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "won": {
-            "type": "boolean"
-          }
-        }
-      },
-      "GameParticipationWriteDTO": {
+      "GameWriteDTO": {
         "required": [
-          "userId"
+          "numPlayers",
+          "numTurns",
+          "seconds",
+          "createdAt"
         ],
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "gameId": {
+          "numPlayers": {
             "type": "integer",
             "format": "int32"
           },
-          "deckId": {
+          "numTurns": {
             "type": "integer",
             "format": "int32"
           },
-          "won": {
-            "type": "boolean"
+          "seconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

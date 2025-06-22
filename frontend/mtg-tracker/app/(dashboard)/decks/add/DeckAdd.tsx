@@ -5,10 +5,12 @@ import ComboBox from "@/components/ComboBox";
 import OptionsLayout from "@/components/OptionsLayout";
 import TextInput from "@/components/TextInput";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
+import { ActionType } from "@/context/DeckContext";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeck } from "@/hooks/useDeck";
 import useToast from "@/hooks/useToast";
-import { DeckWriteDTO } from "@/types/client";
+import { DeckReadDTO, DeckWriteDTO } from "@/types/client";
 import { Field, Label } from "@headlessui/react";
 import { isAxiosError } from "axios";
 import {
@@ -38,6 +40,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 	const [moxfield, setMoxfield] = useState("");
 	const delayRef = useRef(false);
 	const { toast } = useToast();
+  const { decks, dispatch } = useDeck();
 
 	const handleComboboxSelect: Dispatch<SetStateAction<string | null>> = (
 		value
@@ -57,7 +60,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 		delayRef.current = false;
 
 		const cardName = query.replaceAll(/[^a-zA-Z0-9,-\s]/g, "");
-		const filteredSearchString = `${cardName} type:legendary (game:paper) legal:commander`;
+		const filteredSearchString = `${cardName} type:legendary (game:paper)`;
 		try {
 			const response = await fetch(
 				`https://api.scryfall.com/cards/search?q=${filteredSearchString}`
@@ -122,11 +125,15 @@ export default function DeckAdd({}: DeckAddInterface) {
 			numGames: 0,
 			numWins: 0,
 		};
+
 		try {
-			await api.postApiDeck(deckWriteDTO, { withCredentials: true });
+			const deckReadDTO = await api.postApiDeck(deckWriteDTO, { withCredentials: true });
       setSelected(null);
       setQuery("");
       setMoxfield("");
+      
+      dispatch({ type: ActionType.UPDATE, payload: [...decks, deckReadDTO] });
+
 			toast(`Saved deck: ${selected}`, "success");
 		} catch (error) {
 			if (isAxiosError(error) && error.response?.status === CONFLICT) {

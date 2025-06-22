@@ -18,16 +18,16 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
     // GET: api/game
     // Returns all games
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GameDTO>>> GetGames()
+    public async Task<ActionResult<IEnumerable<GameReadDTO>>> GetGames()
     {
         var games = await _context.Games.ToListAsync();
-        return _mapper.Map<List<GameDTO>>(games);
+        return _mapper.Map<List<GameReadDTO>>(games);
     }
 
     // GET: api/game/{id}
     // Returns details for a specific game
     [HttpGet("{id}")]
-    public async Task<ActionResult<GameDTO>> GetGame(int id)
+    public async Task<ActionResult<GameReadDTO>> GetGame(int id)
     {
         var game = await _context.Games.FindAsync(id);
         if (game is null)
@@ -35,14 +35,14 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return NotFound();
         }
 
-        return _mapper.Map<GameDTO>(game);
+        return _mapper.Map<GameReadDTO>(game);
     }
 
     // POST: api/game
     // Create a new game
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostGame(GameDTO gameDTO)
+    public async Task<ActionResult<GameReadDTO>> PostGame(GameWriteDTO gameDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -74,7 +74,30 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
         return CreatedAtAction(
             nameof(GetGame),
             new { id = game.Id },
-            _mapper.Map<GameDTO>(game)
+            _mapper.Map<GameReadDTO>(game)
         );
+    }
+
+    // DELETE: api/game/{id}
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeleteGame(int id)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var game = await _context.Games.FindAsync(id);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        _context.Games.Remove(game);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }

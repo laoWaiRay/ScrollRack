@@ -11,7 +11,7 @@ public class AutoMapperProfile : Profile
         // Server -> Client
         CreateMap<Deck, DeckReadDTO>();
         CreateMap<FriendRequest, FriendRequestDTO>();
-        CreateMap<Game, GameDTO>();
+        CreateMap<Game, GameReadDTO>();
         CreateMap<GameParticipation, GameParticipationReadDTO>();
         CreateMap<Room, RoomDTO>();
         CreateMap<StatSnapshot, StatSnapshotDTO>();
@@ -20,7 +20,7 @@ public class AutoMapperProfile : Profile
         // Client -> Server
         CreateMap<DeckWriteDTO, Deck>();
         CreateMap<FriendRequestDTO, FriendRequest>();
-        CreateMap<GameDTO, Game>();
+        CreateMap<GameWriteDTO, Game>();
         CreateMap<GameParticipationReadDTO, GameParticipation>();
         CreateMap<GameParticipationWriteDTO, GameParticipation>();
         CreateMap<RoomDTO, Room>();

@@ -1,11 +1,19 @@
 "use client";
 import { CurrentGameData } from "@/app/(dashboard)/pod/create/CreatePod";
-import { DeckReadDTO, UserReadDTO } from "@/types/client";
+import {
+	DeckReadDTO,
+	GameReadDTO,
+	GameWriteDTO,
+	GameParticipationWriteDTO,
+	UserReadDTO,
+} from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
 import UserCard from "./UserCard";
 import Crown from "@/public/icons/crown.svg";
 import { Button } from "@headlessui/react";
+import { api } from "@/generated/client";
+import useToast from "@/hooks/useToast";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -30,6 +38,7 @@ export default function InGameScreen({
 		return Math.floor(deltaInMs / 1000);
 	});
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
+	const { toast } = useToast();
 
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
@@ -37,31 +46,65 @@ export default function InGameScreen({
 	}
 
 	async function handleSaveGame() {
-		// TODO: Finish this after implementing player decks
+		if (!winner || !players.some((p) => p.id === winner.id)) {
+			toast("Must select a winner", "warn");
+			return;
+		}
 
-		// try {
-		//   const gameDTO: GameDTO = {
-		//     createdAt: startTime.toString(),
-		//     numPlayers: players.length,
-		//     seconds: elapsedTimeInSeconds,
-		//     numTurns: 0,
-		//   };
+		let gameSaved = false;
+    let gameSavedId = 0;
 
-		//   await api.postApiGame(gameDTO, { withCredentials: true });
+		try {
+			const gameWriteDTO: GameWriteDTO = {
+				numPlayers: players.length,
+				numTurns: 0,
+				seconds: elapsedTimeInSeconds,
+				createdAt: (new Date(startTime)).toISOString(),
+			};
 
-		//   for (const player of players) {
-		//     const gameParticipationDTO: GameParticipationWriteDTO = {
-		//       userId: player.id,
-		//       deckId: player.
-		//     }
-		//     await api.postApiGameParticipation()
-		//   }
+			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
+				withCredentials: true,
+			});
 
-		// } catch (error) {
+			gameSaved = true;
+      gameSavedId = gameReadDTO.id;
 
-		// }
-		setLocalStorageValue(null);
-		setCurrentGameData(null);
+			const gameParticipationWriteDTOs: GameParticipationWriteDTO[] = [];
+
+			for (const [playerId, deckData] of Object.entries(playerIdToDeck)) {
+				const isWinner = winner.id === playerId;
+
+				if (deckData == null) {
+					throw Error("Deck data for user is null");
+				}
+
+				const gameParticipationWriteDTO: GameParticipationWriteDTO = {
+					userId: playerId,
+					deckId: deckData.id,
+					gameId: gameReadDTO.id,
+					won: isWinner,
+				};
+
+				gameParticipationWriteDTOs.push(gameParticipationWriteDTO);
+			}
+
+			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
+				await api.postApiGameParticipation(gameParticipationWriteDTO, {
+					withCredentials: true,
+				});
+			}
+
+			toast("Game saved", "success");
+      setLocalStorageValue(null);
+      setCurrentGameData(null);
+		} catch (error) {
+			if (gameSaved) {
+				// Revert, delete game data
+        await api.deleteApiGameId(undefined, { params: { id: gameSavedId }, withCredentials: true });
+			}
+      console.log(error)
+      toast("Error saving game", "warn");
+		}
 	}
 
 	useEffect(() => {
@@ -97,25 +140,25 @@ export default function InGameScreen({
 
 			{/* Player List */}
 			<div className="flex flex-col self-start px-6 w-full">
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-4">
 					{players.map((player) => (
 						<Button
 							className={`${
-								player === winner && "!border-primary-100 !border"
+								player === winner && "!border-primary-200 !border-4"
 							} flex justify-between items-center w-full rounded-lg relative overflow-hidden bg-white/5`}
 							key={player.id}
 							onClick={() => setWinner(player)}
 						>
 							<UserCard
 								user={player}
-								textColor={player === winner ? "text-primary-100" : ""}
+								textColor={
+									player === winner ? "text-primary-100 font-semibold" : ""
+								}
 								useCommanderDisplay
 							/>
 							{player === winner && (
 								<div className="w-full absolute flex justify-center top-0 mt-4">
-									<div
-										className={`size-[1.5em] ${"text-primary-200"}`}
-									>
+									<div className={`size-[1.5em] ${"text-primary-200"}`}>
 										<Crown />
 									</div>
 								</div>

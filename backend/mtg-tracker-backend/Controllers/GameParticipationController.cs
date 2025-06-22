@@ -42,7 +42,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
     // POST: api/gameparticipation
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> PostGameParticipation(GameParticipationWriteDTO gpwDTO)
+    public async Task<ActionResult<GameParticipationReadDTO>> PostGameParticipation(GameParticipationWriteDTO gpwDTO)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -110,7 +110,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
             return StatusCode(500, "Error creating game participation");
         }
 
-        return Ok();
+        return Ok(_mapper.Map<GameParticipationReadDTO>(gameParticipation));
     }
 
 }

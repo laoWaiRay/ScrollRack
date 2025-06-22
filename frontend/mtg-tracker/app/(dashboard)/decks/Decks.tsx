@@ -16,13 +16,14 @@ import Add from "@/public/icons/add.svg";
 import Edit from "@/public/icons/edit.svg";
 import DeckCard from "@/components/DeckCard";
 import Fuse from "fuse.js";
+import { useDeck } from "@/hooks/useDeck";
 
 interface DecksInterface {
-	decks: DeckReadDTO[];
 }
 
-export default function Decks({ decks }: DecksInterface) {
+export default function Decks({}: DecksInterface) {
 	const { user } = useAuth();
+  const { decks, dispatch } = useDeck();
 	const [filter, setFilter] = useState("");
 	const [filtered, setFiltered] = useState(decks);
 

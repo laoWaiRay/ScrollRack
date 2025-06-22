@@ -25,10 +25,11 @@ type DeckReadDTO = {
   numGames: number;
   numWins: number;
 };
-type GameParticipationReadDTO = Partial<{
-  id: number;
+type GameParticipationReadDTO = {
+  gameId: number;
+  deckId: number;
   won: boolean;
-}>;
+};
 
 const RegisterRequest = z
   .object({ email: z.string(), password: z.string() })
@@ -109,8 +110,11 @@ const DeckWriteDTO = z
   })
   .passthrough();
 const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
-  .object({ id: z.number().int(), won: z.boolean() })
-  .partial()
+  .object({
+    gameId: z.number().int(),
+    deckId: z.number().int(),
+    won: z.boolean(),
+  })
   .passthrough();
 const UserReadDTO: z.ZodType<UserReadDTO> = z
   .object({
@@ -132,21 +136,29 @@ const FriendRequestDTO = z
     receiverId: z.string(),
   })
   .passthrough();
-const GameDTO = z
+const GameReadDTO = z
+  .object({
+    id: z.number().int(),
+    numPlayers: z.number().int(),
+    numTurns: z.number().int(),
+    seconds: z.number().int(),
+    createdAt: z.string().datetime({ offset: true }),
+  })
+  .passthrough();
+const GameWriteDTO = z
   .object({
     numPlayers: z.number().int(),
     numTurns: z.number().int(),
     seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
   })
-  .partial()
   .passthrough();
 const GameParticipationWriteDTO = z
   .object({
     userId: z.string(),
-    gameId: z.number().int().optional(),
-    deckId: z.number().int().optional(),
-    won: z.boolean().optional(),
+    gameId: z.number().int(),
+    deckId: z.number().int(),
+    won: z.boolean(),
   })
   .passthrough();
 const RoomDTO: z.ZodType<RoomDTO> = z
@@ -218,7 +230,8 @@ export const schemas = {
   UserReadDTO,
   UserFriendAddDTO,
   FriendRequestDTO,
-  GameDTO,
+  GameReadDTO,
+  GameWriteDTO,
   GameParticipationWriteDTO,
   RoomDTO,
   AddPlayerDTO,
@@ -388,7 +401,7 @@ const endpoints = makeApi([
     path: "/api/Game",
     alias: "getApiGame",
     requestFormat: "json",
-    response: z.array(GameDTO),
+    response: z.array(GameReadDTO),
   },
   {
     method: "post",
@@ -399,10 +412,10 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: GameDTO,
+        schema: GameWriteDTO,
       },
     ],
-    response: z.void(),
+    response: GameReadDTO,
   },
   {
     method: "get",
@@ -416,7 +429,21 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: GameDTO,
+    response: GameReadDTO,
+  },
+  {
+    method: "delete",
+    path: "/api/Game/:id",
+    alias: "deleteApiGameId",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "id",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.void(),
   },
   {
     method: "get",
@@ -437,7 +464,7 @@ const endpoints = makeApi([
         schema: GameParticipationWriteDTO,
       },
     ],
-    response: z.void(),
+    response: GameParticipationReadDTO,
   },
   {
     method: "get",

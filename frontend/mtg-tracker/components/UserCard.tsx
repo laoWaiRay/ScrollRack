@@ -62,7 +62,7 @@ export default function UserCard({
 	};
 
 	useEffect(() => {
-		if (selected) {
+		if (selected || (!useDeckSelector && !useCommanderDisplay)) {
 			return;
 		}
 
@@ -90,6 +90,7 @@ export default function UserCard({
 				}
 				alt="User avatar"
 				fill={true}
+        sizes="(max-width: 768px) 100vw, 500px"
 			/>
 			<div className="absolute inset-0 bg-black/80 z-0" />
 
@@ -108,7 +109,7 @@ export default function UserCard({
 
 			{useDeckSelector && (
 				<ListBox
-					list={user.decks.map((d) => d.commander)}
+					list={user.decks.map((d) => d.commander).sort((a,b) => a.localeCompare(b))}
 					selected={selected}
 					setSelected={handleSelect}
           transparent={true}

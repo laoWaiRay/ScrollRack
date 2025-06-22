@@ -4,7 +4,7 @@ public class Game
 {
     public int Id { get; set; }
     public Room? Room { get; set; }
-    public required int? RoomId { get; set; }
+    public int? RoomId { get; set; }
 
     public List<GameParticipation> GameParticipations { get; } = [];
 

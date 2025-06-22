@@ -3,8 +3,10 @@ import GithubLogo from "@/public/icons/github.svg";
 
 export default function Footer() {
 	return (
-		<footer className="px-6 lg:px-12 py-12 bg-surface-600 flex flex-col lg:flex-row 
-    justify-between border-t border-surface-500 gap-6">
+		<footer
+			className="px-6 lg:px-12 py-12 bg-surface-600 flex flex-col lg:flex-row 
+    justify-between border-t border-surface-500 gap-6"
+		>
 			<p className="lg:max-w-[35rem]">
 				ScrollRack is unofficial Fan Content permitted under the{" "}
 				<a
@@ -25,10 +27,13 @@ export default function Footer() {
 					</a>
 				</p>
 				<p>
-					<a href="https://buymeacoffee.com/laowairay" className="flex mr-[6px] link text-fg">
+					<a
+						href="https://buymeacoffee.com/laowairay"
+						className="flex mr-[6px] link text-fg items-center"
+					>
 						Buy me a coffee
 						<Image
-              className="ml-2 w-[1em] h-[1em]"
+							className="ml-2 w-[1em] h-[1em]"
 							src="/icons/bmc-logo-light.svg"
 							alt="Coffee cup"
 							width={16}

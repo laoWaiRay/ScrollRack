@@ -25,11 +25,12 @@ export default function DeckEdit({}: DeckEditInterface) {
 	const [selected, setSelected] = useState<string | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+	const selectedDeck = decks.find((d) => d.commander === selected);
+
 	async function handleUpdateDeck(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		try {
-			const deck = decks.find((d) => d.commander === selected);
-			if (!deck) {
+			if (!selectedDeck) {
 				toast("Error updating deck", "warn");
 				return;
 			}
@@ -43,12 +44,12 @@ export default function DeckEdit({}: DeckEditInterface) {
 			}
 
 			const deckWriteDTO: DeckWriteDTO = {
-				...deck,
+				...selectedDeck,
 				moxfield: moxfield,
 			};
 
 			await api.putApiDeckId(deckWriteDTO, {
-				params: { id: deck.id },
+				params: { id: selectedDeck.id },
 				withCredentials: true,
 			});
 			setSelected(null);
@@ -56,25 +57,42 @@ export default function DeckEdit({}: DeckEditInterface) {
 			dispatch({
 				type: ActionType.UPDATE,
 				payload: [
-					...decks.filter((d) => d.id !== deck.id),
-					{ ...deck, moxfield },
+					...decks.filter((d) => d.id !== selectedDeck.id),
+					{ ...selectedDeck, moxfield },
 				],
 			});
 
-			toast(`Updated deck "${deck.commander}"`, "success");
+			toast(`Updated deck "${selectedDeck.commander}"`, "success");
 		} catch (error) {
 			console.log(error);
 			toast("Error updating deck", "warn");
 		}
 	}
 
-	function handleDeleteDeck() {
-		console.log("handleDeleteDeck");
+	async function handleDeleteDeck() {
+		if (!selectedDeck) {
+			return;
+		}
+
+		try {
+			await api.deleteApiDeckId(undefined, {
+				params: { id: selectedDeck.id },
+				withCredentials: true,
+			});
+			const updatedDecks = decks.filter(d => d.id !== selectedDeck.id);
+			dispatch({ type: ActionType.UPDATE, payload: updatedDecks });
+
+			setSelected(null);
+			setMoxfield("");
+			toast(`Deleted deck: ${selectedDeck.commander}`, "success");
+		} catch (error) {
+			console.log(error);
+			toast("Error deleting deck", "warn");
+		}
 	}
 
 	useEffect(() => {
 		if (selected) {
-			const selectedDeck = decks.find((d) => d.commander === selected);
 			setMoxfield(selectedDeck?.moxfield ?? "");
 		}
 	}, [selected]);
@@ -122,7 +140,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 						href="/decks"
 						style="transparent"
 						styles="border border-surface-500 py-4"
-            uppercase={false}
+						uppercase={false}
 					>
 						View Decks
 					</ButtonLink>
@@ -132,7 +150,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 							style="primary"
 							onClick={() => {}}
 							disabled={!selected}
-              uppercase={false}
+							uppercase={false}
 						>
 							Save Changes
 						</ButtonPrimary>
