@@ -16,11 +16,25 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
     private readonly IMapper _mapper = mapper;
 
     // GET: api/game
-    // Returns all games
+    // Returns all games for the current user
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GameReadDTO>>> GetGames()
     {
-        var games = await _context.Games.ToListAsync();
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var participatedInGameIds = await _context.GameParticipations
+            .Where(gp => gp.UserId == userId)
+            .Select(gp => gp.GameId)
+            .ToListAsync();
+
+        var games = await _context.Games
+            .Where(g => participatedInGameIds.Contains(g.Id))
+            .ToListAsync();
+
         return _mapper.Map<List<GameReadDTO>>(games);
     }
 
