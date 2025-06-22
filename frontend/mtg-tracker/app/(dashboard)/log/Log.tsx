@@ -9,10 +9,11 @@ import { GameLogCard } from "@/components/GameLogCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
 import { useGame } from "@/hooks/useGame";
+import useGameData from "@/hooks/useGameData";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { DeckReadDTO, GameReadDTO, UserReadDTO } from "@/types/client";
+import { DeckReadDTO, UserReadDTO } from "@/types/client";
 import Fuse from "fuse.js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface GameData {
 	gameId: number;
@@ -36,35 +37,7 @@ export default function Log({}: LogInterface) {
 	const { decks, dispatch: dispatchDeck } = useDeck();
 	const [filter, setFilter] = useState("");
 
-	const gameData: GameData[] = useMemo(() => {
-		return gameParticipations
-			.map((gp) => {
-				const game: GameReadDTO | undefined = games.find(
-					(g) => g.id === gp.gameId
-				);
-				if (game) {
-					const deck = decks.find((d) => d.id === gp.deckId);
-					if (!deck) {
-						return null;
-					}
-					const combined: GameData = {
-						gameId: game.id,
-						gameParticipationId: gp.id,
-						deck,
-						won: gp.won,
-						winner: game.winner,
-						numPlayers: game.numPlayers,
-						seconds: game.seconds,
-						createdAt: game.createdAt,
-						createdByUserId: game.createdByUserId,
-					};
-					return combined;
-				} else {
-					return null;
-				}
-			})
-			.filter((result) => result !== null);
-	}, [gameParticipations]);
+	const { gameData } = useGameData({ games, gameParticipations, decks });
 
 	const [filtered, setFiltered] = useState(gameData);
 
@@ -87,18 +60,16 @@ export default function Log({}: LogInterface) {
 
 		if (filter !== "" && filtered.length > 0) {
 			return filtered.map((data) => (
-				<GameLogCard gameData={data} key={data.gameParticipationId} />
+				<GameLogCard gameData={data} key={data.gameParticipationId} showButtons={true} />
 			));
 		}
 
 		return gameData.map((data) => (
-			<GameLogCard gameData={data} key={data.gameParticipationId} />
+			<GameLogCard gameData={data} key={data.gameParticipationId} showButtons={true} />
 		));
 	}
-  
-  async function handleDeleteGame() {
 
-  }
+	async function handleDeleteGame() {}
 
 	return (
 		<DashboardLayout>

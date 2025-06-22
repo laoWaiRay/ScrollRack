@@ -15,6 +15,9 @@ import {
 } from "@/components/Dashboard";
 import useToast from "@/hooks/useToast";
 import { useDeck } from "@/hooks/useDeck";
+import { useGame } from "@/hooks/useGame";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import useGameData from "@/hooks/useGameData";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -36,8 +39,13 @@ export default function CommandZone({
 	statSnapshot,
 }: CommandZoneInterface) {
 	const { user } = useAuth();
+	const { games, dispatch: dispatchGame } = useGame();
+	const { gameParticipations, dispatch: dispatchGameParticipation } =
+		useGameParticipation();
   const { decks, dispatch: dispatchDeck } = useDeck();
 	const { toast } = useToast();
+
+	const { gameData } = useGameData({ games, gameParticipations, decks });
 
 	const statCardData: StatCardData[] = [
 		{
@@ -164,23 +172,14 @@ export default function CommandZone({
 						styles="col-span-3 !hidden lg:!flex"
 						innerStyles="lg:justify-start h-full"
 					>
-						<h3 className=" pb-4 mb-4 border-b border-surface-500">
+						<h3 className="pb-4 mb-4 border-b border-surface-500">
 							Recent Games
 						</h3>
-						<div className="overflow-y-auto pl-2 pr-4">
-							{[...Array(10)].map((_, i) => (
+						<div className="overflow-y-auto flex flex-col gap-2 pr-2">
+							{gameData.length > 0 && gameData.map((data) => (
 								<GameLogCard
-									key={i}
-									gameData={{
-										gameParticipationId: "some id",
-										deck: decks[0],
-										won: true,
-                    winner: user!,
-										numPlayers: 4,
-										seconds: 180,
-										createdAt: "some timestamp",
-										createdByUserId: "some id",
-									}}
+									key={data.gameId}
+                  gameData={data}
 								/>
 							))}
 						</div>

@@ -1,5 +1,4 @@
 "use client";
-import { getDecks } from "@/actions/decks";
 import ButtonLink from "@/components/ButtonLink";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Dialog from "@/components/Dialog";

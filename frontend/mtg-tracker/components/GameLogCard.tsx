@@ -11,28 +11,32 @@ import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import useToast from "@/hooks/useToast";
 import { ActionType as GameActionType } from "@/context/GameContext";
-import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 
 interface GameLogCellInterface {
 	header: string;
 	data: string;
 	width?: string;
+  styles?: string;
 }
 
 interface GameLogCardInterface {
 	gameData: GameData;
+	showButtons?: boolean;
 }
 
-function GameLogCell({ header, data, width }: GameLogCellInterface) {
+function GameLogCell({ header, data, width, styles }: GameLogCellInterface) {
 	return (
-		<div className={`flex flex-col ${width}`}>
-			<h4 className="text-fg-dark">{header}</h4>
+		<div className={`flex flex-col ${width} ${styles}`}>
+			<h4 className="text-fg-dark text-sm">{header}</h4>
 			<div suppressHydrationWarning>{data}</div>
 		</div>
 	);
 }
 
-export function GameLogCard({ gameData }: GameLogCardInterface) {
+export function GameLogCard({
+	gameData,
+	showButtons = false,
+}: GameLogCardInterface) {
 	const { user } = useAuth();
 	const { games, dispatch: dispatchGame } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
@@ -69,18 +73,20 @@ export function GameLogCard({ gameData }: GameLogCardInterface) {
 
 	return (
 		<>
-			<Dialog
-				title={`Deleting Game`}
-				description={`This action cannot be undone. Are you sure you want to delete your game from ${new Date(
-					gameData.createdAt
-				).toLocaleString()}?`}
-				isDialogOpen={isDialogOpen}
-				setIsDialogOpen={setIsDialogOpen}
-				onConfirm={() => handleDeleteGame()}
-				useCountdown={true}
-			/>
+			{showButtons && (
+				<Dialog
+					title={`Deleting Game`}
+					description={`This action cannot be undone. Are you sure you want to delete your game from ${new Date(
+						gameData.createdAt
+					).toLocaleString()}?`}
+					isDialogOpen={isDialogOpen}
+					setIsDialogOpen={setIsDialogOpen}
+					onConfirm={() => handleDeleteGame()}
+					useCountdown={true}
+				/>
+			)}
 
-			<div className="flex flex-col w-full py-4 px-4 bg-surface-500/30 rounded-lg gap-3 lg:flex-row lg:p-6 justify-between lg:items-center relative">
+			<div className="flex flex-col w-full py-4 px-4 bg-surface-500/30 rounded-lg gap-3 lg:flex-row lg:p-6 justify-between lg:items-start relative">
 				<GameLogCell
 					header="DATE"
 					data={IsoToDateString(gameData.createdAt)}
@@ -89,7 +95,7 @@ export function GameLogCard({ gameData }: GameLogCardInterface) {
 				<GameLogCell
 					header="COMMANDER"
 					data={gameData.deck.commander.toString()}
-					width="w-[12rem]"
+					width="lg:w-[7rem] xl:w-[12rem]"
 				/>
 				<GameLogCell header="PLAYERS" data={gameData.numPlayers.toString()} />
 				<GameLogCell
@@ -101,8 +107,9 @@ export function GameLogCard({ gameData }: GameLogCardInterface) {
 					header="TIME"
 					data={formatTime(gameData.seconds, "hms")}
 					width="w-[4rem]"
+          styles={showButtons ? "" : "lg:hidden"}
 				/>
-				{user && gameData.createdByUserId === user.id && (
+				{showButtons && user && gameData.createdByUserId === user.id && (
 					<div className="absolute right-0 mr-4 lg:static lg:mr-0">
 						<div className="flex gap-2">
 							{/* <ButtonIcon styles="border border-surface-400 h-fit p-2">
