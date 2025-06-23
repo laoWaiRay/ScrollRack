@@ -1853,9 +1853,11 @@
       "GameParticipationReadDTO": {
         "required": [
           "id",
-          "userId",
           "gameId",
+          "userId",
+          "user",
           "deckId",
+          "deck",
           "won"
         ],
         "type": "object",
@@ -1863,16 +1865,22 @@
           "id": {
             "type": "string"
           },
-          "userId": {
-            "type": "string"
-          },
           "gameId": {
             "type": "integer",
             "format": "int32"
           },
+          "userId": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserReadMinimalDTO"
+          },
           "deckId": {
             "type": "integer",
             "format": "int32"
+          },
+          "deck": {
+            "$ref": "#/components/schemas/DeckReadDTO"
           },
           "won": {
             "type": "boolean"
@@ -1938,12 +1946,15 @@
             "type": "string",
             "nullable": true
           },
-          "winner": {
-            "$ref": "#/components/schemas/UserReadDTO"
-          },
           "winnerId": {
             "type": "string",
             "nullable": true
+          },
+          "gameParticipations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameParticipationReadDTO"
+            }
           }
         }
       },
@@ -2302,8 +2313,7 @@
           "id",
           "userName",
           "email",
-          "decks",
-          "gameParticipations"
+          "decks"
         ],
         "type": "object",
         "properties": {
@@ -2325,12 +2335,29 @@
             "items": {
               "$ref": "#/components/schemas/DeckReadDTO"
             }
+          }
+        }
+      },
+      "UserReadMinimalDTO": {
+        "required": [
+          "id",
+          "userName",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          "gameParticipations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GameParticipationReadDTO"
-            }
+          "userName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

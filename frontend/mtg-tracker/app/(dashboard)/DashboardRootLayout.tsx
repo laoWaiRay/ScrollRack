@@ -237,6 +237,7 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 				</div>
 
 				{/* Main Content */}
+				{/* <main className={`${styles.gridB} bg-[linear-gradient(rgba(0,0,0,0.95)),url("/images/Wallpaper_Vivi_Ornitier_2560x1600.png")] bg-cover bg-center`}>{children}</main> */}
 				<main className={`${styles.gridB} bg-surface-600`}>{children}</main>
 			</div>
 			<Footer />

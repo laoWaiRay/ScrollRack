@@ -10,8 +10,10 @@ public class GameReadDTO
     public required DateTime CreatedAt { get; set; }
     public string? CreatedByUserId { get; set; }
 
-    public UserReadDTO Winner { get; set; } = null!;
+    // public UserReadDTO Winner { get; set; } = null!;
     public string? WinnerId { get; set; }
+
+    public List<GameParticipationReadDTO> GameParticipations { get; set; } = [];
 }
 
 public class GameWriteDTO

@@ -1,26 +1,28 @@
-import { GameData } from "@/app/(dashboard)/log/Log";
 import { formatTime, IsoToDateString } from "@/helpers/time";
-import Edit from "@/public/icons/edit.svg";
 import Close from "@/public/icons/close.svg";
 import ButtonIcon from "./ButtonIcon";
 import { useAuth } from "@/hooks/useAuth";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import Dialog from "./Dialog";
 import { api } from "@/generated/client";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import useToast from "@/hooks/useToast";
 import { ActionType as GameActionType } from "@/context/GameContext";
+import {
+	GameParticipationReadDTO,
+	GameReadDTO,
+} from "@/types/client";
 
 interface GameLogCellInterface {
 	header: string;
 	data: string;
 	width?: string;
-  styles?: string;
+	styles?: string;
 }
 
 interface GameLogCardInterface {
-	gameData: GameData;
+	game: GameReadDTO;
 	showButtons?: boolean;
 }
 
@@ -28,13 +30,13 @@ function GameLogCell({ header, data, width, styles }: GameLogCellInterface) {
 	return (
 		<div className={`flex flex-col ${width} ${styles}`}>
 			<h4 className="text-fg-dark text-sm">{header}</h4>
-			<div suppressHydrationWarning>{data}</div>
+			<div>{data}</div>
 		</div>
 	);
 }
 
 export function GameLogCard({
-	gameData,
+	game,
 	showButtons = false,
 }: GameLogCardInterface) {
 	const { user } = useAuth();
@@ -44,22 +46,34 @@ export function GameLogCard({
 	const { toast } = useToast();
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+	const thisGameParticipation: GameParticipationReadDTO | undefined =
+		game.gameParticipations?.find((gp) => gp.userId === user?.id);
+
+	const thisGameWinner = game.gameParticipations?.find(
+		(gp) => gp.userId === game.winnerId
+	)?.user;
+
 	async function handleDeleteGame() {
-		console.log(`Delete game: ${gameData.gameId}`);
+		if (!thisGameParticipation) {
+			console.log("Error in handleDeleteGame: no gameParticipation found");
+			return;
+		}
+
+		console.log(`Delete game: ${game.id}`);
 		try {
 			await api.deleteApiGameId(undefined, {
-				params: { id: gameData.gameId },
+				params: { id: game.id },
 				withCredentials: true,
 			});
 			dispatchGame({
 				type: GameActionType.UPDATE,
-				payload: [...games.filter((g) => g.id !== gameData.gameId)],
+				payload: [...games.filter((g) => g.id !== game.id)],
 			});
 			dispatchGameParticipation({
 				type: GameActionType.UPDATE,
 				payload: [
 					...gameParticipations.filter(
-						(gp) => gp.id !== gameData.gameParticipationId
+						(gp) => gp.id !== thisGameParticipation.id
 					),
 				],
 			});
@@ -72,12 +86,12 @@ export function GameLogCard({
 	}
 
 	return (
-		<>
+		<div className="flex flex-col bg-surface-500/30 rounded-lg">
 			{showButtons && (
 				<Dialog
 					title={`Deleting Game`}
 					description={`This action cannot be undone. Are you sure you want to delete your game from ${new Date(
-						gameData.createdAt
+						game.createdAt
 					).toLocaleString()}?`}
 					isDialogOpen={isDialogOpen}
 					setIsDialogOpen={setIsDialogOpen}
@@ -86,37 +100,48 @@ export function GameLogCard({
 				/>
 			)}
 
-			<div className="flex flex-col w-full py-4 px-4 bg-surface-500/30 rounded-lg gap-3 lg:flex-row lg:p-6 justify-between lg:items-start relative">
+			<div className="flex flex-col w-full py-4 px-4 rounded-lg gap-3 lg:flex-row lg:p-6 justify-between lg:items-start relative lg:pb-0">
 				<GameLogCell
 					header="DATE"
-					data={IsoToDateString(gameData.createdAt)}
+					data={IsoToDateString(game.createdAt)}
 					width="w-[6rem]"
 				/>
 				<GameLogCell
 					header="COMMANDER"
-					data={gameData.deck.commander.toString()}
+					data={thisGameParticipation?.deck.commander.toString() ?? ""}
 					width="lg:w-[7rem] xl:w-[12rem]"
 				/>
-				<GameLogCell header="PLAYERS" data={gameData.numPlayers.toString()} />
+        <GameLogCell header="PLAYERS" data={game.numPlayers.toString()} />
+				<div className="lg:hidden flex flex-col gap-2">
+					<h2 className="text-sm text-fg-dark">POD</h2>
+					{game.gameParticipations?.map((gp) => {
+						return (
+							<div
+								key={gp.id}
+								className="bg-surface-400/20 w-fit px-3 py-1.5 rounded-lg flex flex-col"
+							>
+								<div>{gp.user.userName}</div>
+								<div className="text-sm uppercase text-fg-dark">
+									{gp.deck.commander}
+								</div>
+							</div>
+						);
+					})}
+				</div>
 				<GameLogCell
 					header="WINNER"
-					data={gameData.winner?.userName ?? ""}
+					data={thisGameWinner?.userName ?? ""}
 					width="w-[6rem]"
 				/>
 				<GameLogCell
 					header="TIME"
-					data={formatTime(gameData.seconds, "hms")}
+					data={formatTime(game.seconds, "hms")}
 					width="w-[4rem]"
-          styles={showButtons ? "" : "lg:hidden"}
+					styles={showButtons ? "" : "lg:hidden"}
 				/>
-				{showButtons && user && gameData.createdByUserId === user.id && (
+				{showButtons && user && game.createdByUserId === user.id && (
 					<div className="absolute right-0 mr-4 lg:static lg:mr-0">
 						<div className="flex gap-2">
-							{/* <ButtonIcon styles="border border-surface-400 h-fit p-2">
-							<div className="size-[1.2em]">
-								<Edit />
-							</div>
-						</ButtonIcon> */}
 							<ButtonIcon
 								styles="border border-surface-400 h-fit p-2"
 								onClick={() => setIsDialogOpen && setIsDialogOpen(true)}
@@ -129,6 +154,25 @@ export function GameLogCard({
 					</div>
 				)}
 			</div>
-		</>
+			<div className="gap-2 m-4 hidden lg:flex flex-col mx-6">
+				<h2 className="text-sm text-fg-dark">POD</h2>
+
+				<div className="flex gap-2 mx-1">
+					{game.gameParticipations?.map((gp) => {
+						return (
+							<div
+								key={gp.id}
+								className="bg-surface-400/20 w-fit px-3 py-1.5 rounded-lg flex-col flex flex-wrap"
+							>
+								<div>{gp.user.userName}</div>
+								<div className="text-sm uppercase text-fg-dark">
+									{gp.deck.commander}
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+		</div>
 	);
 }

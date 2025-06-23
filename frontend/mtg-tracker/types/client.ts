@@ -15,6 +15,7 @@ export type InfoRequest = z.infer<typeof schemas.InfoRequest>;
 export type DeckReadDTO = z.infer<typeof schemas.DeckReadDTO>;
 export type DeckWriteDTO = z.infer<typeof schemas.DeckWriteDTO>;
 export type UserReadDTO = z.infer<typeof schemas.UserReadDTO>;
+export type UserReadMinimalDTO = z.infer<typeof schemas.UserReadMinimalDTO>;
 export type FriendRequestDTO = z.infer<typeof schemas.FriendRequestDTO>;
 export type GameReadDTO = z.infer<typeof schemas.GameReadDTO>;
 export type GameWriteDTO = z.infer<typeof schemas.GameWriteDTO>;

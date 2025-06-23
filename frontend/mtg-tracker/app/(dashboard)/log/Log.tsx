@@ -7,25 +7,10 @@ import {
 import FilterSortBar from "@/components/FilterSortBar";
 import { GameLogCard } from "@/components/GameLogCard";
 import { useAuth } from "@/hooks/useAuth";
-import { useDeck } from "@/hooks/useDeck";
 import { useGame } from "@/hooks/useGame";
-import useGameData from "@/hooks/useGameData";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { DeckReadDTO, UserReadDTO } from "@/types/client";
 import Fuse from "fuse.js";
 import { useEffect, useState } from "react";
-
-export interface GameData {
-	gameId: number;
-	gameParticipationId: string;
-	deck: DeckReadDTO;
-	won: boolean;
-	winner: UserReadDTO | undefined;
-	numPlayers: number;
-	seconds: number;
-	createdAt: string;
-	createdByUserId: string | null | undefined;
-}
 
 interface LogInterface {}
 
@@ -34,20 +19,23 @@ export default function Log({}: LogInterface) {
 	const { games, dispatch: dispatchGame } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
-	const { decks, dispatch: dispatchDeck } = useDeck();
 	const [filter, setFilter] = useState("");
-
-	const { gameData } = useGameData({ games, gameParticipations, decks });
-
-	const [filtered, setFiltered] = useState(gameData);
+	const [filtered, setFiltered] = useState(games);
 
 	useEffect(() => {
 		if (filter === "") {
 			return;
 		}
 
-		const fuse = new Fuse(gameData, {
-			keys: ["deck.commander"],
+		const fuse = new Fuse(games, {
+			keys: [
+				{
+					name: "commanderName",
+					getFn: (game) =>
+						game.gameParticipations?.find((gp) => gp.userId === user?.id)?.deck
+							.commander ?? "",
+				},
+			],
 		});
 
 		setFiltered(fuse.search(filter).map((result) => result.item));
@@ -60,16 +48,22 @@ export default function Log({}: LogInterface) {
 
 		if (filter !== "" && filtered.length > 0) {
 			return filtered.map((data) => (
-				<GameLogCard gameData={data} key={data.gameParticipationId} showButtons={true} />
+				<GameLogCard
+					key={data.id}
+					game={data}
+					showButtons={true}
+				/>
 			));
 		}
 
-		return gameData.map((data) => (
-			<GameLogCard gameData={data} key={data.gameParticipationId} showButtons={true} />
+		return games.map((data) => (
+			<GameLogCard
+				key={data.id}
+				game={data}
+				showButtons={true}
+			/>
 		));
 	}
-
-	async function handleDeleteGame() {}
 
 	return (
 		<DashboardLayout>
@@ -79,7 +73,7 @@ export default function Log({}: LogInterface) {
 					<div className="flex flex-col w-full gap-4">
 						<FilterSortBar filter={filter} setFilter={setFilter} />
 
-						<section className="w-full flex flex-col gap-2 px-2">
+						<section className="w-full flex flex-col gap-2 lg:gap-4 px-2">
 							{renderLogs()}
 						</section>
 					</div>

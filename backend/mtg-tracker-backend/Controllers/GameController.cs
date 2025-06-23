@@ -26,15 +26,14 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        var participatedInGameIds = await _context.GameParticipations
-            .Where(gp => gp.UserId == userId)
-            .Select(gp => gp.GameId)
-            .ToListAsync();
-
         var games = await _context.Games
+            .Where(g => g.GameParticipations.Any(gp => gp.UserId == userId))
             .Include(g => g.CreatedBy)
-            .Include(g => g.Winner)
-            .Where(g => participatedInGameIds.Contains(g.Id))
+            .Include(g => g.GameParticipations)
+               .ThenInclude(gp => gp.Deck)
+            .Include(g => g.GameParticipations)
+               .ThenInclude(gp => gp.User)
+            .OrderByDescending(g => g.CreatedAt)
             .ToListAsync();
 
         return _mapper.Map<List<GameReadDTO>>(games);

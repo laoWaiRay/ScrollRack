@@ -2,7 +2,7 @@
 import styles from "./styles.module.css";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
-import { DeckReadDTO, StatSnapshotDTO, UserReadDTO } from "@/types/client";
+import { StatSnapshotDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -13,11 +13,7 @@ import {
 	DashboardHeader,
 	DashboardMain,
 } from "@/components/Dashboard";
-import useToast from "@/hooks/useToast";
-import { useDeck } from "@/hooks/useDeck";
 import { useGame } from "@/hooks/useGame";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
-import useGameData from "@/hooks/useGameData";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -39,13 +35,7 @@ export default function CommandZone({
 	statSnapshot,
 }: CommandZoneInterface) {
 	const { user } = useAuth();
-	const { games, dispatch: dispatchGame } = useGame();
-	const { gameParticipations, dispatch: dispatchGameParticipation } =
-		useGameParticipation();
-  const { decks, dispatch: dispatchDeck } = useDeck();
-	const { toast } = useToast();
-
-	const { gameData } = useGameData({ games, gameParticipations, decks });
+	const { games } = useGame();
 
 	const statCardData: StatCardData[] = [
 		{
@@ -176,10 +166,10 @@ export default function CommandZone({
 							Recent Games
 						</h3>
 						<div className="overflow-y-auto flex flex-col gap-2 pr-2">
-							{gameData.length > 0 && gameData.map((data) => (
+							{games.length > 0 && games.map((data) => (
 								<GameLogCard
-									key={data.gameId}
-                  gameData={data}
+									key={data.id}
+                  game={data}
 								/>
 							))}
 						</div>

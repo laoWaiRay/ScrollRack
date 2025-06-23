@@ -1,23 +1,20 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
-type GameReadDTO = {
-  id: number;
-  numPlayers: number;
-  numTurns: number;
-  seconds: number;
-  createdAt: string;
-  createdByUserId?: (string | null) | undefined;
-  winner?: UserReadDTO | undefined;
-  winnerId?: (string | null) | undefined;
+type GameParticipationReadDTO = {
+  id: string;
+  gameId: number;
+  userId: string;
+  user: UserReadMinimalDTO;
+  deckId: number;
+  deck: DeckReadDTO;
+  won: boolean;
 };
-type UserReadDTO = {
+type UserReadMinimalDTO = {
   id: string;
   userName: string;
   email: string;
   profile?: (string | null) | undefined;
-  decks: Array<DeckReadDTO>;
-  gameParticipations: Array<GameParticipationReadDTO>;
 };
 type DeckReadDTO = {
   id: number;
@@ -28,12 +25,15 @@ type DeckReadDTO = {
   numGames: number;
   numWins: number;
 };
-type GameParticipationReadDTO = {
-  id: string;
-  userId: string;
-  gameId: number;
-  deckId: number;
-  won: boolean;
+type GameReadDTO = {
+  id: number;
+  numPlayers: number;
+  numTurns: number;
+  seconds: number;
+  createdAt: string;
+  createdByUserId?: (string | null) | undefined;
+  winnerId?: (string | null) | undefined;
+  gameParticipations?: Array<GameParticipationReadDTO> | undefined;
 };
 type RoomDTO = {
   id: number;
@@ -41,6 +41,13 @@ type RoomDTO = {
   code: string;
   createdAt?: string | undefined;
   players?: Array<UserReadDTO> | undefined;
+};
+type UserReadDTO = {
+  id: string;
+  userName: string;
+  email: string;
+  profile?: (string | null) | undefined;
+  decks: Array<DeckReadDTO>;
 };
 
 const RegisterRequest = z
@@ -121,15 +128,6 @@ const DeckWriteDTO = z
     numWins: z.number().int(),
   })
   .passthrough();
-const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
-  .object({
-    id: z.string(),
-    userId: z.string(),
-    gameId: z.number().int(),
-    deckId: z.number().int(),
-    won: z.boolean(),
-  })
-  .passthrough();
 const UserReadDTO: z.ZodType<UserReadDTO> = z
   .object({
     id: z.string(),
@@ -137,7 +135,6 @@ const UserReadDTO: z.ZodType<UserReadDTO> = z
     email: z.string(),
     profile: z.string().nullish(),
     decks: z.array(DeckReadDTO),
-    gameParticipations: z.array(GameParticipationReadDTO),
   })
   .passthrough();
 const UserFriendAddDTO = z
@@ -150,6 +147,25 @@ const FriendRequestDTO = z
     receiverId: z.string(),
   })
   .passthrough();
+const UserReadMinimalDTO: z.ZodType<UserReadMinimalDTO> = z
+  .object({
+    id: z.string(),
+    userName: z.string(),
+    email: z.string(),
+    profile: z.string().nullish(),
+  })
+  .passthrough();
+const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
+  .object({
+    id: z.string(),
+    gameId: z.number().int(),
+    userId: z.string(),
+    user: UserReadMinimalDTO,
+    deckId: z.number().int(),
+    deck: DeckReadDTO,
+    won: z.boolean(),
+  })
+  .passthrough();
 const GameReadDTO: z.ZodType<GameReadDTO> = z
   .object({
     id: z.number().int(),
@@ -158,8 +174,8 @@ const GameReadDTO: z.ZodType<GameReadDTO> = z
     seconds: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
     createdByUserId: z.string().nullish(),
-    winner: UserReadDTO.optional(),
     winnerId: z.string().nullish(),
+    gameParticipations: z.array(GameParticipationReadDTO).optional(),
   })
   .passthrough();
 const GameWriteDTO = z
@@ -246,10 +262,11 @@ export const schemas = {
   InfoRequest,
   DeckReadDTO,
   DeckWriteDTO,
-  GameParticipationReadDTO,
   UserReadDTO,
   UserFriendAddDTO,
   FriendRequestDTO,
+  UserReadMinimalDTO,
+  GameParticipationReadDTO,
   GameReadDTO,
   GameWriteDTO,
   GameParticipationWriteDTO,

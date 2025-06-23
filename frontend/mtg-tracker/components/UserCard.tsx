@@ -92,7 +92,7 @@ export default function UserCard({
 				fill={true}
         sizes="(max-width: 768px) 100vw, 500px"
 			/>
-			<div className="absolute inset-0 bg-black/80 z-0" />
+			<div className="absolute inset-0 bg-black/70 z-0" />
 
 			<div className={`flex gap-2 items-center z-10 ${styles}`}>
 				<div className="w-[2em] h-[2em] rounded-full overflow-hidden">

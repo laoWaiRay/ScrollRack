@@ -28,15 +28,21 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
         }
 
         var user = await _context.Users
-            .Include(u => u.GameParticipations)
             .FirstOrDefaultAsync(u => u.Id == userId);
+        
 
         if (user is null)
         {
             return Unauthorized();
         }
 
-        return _mapper.Map<List<GameParticipationReadDTO>>(user.GameParticipations);
+        var gameParticipations = await _context.GameParticipations
+            .Where(gp => gp.UserId == userId)
+            .Include(gp => gp.User)
+            .Include(gp => gp.Deck)
+            .ToListAsync();
+
+        return _mapper.Map<List<GameParticipationReadDTO>>(gameParticipations);
     }
 
     // POST: api/gameparticipation
@@ -112,5 +118,4 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
 
         return Ok(_mapper.Map<GameParticipationReadDTO>(gameParticipation));
     }
-
 }

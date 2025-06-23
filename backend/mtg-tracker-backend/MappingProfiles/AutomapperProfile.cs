@@ -16,6 +16,7 @@ public class AutoMapperProfile : Profile
         CreateMap<Room, RoomDTO>();
         CreateMap<StatSnapshot, StatSnapshotDTO>();
         CreateMap<ApplicationUser, UserReadDTO>();
+        CreateMap<ApplicationUser, UserReadMinimalDTO>();
 
         // Client -> Server
         CreateMap<DeckWriteDTO, Deck>();
