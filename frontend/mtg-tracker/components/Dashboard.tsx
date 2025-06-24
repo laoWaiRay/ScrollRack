@@ -63,7 +63,7 @@ export function DashboardHeader({
   const router = useRouter();
 
 	return (
-		<div className="border-b-2 border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
+		<div className="border-b border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
 			<div className="flex justify-between items-center mx-4">
 				<div className="flex gap-8 items-center">
 					<div className="text-lg font-semibold select-none">{title}</div>

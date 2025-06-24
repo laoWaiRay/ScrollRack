@@ -30,6 +30,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
 
         List<Deck> userDecks = await _context.Decks
             .Where(d => d.UserId == userId)
+            .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
         return _mapper.Map<List<DeckReadDTO>>(userDecks);

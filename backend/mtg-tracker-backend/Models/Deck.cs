@@ -13,4 +13,5 @@ public class Deck
     public string? Moxfield { get; set; }
     public int NumGames { get; set; }
     public int NumWins { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

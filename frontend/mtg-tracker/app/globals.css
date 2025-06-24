@@ -270,6 +270,10 @@ Tailwind Components
 	.dashboard-main-content-layout {
 		@apply flex flex-col gap-2 w-full items-center my-2;
 	}
+    
+    .bg-card-surface {
+        @apply bg-surface-500/30
+    }
 }
 
 /*--------------------------------------------------------------------------------------

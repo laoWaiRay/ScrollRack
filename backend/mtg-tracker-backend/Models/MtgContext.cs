@@ -34,6 +34,10 @@ public class MtgContext(DbContextOptions<MtgContext> options)
             .Property(e => e.CreatedAt)
             .HasDefaultValueSql("NOW()");
 
+        modelBuilder.Entity<Deck>()
+            .Property(e => e.CreatedAt)
+            .HasDefaultValueSql("NOW()");
+
         modelBuilder.Entity<FriendRequest>(
             nestedBuilder =>
             {

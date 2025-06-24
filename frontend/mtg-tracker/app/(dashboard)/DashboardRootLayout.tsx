@@ -21,6 +21,7 @@ import { usePathname } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Hamburger from "@/components/animations/Hamburger";
 import { getPath } from "@/helpers/url";
+import Drawer from "@/components/Drawer";
 
 interface DashboardRootLayoutProps {
 	children: ReactNode;
@@ -88,7 +89,9 @@ const mobileOnlyLinkData: LinkData[] = [
 	},
 ];
 
-export default function DashboardRootLayout({ children }: DashboardRootLayoutProps) {
+export default function DashboardRootLayout({
+	children,
+}: DashboardRootLayoutProps) {
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -101,7 +104,10 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 					_offset={15}
 					styles="xl:hidden"
 				>
-					<SidebarLink href={data.href} isActive={getPath(pathname) === data.href}>
+					<SidebarLink
+						href={data.href}
+						isActive={getPath(pathname) === data.href}
+					>
 						<data.icon className="size-[2em] xl:size-[1.5em] stroke-2 xl:mr-2" />
 						<span className="hidden xl:inline">{data.name}</span>
 					</SidebarLink>
@@ -117,7 +123,7 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 					href={data.href}
 					isActive={getPath(pathname) === data.href}
 					onClick={() => setIsDrawerOpen(false)}
-          isTabbable={false}
+					isTabbable={false}
 				>
 					<data.icon className="w-[2em] h-[2em]" />
 					<span className="ml-4">{data.name}</span>
@@ -125,18 +131,18 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 			</li>
 		));
 	}
-  
-  useEffect(() => {
-  if (isDrawerOpen) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "";
-  }
 
-  return () => {
-    document.body.style.overflow = "";
-  };
-}, [isDrawerOpen]);
+	useEffect(() => {
+		if (isDrawerOpen) {
+			document.body.style.overflow = "hidden";
+		} else {
+			document.body.style.overflow = "";
+		}
+
+		return () => {
+			document.body.style.overflow = "";
+		};
+	}, [isDrawerOpen]);
 
 	return (
 		<div className="bg-surface-600">
@@ -189,7 +195,7 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 				{/* Mobile Top Navigation */}
 				<header
 					className="lg:hidden flex fixed w-screen justify-between items-center font-dancing-script text-white 
-        text-xl select-none p-4 z-90 bg-surface-500"
+        text-xl select-none p-4 z-90 bg-surface-600 border-b border-surface-500"
 				>
 					<div className="flex items-center justify-center ml-4">
 						<LogoImage
@@ -208,36 +214,30 @@ export default function DashboardRootLayout({ children }: DashboardRootLayoutPro
 				</div>
 
 				{/* Hidden Drawer */}
-				<div
-					className={`w-screen h-dvh overflow-y-auto bg-surface-600 fixed top-0 left-0 z-90 transition-transform duration-300 ease-in-out flex flex-col
-          justify-center pt-8 pb-20 ${!isDrawerOpen && "translate-x-[300%]"}`}
-				>
-					<div className="flex flex-col h-full mt-[80px]">
-						<h2 className="text-fg-dark mb-2 flex justify-center">MAIN MENU</h2>
-						<ul className="flex flex-col gap-2">
-							{renderMobileLinks(
-								linkData.filter(
-									(data) => !["Account", "Settings"].includes(data.name)
-								)
-							)}
-							{renderMobileLinks(mobileOnlyLinkData)}
-						</ul>
+				<Drawer isDrawerOpen={isDrawerOpen}>
+					<h2 className="text-fg-dark mb-2 flex justify-center">MAIN MENU</h2>
+					<ul className="flex flex-col gap-2">
+						{renderMobileLinks(
+							linkData.filter(
+								(data) => !["Account", "Settings"].includes(data.name)
+							)
+						)}
+						{renderMobileLinks(mobileOnlyLinkData)}
+					</ul>
 
-						<h2 className="text-fg-dark mt-4 mb-2 flex justify-center">
-							PROFILE
-						</h2>
-						<ul className="flex flex-col gap-2">
-							{renderMobileLinks(
-								linkData.filter((data) =>
-									["Account", "Settings"].includes(data.name)
-								)
-							)}
-						</ul>
-					</div>
-				</div>
+					<h2 className="text-fg-dark mt-4 mb-2 flex justify-center">
+						PROFILE
+					</h2>
+					<ul className="flex flex-col gap-2">
+						{renderMobileLinks(
+							linkData.filter((data) =>
+								["Account", "Settings"].includes(data.name)
+							)
+						)}
+					</ul>
+				</Drawer>
 
 				{/* Main Content */}
-				{/* <main className={`${styles.gridB} bg-[linear-gradient(rgba(0,0,0,0.95)),url("/images/Wallpaper_Vivi_Ornitier_2560x1600.png")] bg-cover bg-center`}>{children}</main> */}
 				<main className={`${styles.gridB} bg-surface-600`}>{children}</main>
 			</div>
 			<Footer />

@@ -9,6 +9,7 @@ public class DeckReadDTO
     public required string ScryfallId { get; set; }
     public required int NumGames { get; set; }
     public required int NumWins { get; set; }
+    public required DateTime CreatedAt { get; set; }
 }
 
 public class DeckWriteDTO

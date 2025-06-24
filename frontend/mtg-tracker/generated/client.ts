@@ -9,6 +9,7 @@ type GameParticipationReadDTO = {
   deckId: number;
   deck: DeckReadDTO;
   won: boolean;
+  createdAt: string;
 };
 type UserReadMinimalDTO = {
   id: string;
@@ -24,6 +25,7 @@ type DeckReadDTO = {
   scryfallId: string;
   numGames: number;
   numWins: number;
+  createdAt: string;
 };
 type GameReadDTO = {
   id: number;
@@ -116,6 +118,7 @@ const DeckReadDTO: z.ZodType<DeckReadDTO> = z
     scryfallId: z.string(),
     numGames: z.number().int(),
     numWins: z.number().int(),
+    createdAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
 const DeckWriteDTO = z
@@ -164,6 +167,7 @@ const GameParticipationReadDTO: z.ZodType<GameParticipationReadDTO> = z
     deckId: z.number().int(),
     deck: DeckReadDTO,
     won: z.boolean(),
+    createdAt: z.string().datetime({ offset: true }),
   })
   .passthrough();
 const GameReadDTO: z.ZodType<GameReadDTO> = z

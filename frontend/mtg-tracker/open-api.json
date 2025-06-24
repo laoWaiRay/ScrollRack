@@ -1757,7 +1757,8 @@
           "moxfield",
           "scryfallId",
           "numGames",
-          "numWins"
+          "numWins",
+          "createdAt"
         ],
         "type": "object",
         "properties": {
@@ -1784,6 +1785,10 @@
           "numWins": {
             "type": "integer",
             "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -1858,7 +1863,8 @@
           "user",
           "deckId",
           "deck",
-          "won"
+          "won",
+          "createdAt"
         ],
         "type": "object",
         "properties": {
@@ -1884,6 +1890,10 @@
           },
           "won": {
             "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

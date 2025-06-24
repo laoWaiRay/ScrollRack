@@ -2,28 +2,38 @@ import ButtonIcon from "./ButtonIcon";
 import SearchBar from "./SearchBar";
 import Sort from "@/public/icons/sort.svg";
 import Filter from "@/public/icons/filter.svg";
-import { Dispatch, SetStateAction } from "react";
+import {
+	Dispatch,
+	SetStateAction,
+} from "react";
 
 interface FilterSortBarInterface {
-  filter: string; 
-  setFilter: Dispatch<SetStateAction<string>>;
+	filter: string;
+	setFilter: Dispatch<SetStateAction<string>>;
+  onSortClick: () => void;
+  onFilterClick: () => void;
 }
 
-export default function FilterSortBar({ filter, setFilter }: FilterSortBarInterface) {
+export default function FilterSortBar({
+	filter,
+	setFilter,
+  onSortClick,
+  onFilterClick,
+}: FilterSortBarInterface) {
 	return (
-		<section className="flex w-full mt-2 justify-between items-center gap-2 px-2 max-w-md">
+		<section className="flex w-full mt-2 justify-between items-center gap-2 px-2">
 			<SearchBar
 				value={filter}
 				onChange={(e) => setFilter(e.target.value)}
 				onClick={() => setFilter("")}
 			/>
 
-			<ButtonIcon>
+			<ButtonIcon onClick={onSortClick}>
 				<div className="w-[2.5em] border border-surface-500 rounded p-1">
 					<Sort />
 				</div>
 			</ButtonIcon>
-			<ButtonIcon>
+			<ButtonIcon onClick={onFilterClick}>
 				<div className="w-[2.5em] border border-surface-500 rounded p-2">
 					<Filter />
 				</div>

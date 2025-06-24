@@ -135,7 +135,6 @@ export default function Account({}: AccountInterface) {
 				userName: username,
 				profile: user.profile,
         decks: user.decks,
-        gameParticipations: user.gameParticipations,
 			};
 
 			dispatch!({ type: ActionType.UPDATE, payload: userReadDTO });

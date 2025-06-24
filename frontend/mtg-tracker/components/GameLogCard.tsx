@@ -86,7 +86,7 @@ export function GameLogCard({
 	}
 
 	return (
-		<div className="flex flex-col bg-surface-500/30 rounded-lg">
+		<div className="flex flex-col bg-card-surface rounded-lg">
 			{showButtons && (
 				<Dialog
 					title={`Deleting Game`}
@@ -118,7 +118,7 @@ export function GameLogCard({
 						return (
 							<div
 								key={gp.id}
-								className="bg-surface-400/20 w-fit px-3 py-1.5 rounded-lg flex flex-col"
+								className="border border-surface-500 w-fit px-3 py-1.5 rounded-lg flex flex-col"
 							>
 								<div>{gp.user.userName}</div>
 								<div className="text-sm uppercase text-fg-dark">
@@ -162,7 +162,7 @@ export function GameLogCard({
 						return (
 							<div
 								key={gp.id}
-								className="bg-surface-400/20 w-fit px-3 py-1.5 rounded-lg flex-col flex flex-wrap"
+								className="border border-surface-500 w-fit px-3 py-1.5 rounded-lg flex-col flex flex-wrap"
 							>
 								<div>{gp.user.userName}</div>
 								<div className="text-sm uppercase text-fg-dark">

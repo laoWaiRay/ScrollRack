@@ -9,6 +9,7 @@ public class GameParticipationReadDTO
     public required int DeckId { get; set; }
     public required DeckReadDTO Deck { get; set; }
     public required bool Won { get; set; }
+    public required DateTime CreatedAt { get; set; }
 }
 
 public class GameParticipationWriteDTO

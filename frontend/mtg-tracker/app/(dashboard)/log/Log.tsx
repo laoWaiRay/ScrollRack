@@ -4,6 +4,7 @@ import {
 	DashboardHeader,
 	DashboardMain,
 } from "@/components/Dashboard";
+import Drawer from "@/components/Drawer";
 import FilterSortBar from "@/components/FilterSortBar";
 import { GameLogCard } from "@/components/GameLogCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,7 +72,7 @@ export default function Log({}: LogInterface) {
 			<DashboardMain>
 				<div className={`dashboard-main-content-layout max-w-lg lg:max-w-4xl`}>
 					<div className="flex flex-col w-full gap-4">
-						<FilterSortBar filter={filter} setFilter={setFilter} />
+						<FilterSortBar filter={filter} setFilter={setFilter} onSortClick={() => {}} onFilterClick={() => {}} />
 
 						<section className="w-full flex flex-col gap-2 lg:gap-4 px-2">
 							{renderLogs()}
