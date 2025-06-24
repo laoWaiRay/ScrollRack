@@ -92,6 +92,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
         // the user is currently in the room
         if (userToAdd.Id != userId && (userToAdd.JoinedRoom is null || userToAdd.JoinedRoom.Code != game.Room.Code))
         {
+            Console.WriteLine("HERE 1");
             return BadRequest();
         }
 
@@ -100,6 +101,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
 
         if (!isDeckOwner)
         {
+            Console.WriteLine("HERE 2");
             return BadRequest();
         }
 

@@ -6,6 +6,7 @@ using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using System.Text.Json;
 
 namespace Mtg_tracker.Controllers;
 
@@ -33,19 +34,83 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
-        var deckWins = await _context.GameParticipations
+        var allDeckGameParticipations = await _context.GameParticipations
+            .Include(gp => gp.Game)
             .Where(gp => gp.UserId == userId)
-            .Where(gp => gp.Won == true)
             .OrderByDescending(gp => gp.CreatedAt)
             .ToListAsync();
 
-        var deckReadDTOs = _mapper.Map<List<DeckReadDTO>>(userDecks);
+        List<DeckReadDTO> deckReadDTOs = [];
 
-        foreach (var deck in deckReadDTOs)
+        foreach (var deck in userDecks)
         {
-            var latestWin = deckWins.FirstOrDefault(gp => gp.DeckId == deck.Id);
-            deck.LatestWin = latestWin?.CreatedAt;
+            var deckGameParticipations = allDeckGameParticipations
+                .Where(gp => gp.DeckId == deck.Id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            var latestWin = deckGameParticipations?
+                .FirstOrDefault(gp => gp.DeckId == deck.Id && gp.Won)?.CreatedAt;
+
+            var isWinStreak = deckGameParticipations?.FirstOrDefault(gp => gp.DeckId == deck.Id)?.Won;
+            var streak = deckGameParticipations?
+                .TakeWhile(gp => gp.Won == isWinStreak)
+                .Count();
+
+            if (isWinStreak.HasValue && streak.HasValue)
+            {
+                if (isWinStreak == true && streak > deck.LongestWinStreak)
+                {
+                    deck.LongestWinStreak = streak.Value;
+                }
+                if (isWinStreak == false && streak > deck.LongestLossStreak)
+                {
+                    deck.LongestLossStreak = streak.Value;
+                }
+            }
+
+            var winningGameLengths = deckGameParticipations?
+                .Where(gp => gp.Won)
+                .Select(gp => gp.Game.Seconds)
+                .ToList();
+
+            // Calculate Par
+            var parsByPodSize = deckGameParticipations?
+                .GroupBy(gp => gp.Game.NumPlayers)
+                .Select(group => (1.0 / group.Key) * group.Count());
+
+            double par = 0.0;
+
+            if (parsByPodSize != null && deckGameParticipations != null)
+            {
+                par = parsByPodSize.Aggregate(0.0, (current, next) =>
+                {
+                    return current + next;
+                });
+
+                if (deckGameParticipations.Count > 0)
+                {
+                    par /= deckGameParticipations.Count;
+                }
+                else
+                {
+                    par = 0.0;
+                }
+            }
+
+            var dto = _mapper.Map<DeckReadDTO>(deck);
+            dto.LatestWin = latestWin;
+            dto.IsCurrentWinStreak = isWinStreak;
+            dto.CurrentStreak = streak;
+            dto.NumGames = deckGameParticipations != null ? deckGameParticipations.Count : 0;
+            dto.NumWins = deckGameParticipations != null ? deckGameParticipations.Where(gp => gp.Won).Count() : 0;
+            dto.FastestWinInSeconds = winningGameLengths?.Count > 0 ? winningGameLengths.Min() : 0;
+            dto.SlowestWinInSeconds = winningGameLengths?.Count > 0 ? winningGameLengths.Max() : 0;
+            dto.Par = par;
+            deckReadDTOs.Add(dto);
         }
+
+        await _context.SaveChangesAsync();
 
         return deckReadDTOs;
     }

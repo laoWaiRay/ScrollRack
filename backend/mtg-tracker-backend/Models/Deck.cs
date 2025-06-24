@@ -11,7 +11,7 @@ public class Deck
     public required string Commander { get; set; }
     public required string ScryfallId { get; set; }
     public string? Moxfield { get; set; }
-    public int NumGames { get; set; }
-    public int NumWins { get; set; }
+    public int LongestLossStreak { get; set; }
+    public int LongestWinStreak { get; set; }
     public DateTime CreatedAt { get; set; }
 }

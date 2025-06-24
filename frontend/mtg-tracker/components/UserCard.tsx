@@ -57,7 +57,7 @@ export default function UserCard({
 		}
 
 		setSelected(selectedValue);
-		setPlayerIdToDeck({ ...playerIdToDeck, [user.id]: deckReadDTO });
+		setPlayerIdToDeck((prev) => ({ ...prev, [user.id]: deckReadDTO }));
 		setLocalStorageValue({ id: user.id, deckData: deckReadDTO });
 	};
 
@@ -71,10 +71,10 @@ export default function UserCard({
 			setSelected(selectedDeckData.deckData.commander);
 
 			if (setPlayerIdToDeck) {
-				setPlayerIdToDeck({
-					...playerIdToDeck,
+				setPlayerIdToDeck((prev) => ({
+					...prev,
 					[user.id]: selectedDeckData.deckData,
-				});
+				}));
 			}
 		}
 	}, []);
@@ -92,9 +92,9 @@ export default function UserCard({
 				fill={true}
         sizes="(max-width: 768px) 100vw, 500px"
 			/>
-			<div className="absolute inset-0 bg-black/70 z-0" />
+			<div className="absolute inset-0 bg-black/50 z-0" />
 
-			<div className={`flex gap-2 items-center z-10 ${styles}`}>
+			<div className={`flex gap-2 items-center z-10 bg-black/40 py-2 px-4 rounded-lg ${styles}`}>
 				<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 					<Image
 						className="h-full w-full object-cover"
@@ -117,7 +117,7 @@ export default function UserCard({
 			)}
 
 			{useCommanderDisplay && (
-				<div className={`z-10 self-start ${textColor}`}>{userDeck?.commander}</div>
+				<div className={`z-10 self-start ${textColor} bg-black/50 py-2 px-4 rounded-lg`}>{userDeck?.commander}</div>
 			)}
 		</div>
 	);

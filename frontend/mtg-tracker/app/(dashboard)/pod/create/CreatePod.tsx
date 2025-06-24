@@ -60,6 +60,13 @@ export default function CreatePod({}: CreatePodInterface) {
 		!!playerIdToDeck  &&
     playerIds.every(id => Object.keys(playerIdToDeck).includes(id));
 
+  console.log(`hostedRoom: ${hostedRoom}`);
+  console.log(`playerIds: ${hostedRoom?.players?.map(p => p.id) ?? []}`)
+  console.log(`hostedRoom.players: ${hostedRoom?.players}`)
+  console.log(`hostedRoom.players.length: ${hostedRoom?.players?.length}`)
+  console.log(`playerIdToDeck: ${JSON.stringify(playerIdToDeck)}`)
+  console.log(`finalCheck: ${playerIds.every(id => Object.keys(playerIdToDeck).includes(id))}`)
+
 	const handleReceiveUpdateRoom = (room: RoomDTO) => {
 		dispatch({ type: ActionType.UPDATE, payload: [room] });
 	};

@@ -144,6 +144,8 @@ export default function Lobby({
 		setLocalStorageValue(initialGameData);
 		setCurrentGameData(initialGameData);
 	}
+  
+  console.log(JSON.stringify(hostedRoom.players?.map(p => p.userName)))
 
 	return (
 		<>
@@ -174,7 +176,7 @@ export default function Lobby({
 									/>
 									{player.id !== user?.id && (
 										<ButtonIcon
-											styles="size-[1.5em] active:text-white hover:text-white absolute top-0 right-0 mt-4.5 mr-4"
+											styles="size-[1.8em] active:text-white hover:text-white absolute top-0 right-0 mt-4.5 mr-4"
 											onClick={() => handleRemovePlayer(player.id)}
 										>
 											<UserRemove />

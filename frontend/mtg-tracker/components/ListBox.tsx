@@ -20,7 +20,7 @@ export default function ListBox({
 	setSelected,
   transparent
 }: ListBoxInterface) {
-  const styles = transparent ? "bg-black/10 border border-white/10" : "bg-surface-500";
+  const styles = transparent ? "bg-black/40 border border-white/10" : "bg-surface-500";
 
 	return (
 		<Listbox value={selected} onChange={setSelected}>

@@ -1758,7 +1758,9 @@
           "scryfallId",
           "numGames",
           "numWins",
-          "createdAt"
+          "createdAt",
+          "longestWinStreak",
+          "longestLossStreak"
         ],
         "type": "object",
         "properties": {
@@ -1793,6 +1795,38 @@
           "latestWin": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "currentStreak": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isCurrentWinStreak": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "longestLossStreak": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fastestWinInSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slowestWinInSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "par": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           }
         }

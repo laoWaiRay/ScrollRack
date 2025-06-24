@@ -2,7 +2,9 @@ import { getImageUrl } from "@/helpers/scryfallApi";
 import { DeckReadDTO } from "@/types/client";
 import Image from "next/image";
 import Moxfield from "@/public/icons/moxfield.svg";
-import ButtonPrimary from "./ButtonPrimary";
+import dayjs from "dayjs";
+import { formatTime } from "@/helpers/time";
+import { toPercent } from "@/helpers/math";
 
 interface DeckCardInterface {
 	deck: DeckReadDTO;
@@ -24,39 +26,83 @@ export default function DeckCard({ deck }: DeckCardInterface) {
 			data: deck.numWins.toString(),
 		},
 		{
-			title: "Last Win",
-			data: "Feb 12, 2025",
+			title: "Losses",
+			data: (deck.numGames - deck.numWins).toString(),
 		},
 		{
-			title: "Streak (Win/Loss)",
-			data: "4/7",
+			title: "Win Rate",
+			data: deck.numGames > 0 ? toPercent(deck.numWins / deck.numGames) : "-",
+		},
+		{
+			title: "Par",
+			data: deck.par ? toPercent(deck.par) : "-",
+		},
+		{
+			title: "Current Streak",
+			data: getStreakString(),
 		},
 		{
 			title: "Longest Win Streak",
-			data: "3",
+			data: deck.longestWinStreak.toString(),
 		},
 		{
 			title: "Longest Loss Streak",
-			data: "10",
+			data: deck.longestLossStreak.toString(),
+		},
+		{
+			title: "Last Win",
+			data: deck.latestWin ? dayjs(deck.latestWin).format("YYYY-MM-DD") : "-",
 		},
 		{
 			title: "Fastest Win",
-			data: "00:10:42",
+			data: deck.fastestWinInSeconds ? formatTime(deck.fastestWinInSeconds, "hms") : "-",
 		},
 		{
-			title: "Longest Game",
-			data: "05:32:45",
+			title: "Slowest Win",
+			data: deck.slowestWinInSeconds ? formatTime(deck.slowestWinInSeconds, "hms") : "-",
 		},
 	];
+
+	let streakStyle = "";
+
+	if (deck.isCurrentWinStreak == true) {
+		streakStyle = "text-success";
+	}
+
+	if (deck.isCurrentWinStreak == false) {
+		streakStyle = "text-error";
+	}
+
+	function getStreakString() {
+		const { currentStreak, isCurrentWinStreak } = deck;
+
+		if (currentStreak == null || isCurrentWinStreak == null) {
+			return "-";
+		}
+
+		const suffix =
+			currentStreak === 1
+				? isCurrentWinStreak
+					? "Win"
+					: "Loss"
+				: isCurrentWinStreak
+				? "Wins"
+				: "Losses";
+
+		return `${currentStreak} ${suffix}`;
+	}
 
 	function renderStats() {
 		return deckStats.map((stat) => (
 			<div key={stat.title} className="flex justify-between">
 				<span>{`${stat.title}:`}</span>
-				<span>{stat.data}</span>
+				<span className={`${stat.title === "Current Streak" && streakStyle}`}>
+					{stat.data}
+				</span>
 			</div>
 		));
 	}
+
 	return (
 		<div className="flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg">
 			<div className="w-full flex justify-center items-center px-4 mb-2 gap-3 lg:justify-center">

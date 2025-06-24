@@ -27,6 +27,13 @@ type DeckReadDTO = {
   numWins: number;
   createdAt: string;
   latestWin?: (string | null) | undefined;
+  currentStreak?: (number | null) | undefined;
+  isCurrentWinStreak?: (boolean | null) | undefined;
+  longestWinStreak: number;
+  longestLossStreak: number;
+  fastestWinInSeconds?: (number | null) | undefined;
+  slowestWinInSeconds?: (number | null) | undefined;
+  par?: (number | null) | undefined;
 };
 type GameReadDTO = {
   id: number;
@@ -121,6 +128,13 @@ const DeckReadDTO: z.ZodType<DeckReadDTO> = z
     numWins: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
     latestWin: z.string().datetime({ offset: true }).nullish(),
+    currentStreak: z.number().int().nullish(),
+    isCurrentWinStreak: z.boolean().nullish(),
+    longestWinStreak: z.number().int(),
+    longestLossStreak: z.number().int(),
+    fastestWinInSeconds: z.number().int().nullish(),
+    slowestWinInSeconds: z.number().int().nullish(),
+    par: z.number().nullish(),
   })
   .passthrough();
 const DeckWriteDTO = z

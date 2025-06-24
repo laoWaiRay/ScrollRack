@@ -22,6 +22,7 @@ import { ActionType as GameParticipationActionType } from "@/context/GamePartici
 import { ActionType as DeckActionType } from "@/context/DeckContext";
 import { formatTime } from "@/helpers/time";
 import { useDeck } from "@/hooks/useDeck";
+import { getDecks } from "@/actions/decks";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -53,6 +54,8 @@ export default function InGameScreen({
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
   const { decks, dispatch: dispatchDeck } = useDeck();
+  
+  console.log(JSON.stringify(players.map(p => (p.userName))))
 
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
@@ -93,15 +96,20 @@ export default function InGameScreen({
 
 			const gameParticipationWriteDTOs: GameParticipationWriteDTO[] = [];
 
-			for (const [playerId, deckData] of Object.entries(playerIdToDeck)) {
-				const isWinner = winner.id === playerId;
+			for (const player of players) {
+        if (!(player.id in playerIdToDeck)) {
+          throw Error("Player deck data not found");
+        }
+
+        const deckData = playerIdToDeck[player.id];
+				const isWinner = winner.id === player.id;
 
 				if (deckData == null) {
 					throw Error("Deck data for user is null");
 				}
 
 				const gameParticipationWriteDTO: GameParticipationWriteDTO = {
-					userId: playerId,
+					userId: player.id,
 					deckId: deckData.id,
 					gameId: gameReadDTO.id,
 					won: isWinner,
@@ -134,11 +142,10 @@ export default function InGameScreen({
 					payload: [...gameParticipations, hostGpReadDTO],
 				});
         
-        const updatedDeck = hostGpReadDTO.deck;
-        updatedDeck.latestWin = (new Date()).toISOString();
+        const updatedDecks = await getDecks();
         dispatchDeck({
           type: GameActionType.UPDATE,
-          payload: [...(decks.filter(d => d.id !== updatedDeck.id)), updatedDeck],
+          payload: updatedDecks,
         })
 			}
 			setLocalStorageValue(null);
