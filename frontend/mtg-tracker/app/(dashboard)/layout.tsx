@@ -12,6 +12,9 @@ import { getGames } from "@/actions/games";
 import { GameProvider } from "@/context/GameContext";
 import { getGameParticipations } from "@/actions/gameParticipations";
 import { GameParticipationProvider } from "@/context/GameParticipationContext";
+import DatePickerProvider from "@/components/DatePickerProvider";
+import MuiThemeProvider from "@/components/MuiThemeProvider";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
 export default async function layout({ children }: { children: ReactNode }) {
 	const friends = await getFriends();
@@ -22,18 +25,26 @@ export default async function layout({ children }: { children: ReactNode }) {
 	const gameParticipations = await getGameParticipations();
 
 	return (
-		<FriendProvider initialFriends={friends}>
-			<FriendRequestProvider initialFriendRequests={friendRequests}>
-				<RoomProvider initialRooms={rooms}>
-					<DeckProvider initialDecks={decks}>
-						<GameProvider initialGames={games}>
-							<GameParticipationProvider initialGameParticipations={gameParticipations}>
-								<DashboardRootLayout>{children}</DashboardRootLayout>
-							</GameParticipationProvider>
-						</GameProvider>
-					</DeckProvider>
-				</RoomProvider>
-			</FriendRequestProvider>
-		</FriendProvider>
+		<AppRouterCacheProvider>
+			<MuiThemeProvider>
+				<DatePickerProvider>
+					<FriendProvider initialFriends={friends}>
+						<FriendRequestProvider initialFriendRequests={friendRequests}>
+							<RoomProvider initialRooms={rooms}>
+								<DeckProvider initialDecks={decks}>
+									<GameProvider initialGames={games}>
+										<GameParticipationProvider
+											initialGameParticipations={gameParticipations}
+										>
+											<DashboardRootLayout>{children}</DashboardRootLayout>
+										</GameParticipationProvider>
+									</GameProvider>
+								</DeckProvider>
+							</RoomProvider>
+						</FriendRequestProvider>
+					</FriendProvider>
+				</DatePickerProvider>
+			</MuiThemeProvider>
+		</AppRouterCacheProvider>
 	);
 }

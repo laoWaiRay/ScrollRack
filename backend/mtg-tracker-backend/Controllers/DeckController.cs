@@ -33,7 +33,21 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
-        return _mapper.Map<List<DeckReadDTO>>(userDecks);
+        var deckWins = await _context.GameParticipations
+            .Where(gp => gp.UserId == userId)
+            .Where(gp => gp.Won == true)
+            .OrderByDescending(gp => gp.CreatedAt)
+            .ToListAsync();
+
+        var deckReadDTOs = _mapper.Map<List<DeckReadDTO>>(userDecks);
+
+        foreach (var deck in deckReadDTOs)
+        {
+            var latestWin = deckWins.FirstOrDefault(gp => gp.DeckId == deck.Id);
+            deck.LatestWin = latestWin?.CreatedAt;
+        }
+
+        return deckReadDTOs;
     }
 
     // GET: api/deck/{id}

@@ -1789,6 +1789,11 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "latestWin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },

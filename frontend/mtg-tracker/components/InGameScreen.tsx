@@ -19,7 +19,9 @@ import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
+import { ActionType as DeckActionType } from "@/context/DeckContext";
 import { formatTime } from "@/helpers/time";
+import { useDeck } from "@/hooks/useDeck";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -50,6 +52,7 @@ export default function InGameScreen({
 	const { games, dispatch: dispatchGame } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
+  const { decks, dispatch: dispatchDeck } = useDeck();
 
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
@@ -130,6 +133,13 @@ export default function InGameScreen({
 					type: GameParticipationActionType.UPDATE,
 					payload: [...gameParticipations, hostGpReadDTO],
 				});
+        
+        const updatedDeck = hostGpReadDTO.deck;
+        updatedDeck.latestWin = (new Date()).toISOString();
+        dispatchDeck({
+          type: GameActionType.UPDATE,
+          payload: [...(decks.filter(d => d.id !== updatedDeck.id)), updatedDeck],
+        })
 			}
 			setLocalStorageValue(null);
 			setCurrentGameData(null);

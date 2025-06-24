@@ -26,6 +26,7 @@ type DeckReadDTO = {
   numGames: number;
   numWins: number;
   createdAt: string;
+  latestWin?: (string | null) | undefined;
 };
 type GameReadDTO = {
   id: number;
@@ -119,6 +120,7 @@ const DeckReadDTO: z.ZodType<DeckReadDTO> = z
     numGames: z.number().int(),
     numWins: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
+    latestWin: z.string().datetime({ offset: true }).nullish(),
   })
   .passthrough();
 const DeckWriteDTO = z

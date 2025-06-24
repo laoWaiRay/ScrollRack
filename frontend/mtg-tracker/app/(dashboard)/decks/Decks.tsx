@@ -18,6 +18,10 @@ import Drawer from "@/components/Drawer";
 import Switch from "@/components/Switch";
 import East from "@/public/icons/east.svg";
 import { DeckReadDTO } from "@/types/client";
+import DateSelect from "@/components/DateSelect";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import dayjs from "dayjs";
+import ButtonPrimary from "@/components/ButtonPrimary";
 
 interface DecksInterface {}
 
@@ -25,6 +29,7 @@ interface SortValues {
 	recency: "newest" | "oldest" | null;
 	numGames: "most" | "least" | null;
 	winRate: "highest" | "lowest" | null;
+	recentWins: "most recent" | "least recent" | null;
 }
 
 export default function Decks({}: DecksInterface) {
@@ -34,15 +39,19 @@ export default function Decks({}: DecksInterface) {
 	const [filtered, setFiltered] = useState(decks);
 	const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 	const [isSortDrawerOpen, setIsSortDrawerOpen] = useState(false);
+	const [startDate, setStartDate] = useState<PickerValue>(dayjs());
+	const [endDate, setEndDate] = useState<PickerValue>(dayjs());
+	const [showAllDecks, setShowAllDecks] = useState(true);
 
 	const initialSortValues: SortValues = {
 		recency: "newest",
 		numGames: null,
 		winRate: null,
+		recentWins: null,
 	};
 
 	const [sortValues, setSortValues] = useState(initialSortValues);
-	const { recency, numGames, winRate } = sortValues;
+	const { recency, numGames, winRate, recentWins } = sortValues;
 
 	type ValueOf<T> = T[keyof T];
 	function updateValues(
@@ -109,6 +118,21 @@ export default function Decks({}: DecksInterface) {
 				},
 			],
 		},
+		{
+			heading: "RECENT WINS",
+			switches: [
+				{
+					name: "Most Recent First",
+					enabled: recentWins === "most recent",
+					setEnabled: () => updateValues("recentWins", "most recent"),
+				},
+				{
+					name: "Least Recent First",
+					enabled: recentWins === "least recent",
+					setEnabled: () => updateValues("recentWins", "least recent"),
+				},
+			],
+		},
 	];
 
 	const sortNumGames = (a: DeckReadDTO, b: DeckReadDTO) => {
@@ -136,12 +160,58 @@ export default function Decks({}: DecksInterface) {
 	const sortRecency = (a: DeckReadDTO, b: DeckReadDTO) => {
 		switch (recency) {
 			case "newest":
-				return -1 * a.createdAt.localeCompare(b.createdAt);
+				return (
+					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+				);
 			case "oldest":
-				return a.createdAt.localeCompare(b.createdAt);
+				return (
+					new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+				);
 			default:
 				return 0;
 		}
+	};
+
+	const sortRecentWins = (a: DeckReadDTO, b: DeckReadDTO) => {
+		switch (recentWins) {
+			case "most recent":
+				if (a.latestWin == null && b.latestWin == null) {
+					return 0;
+				} else if (a.latestWin == null) {
+					return 1;
+				} else if (b.latestWin == null) {
+					return -1;
+				} else {
+					return (
+						new Date(b.latestWin).getTime() - new Date(a.latestWin).getTime()
+					);
+				}
+			case "least recent":
+				if (a.latestWin == null && b.latestWin == null) {
+					return 0;
+				} else if (a.latestWin == null) {
+					return -1;
+				} else if (b.latestWin == null) {
+					return 1;
+				} else {
+					return (
+						new Date(a.latestWin).getTime() - new Date(b.latestWin).getTime()
+					);
+				}
+			default:
+				return 0;
+		}
+	};
+
+	const filterDeckByDateRange = (toFilter: DeckReadDTO[]) => {
+		if (!showAllDecks && startDate && endDate) {
+			return toFilter.filter(
+				(d) =>
+					d.createdAt >= startDate.startOf("day").toISOString() &&
+					d.createdAt <= endDate.endOf("day").toISOString()
+			);
+		}
+		return toFilter;
 	};
 
 	useEffect(() => {
@@ -149,12 +219,19 @@ export default function Decks({}: DecksInterface) {
 			return;
 		}
 
+		// Apply date filter here for filtered
+		const timeFilteredDecks = filterDeckByDateRange(decks);
+
 		// Apply sorting here for filtered decks, before filtering
-		decks.sort(
-			(a, b) => sortNumGames(a, b) || sortWinRate(a, b) || sortRecency(a, b)
+		timeFilteredDecks.sort(
+			(a, b) =>
+				sortNumGames(a, b) ||
+				sortWinRate(a, b) ||
+				sortRecentWins(a, b) ||
+				sortRecency(a, b)
 		);
 
-		const fuse = new Fuse(decks, {
+		const fuse = new Fuse(timeFilteredDecks, {
 			keys: ["commander"],
 		});
 
@@ -169,13 +246,32 @@ export default function Decks({}: DecksInterface) {
 		if (filter !== "" && filtered.length > 0) {
 			return filtered.map((deck) => <DeckCard key={deck.id} deck={deck} />);
 		} else {
+			// Apply date filter here for non-filtered decks
+			const timeFilteredDecks = filterDeckByDateRange(decks);
+
 			// Apply sorting here for non-filtered decks
-			decks.sort(
-				(a, b) => sortNumGames(a, b) || sortWinRate(a, b) || sortRecency(a, b)
+			timeFilteredDecks.sort(
+				(a, b) =>
+					sortNumGames(a, b) ||
+					sortWinRate(a, b) ||
+					sortRecentWins(a, b) ||
+					sortRecency(a, b)
 			);
 
-			return decks.map((deck) => <DeckCard key={deck.id} deck={deck} />);
+			return timeFilteredDecks.map((deck) => (
+				<DeckCard key={deck.id} deck={deck} />
+			));
 		}
+	}
+
+	function resetSortToDefault() {
+		setSortValues(initialSortValues);
+	}
+
+	function resetTimeFilterToDefault() {
+		setShowAllDecks(true);
+		setStartDate(dayjs());
+		setEndDate(dayjs());
 	}
 
 	return (
@@ -237,6 +333,84 @@ export default function Decks({}: DecksInterface) {
 								</div>
 							))}
 						</div>
+						<ButtonPrimary
+							onClick={() => {
+								setIsSortDrawerOpen(false);
+								resetSortToDefault();
+							}}
+              style="transparent"
+              styles="mt-8"
+						>
+							Reset To Default
+						</ButtonPrimary>
+					</section>
+				</Drawer>
+
+				{/* Hidden Date Selection Drawer */}
+				<Drawer isDrawerOpen={isFilterDrawerOpen} zIndex="z-80">
+					{/* Back Button */}
+					<div className="self-end mr-10">
+						<ButtonIcon onClick={() => setIsFilterDrawerOpen(false)}>
+							<div className="size-12 border border-fg p-2.5 rounded-full">
+								<East />
+							</div>
+						</ButtonIcon>
+					</div>
+
+					<section className="flex flex-col mt-6 mx-8 gap-8 items-center">
+						<h2>TIME</h2>
+
+						<div className="flex flex-col gap-6 w-full">
+							<div className="flex justify-between px-2 w-full">
+								<div>Show all Decks</div>
+								<Switch
+									enabled={showAllDecks}
+									setEnabled={() => setShowAllDecks(true)}
+								/>
+							</div>
+
+							<div className="flex justify-between px-2 w-full">
+								<div>Filter Decks by Date</div>
+								<Switch
+									enabled={!showAllDecks}
+									setEnabled={() => setShowAllDecks(false)}
+								/>
+							</div>
+						</div>
+
+						<div className="mt-6">
+							<h3 className="flex justify-center mb-4">STARTING FROM</h3>
+							<div className="flex flex-col gap-6">
+								<DateSelect
+									value={startDate}
+									setValue={setStartDate}
+									disabled={showAllDecks}
+								/>
+							</div>
+						</div>
+
+						<div className="">
+							<h3 className="flex justify-center mb-4">UNTIL</h3>
+							<div className="flex flex-col gap-6">
+								<DateSelect
+									value={endDate}
+									setValue={setEndDate}
+									disabled={showAllDecks}
+									minDate={dayjs(startDate)}
+								/>
+							</div>
+						</div>
+
+						<ButtonPrimary
+							onClick={() => {
+								setIsFilterDrawerOpen(false);
+								resetTimeFilterToDefault();
+							}}
+              style="transparent"
+              styles="mt-8"
+						>
+							Reset To Default
+						</ButtonPrimary>
 					</section>
 				</Drawer>
 
