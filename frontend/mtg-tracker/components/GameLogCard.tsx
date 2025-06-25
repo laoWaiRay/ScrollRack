@@ -40,7 +40,7 @@ export function GameLogCard({
 	showButtons = false,
 }: GameLogCardInterface) {
 	const { user } = useAuth();
-	const { games, dispatch: dispatchGame } = useGame();
+	const { gameState, dispatch: dispatchGame } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
 	const { toast } = useToast();

@@ -5,17 +5,30 @@ import { createContext, ReactNode, useReducer, Reducer, Dispatch } from "react";
 
 export enum ActionType {
 	UPDATE,
+  APPEND,
+  SET_PAGE,
+  SET_HAS_MORE,
 }
 
-type Action = { type: ActionType.UPDATE; payload: GameReadDTO[] };
+export interface GameState {
+	games: GameReadDTO[];
+	page: number;
+	hasMore: boolean;
+}
+
+type Action =
+  | { type: ActionType.UPDATE; payload: GameReadDTO[] }
+  | { type: ActionType.APPEND; payload: GameReadDTO[] }
+  | { type: ActionType.SET_PAGE; payload: number }
+  | { type: ActionType.SET_HAS_MORE; payload: boolean };
 
 interface GameContextType {
-	games: GameReadDTO[];
+	gameState: GameState;
 	dispatch: Dispatch<Action>;
 }
 
 export const GameContext = createContext<GameContextType>({
-	games: [],
+	gameState: { games: [], page: 0, hasMore: true },
 	dispatch: () => {
 		throw new Error("dispatch must be used within a GameProvider");
 	},
@@ -23,26 +36,35 @@ export const GameContext = createContext<GameContextType>({
 
 interface GameProviderInterface {
 	children: ReactNode;
-	initialGames: GameReadDTO[];
+	initialGameState: GameState;
 }
 
 export function GameProvider({
 	children,
-	initialGames,
+	initialGameState,
 }: GameProviderInterface) {
-	const [games, dispatch] = useReducer(gameReducer, initialGames);
+	const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
 
 	return (
-		<GameContext.Provider value={{ games, dispatch }}>
+		<GameContext.Provider value={{ gameState, dispatch }}>
 			{children}
 		</GameContext.Provider>
 	);
 }
 
-const gameReducer: Reducer<GameReadDTO[], Action> = (state, action) => {
+const gameReducer: Reducer<GameState, Action> = (state, action) => {
 	switch (action.type) {
 		case ActionType.UPDATE: {
-			return action.payload;
+			return { ...state, games: action.payload };
 		}
+    case ActionType.APPEND: {
+      return { ...state, games: [ ...state.games, ...action.payload ] };
+    }
+    case ActionType.SET_PAGE: {
+      return { ...state, page: action.payload } 
+    }
+    case ActionType.SET_HAS_MORE: {
+      return { ...state, hasMore: action.payload } 
+    }
 	}
 };

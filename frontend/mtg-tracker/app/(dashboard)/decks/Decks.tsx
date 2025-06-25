@@ -59,12 +59,8 @@ export default function Decks({}: DecksInterface) {
 		value: ValueOf<SortValues>,
 		allowNull: boolean = true
 	) {
-		if (allowNull) {
-			if (sortValues[key] == value) {
-				setSortValues((prev) => ({ ...prev, [key]: null }));
-			} else {
-				setSortValues((prev) => ({ ...prev, [key]: value }));
-			}
+		if (allowNull && sortValues[key] == value) {
+			setSortValues((prev) => ({ ...prev, [key]: null }));
 		} else {
 			setSortValues((prev) => ({ ...prev, [key]: value }));
 		}
@@ -338,8 +334,8 @@ export default function Decks({}: DecksInterface) {
 								setIsSortDrawerOpen(false);
 								resetSortToDefault();
 							}}
-              style="transparent"
-              styles="mt-8"
+							style="transparent"
+							styles="mt-8"
 						>
 							Reset To Default
 						</ButtonPrimary>
@@ -406,8 +402,8 @@ export default function Decks({}: DecksInterface) {
 								setIsFilterDrawerOpen(false);
 								resetTimeFilterToDefault();
 							}}
-              style="transparent"
-              styles="mt-8"
+							style="transparent"
+							styles="mt-8"
 						>
 							Reset To Default
 						</ButtonPrimary>

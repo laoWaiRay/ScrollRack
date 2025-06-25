@@ -45,6 +45,11 @@ type GameReadDTO = {
   winnerId?: (string | null) | undefined;
   gameParticipations?: Array<GameParticipationReadDTO> | undefined;
 };
+type PagedResultOfGameReadDTO = Partial<{
+  items: Array<GameReadDTO>;
+  page: number;
+  hasMore: boolean;
+}>;
 type RoomDTO = {
   id: number;
   roomOwnerId: string;
@@ -198,6 +203,14 @@ const GameReadDTO: z.ZodType<GameReadDTO> = z
     gameParticipations: z.array(GameParticipationReadDTO).optional(),
   })
   .passthrough();
+const PagedResultOfGameReadDTO: z.ZodType<PagedResultOfGameReadDTO> = z
+  .object({
+    items: z.array(GameReadDTO),
+    page: z.number().int(),
+    hasMore: z.boolean(),
+  })
+  .partial()
+  .passthrough();
 const GameWriteDTO = z
   .object({
     numPlayers: z.number().int(),
@@ -288,6 +301,7 @@ export const schemas = {
   UserReadMinimalDTO,
   GameParticipationReadDTO,
   GameReadDTO,
+  PagedResultOfGameReadDTO,
   GameWriteDTO,
   GameParticipationWriteDTO,
   RoomDTO,
@@ -458,7 +472,14 @@ const endpoints = makeApi([
     path: "/api/Game",
     alias: "getApiGame",
     requestFormat: "json",
-    response: z.array(GameReadDTO),
+    parameters: [
+      {
+        name: "page",
+        type: "Query",
+        schema: z.number().int().optional().default(0),
+      },
+    ],
+    response: PagedResultOfGameReadDTO,
   },
   {
     method: "post",

@@ -21,7 +21,7 @@ export default async function layout({ children }: { children: ReactNode }) {
 	const friendRequests = await getReceivedFriendRequests();
 	const rooms = await getRooms();
 	const decks = await getDecks();
-	const games = await getGames();
+	const gameState = await getGames();
 	const gameParticipations = await getGameParticipations();
 
 	return (
@@ -32,7 +32,7 @@ export default async function layout({ children }: { children: ReactNode }) {
 						<FriendRequestProvider initialFriendRequests={friendRequests}>
 							<RoomProvider initialRooms={rooms}>
 								<DeckProvider initialDecks={decks}>
-									<GameProvider initialGames={games}>
+									<GameProvider initialGameState={gameState}>
 										<GameParticipationProvider
 											initialGameParticipations={gameParticipations}
 										>

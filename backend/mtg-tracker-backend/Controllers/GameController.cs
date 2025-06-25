@@ -14,11 +14,16 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private const int PAGE_SIZE = 3;
 
-    // GET: api/game
-    // Returns all games for the current user
+    // GET: api/game?page=0&startDate=...&endDate=...
+    // Games are sorted by most recent first. Returns the most recent Nth page of games.
+    [Authorize]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GameReadDTO>>> GetGames()
+    public async Task<ActionResult<PagedResult<GameReadDTO>>> GetGames(
+        [FromQuery] int page,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -26,17 +31,37 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        var games = await _context.Games
-            .Where(g => g.GameParticipations.Any(gp => gp.UserId == userId))
+        var query = _context.Games
+            .Where(g => g.GameParticipations.Any(gp => gp.UserId == userId));
+
+        if (startDate != null && endDate != null)
+        {
+            query = query.Where(g => g.CreatedAt >= startDate && g.CreatedAt <= endDate);
+        }
+
+        query = query
             .Include(g => g.CreatedBy)
             .Include(g => g.GameParticipations)
                .ThenInclude(gp => gp.Deck)
             .Include(g => g.GameParticipations)
                .ThenInclude(gp => gp.User)
-            .OrderByDescending(g => g.CreatedAt)
+            .OrderByDescending(g => g.CreatedAt);
+
+        var pagedGames = await query
+            .Skip(page * PAGE_SIZE)
+            .Take(PAGE_SIZE + 1)
             .ToListAsync();
 
-        return _mapper.Map<List<GameReadDTO>>(games);
+        var games = pagedGames.Take(PAGE_SIZE).ToList();
+
+        PagedResult<GameReadDTO> result = new()
+        {
+            Items = _mapper.Map<List<GameReadDTO>>(games),
+            Page = page,
+            HasMore = pagedGames.Count > PAGE_SIZE,
+        };
+
+        return result;
     }
 
     // GET: api/game/{id}

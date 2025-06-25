@@ -10,6 +10,7 @@ export async function callWithAuth<ReturnT>(
 	apiFn: (configOptions?: {
 		headers?: Record<string, string>;
 		params?: Record<string, string>;
+		queries?: Record<string, string | number | undefined>;
 	}) => Promise<ReturnT>
 ): Promise<ReturnT | null>;
 
@@ -30,6 +31,7 @@ export async function callWithAuth<BodyT, ReturnT>(
 	configOptions?: { 
     headers?: Record<string, string>;
     params?: Record<string, string>;
+		queries?: Record<string, string | number | undefined>;
   }
 ): Promise<ReturnT | null>;
 
@@ -46,9 +48,10 @@ export async function callWithAuth<ReturnT>(
 	}
 
 	try {
-    const {headers, params} = configOptions || {};
+    const {headers, params, queries} = configOptions || {};
 		const _configOptions = {
       params,
+      queries,
 			headers: {
         ...(headers || {}),
 				cookie: `${aspNetCoreIdentityCookieName}=${cookie.value}`,

@@ -807,32 +807,34 @@
         "tags": [
           "Game"
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GameReadDTO"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfGameReadDTO"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GameReadDTO"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfGameReadDTO"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GameReadDTO"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfGameReadDTO"
                 }
               }
             }
@@ -2134,6 +2136,24 @@
           "twoFactorRecoveryCode": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "PagedResultOfGameReadDTO": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameReadDTO"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasMore": {
+            "type": "boolean"
           }
         }
       },
