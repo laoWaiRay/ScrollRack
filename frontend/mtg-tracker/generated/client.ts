@@ -246,8 +246,11 @@ const StatSnapshotDTO = z
     gamesPlayed: z.number().int(),
     gamesWon: z.number().int(),
     numDecks: z.number().int(),
+    lastWon: z.string().datetime({ offset: true }).nullish(),
+    mostPlayedCommanders: z.array(z.string()),
+    leastPlayedCommanders: z.array(z.string()),
     currentWinStreak: z.number().int(),
-    currentLossStreak: z.number().int(),
+    isCurrentWinStreak: z.boolean().nullish(),
     longestWinStreak: z.number().int(),
     longestLossStreak: z.number().int(),
     createdAt: z.string().datetime({ offset: true }).optional(),
@@ -646,6 +649,13 @@ const endpoints = makeApi([
     path: "/api/StatSnapshot",
     alias: "getApiStatSnapshot",
     requestFormat: "json",
+    parameters: [
+      {
+        name: "startDate",
+        type: "Query",
+        schema: z.string().datetime({ offset: true }).optional(),
+      },
+    ],
     response: StatSnapshotDTO,
   },
   {

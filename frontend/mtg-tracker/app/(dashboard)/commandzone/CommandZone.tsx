@@ -16,6 +16,9 @@ import {
 import { useGame } from "@/hooks/useGame";
 import { useRouter } from "next/navigation";
 import { useStatSnapshot } from "@/hooks/useStatSnapshot";
+import { useMemo } from "react";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import dayjs from "dayjs";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -41,10 +44,27 @@ const statCardTextStyles = {
 export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 	const { user } = useAuth();
 	const { gameState } = useGame();
+	const { gameParticipations } = useGameParticipation();
 	const { snapshot } = useStatSnapshot();
 	const router = useRouter();
 
 	console.log(JSON.stringify(snapshot, undefined, 3));
+
+	const mostRecentDeck = useMemo(() => {
+		const sorted = gameParticipations.sort(
+			(a, b) =>
+				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+		);
+
+		if (sorted.length > 0) {
+			return {
+				commander: sorted[0].deck.commander,
+				won: sorted[0].won ? "WON" : "LOSS",
+			};
+		} else {
+			return null;
+		}
+	}, [gameParticipations]);
 
 	const statCardData: StatCardData[] = [
 		{
@@ -67,36 +87,68 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 		},
 		{
 			title: "Last Won",
-			data: statSnapshot?.numDecks ?? 0,
+			data: statSnapshot?.lastWon
+				? dayjs(statSnapshot.lastWon).format("MMM D, YYYY")
+				: "n/a",
 			subData: [],
-			styles: statCardNumberStyles,
+			styles: statCardTextStyles,
 		},
 		{
 			title: "Recently Played",
-			data: `${"Atraxa, Grand Unifier"}`,
-			subData: [`WIN`],
+			data: mostRecentDeck ? mostRecentDeck.commander : "n/a",
+			subData: [mostRecentDeck ? mostRecentDeck.won : "n/a"],
 			styles: {
 				main: "text-lg text-fg-light my-2",
-				sub: "text-success font-bold tracking-wider",
+				sub: `${
+					!mostRecentDeck
+						? ""
+						: mostRecentDeck.won == "WON"
+						? "text-success"
+						: "text-error"
+				} font-bold tracking-wider`,
 			},
 		},
 		{
 			title: "Most Played",
-			data: `${"Urza, Lord High Artificer"}`,
-			subData: ["Atraxa, Grand Unifier", "Sheoldred, the Apocalypse"],
+			data:
+				snapshot.mostPlayedCommanders.length > 0
+					? snapshot.mostPlayedCommanders[0]
+					: "n/a",
+			subData: snapshot.mostPlayedCommanders.slice(1, 4),
 			styles: statCardTextStyles,
 		},
 		{
 			title: "Least Played",
-			data: `${"Krenko, Mob Boxx"}`,
-			subData: ["The Wandering Rescuer", "Jin-Gitaxias, Core Augur"],
+			data:
+				snapshot.leastPlayedCommanders.length > 0
+					? snapshot.leastPlayedCommanders[0]
+					: "n/a",
+			subData: snapshot.leastPlayedCommanders.slice(1, 4),
 			styles: statCardTextStyles,
 		},
 		{
 			title: "Streaks",
-			data: statSnapshot?.numDecks ?? 0,
-			subData: [`Longest Win Streak: 10`, `Longest Loss Streak: 20`],
-			styles: statCardTextStyles,
+			data:
+				statSnapshot?.currentWinStreak &&
+				statSnapshot?.isCurrentWinStreak != null
+					? statSnapshot.isCurrentWinStreak
+						? `${statSnapshot.currentWinStreak} Wins`
+						: `${statSnapshot.currentWinStreak} Losses`
+					: "n/a",
+			subData: [
+				`Longest Win Streak: ${snapshot.longestWinStreak}`,
+				`Longest Loss Streak: ${snapshot.longestLossStreak}`,
+			],
+			styles: {
+				main: `text-lg ${
+					statSnapshot?.isCurrentWinStreak == null
+						? "text-fg-light"
+						: statSnapshot.isCurrentWinStreak
+						? "text-success"
+						: "text-error"
+				} my-2`,
+				sub: "text-fg-dark",
+			},
 		},
 	];
 
@@ -106,7 +158,9 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 				<h3>{data.title}</h3>
 				<div className={data.styles?.main}>{data.data}</div>
 				{data.subData.map((sub, i) => (
-					<div key={i} className={data.styles?.sub}>{sub}</div>
+					<div key={i} className={data.styles?.sub}>
+						{sub}
+					</div>
 				))}
 			</StatCard>
 		));
@@ -132,7 +186,9 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 						styles="col-span-2"
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
 					>
-						<PieChart />
+            <div className="h-[350px] lg:h-full">
+              <PieChart />
+            </div>
 					</StatCard>
 
 					{/* Commander Showcase */}

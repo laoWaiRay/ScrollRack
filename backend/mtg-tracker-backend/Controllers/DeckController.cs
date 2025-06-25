@@ -90,7 +90,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             // Calculate Par
             var parsByPodSize = deckGameParticipations?
                 .GroupBy(gp => gp.Game.NumPlayers)
-                .Select(group => (1.0 / group.Key) * group.Count());
+                .Select(group => 1.0 / group.Key * group.Count());
 
             double par = 0.0;
 

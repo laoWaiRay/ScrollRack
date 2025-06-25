@@ -48,7 +48,7 @@ export default function PieChart({ }: PieChartInterface) {
 				toolbar: {
 					show: false,
 				},
-        height: "350px",
+        height: "100%",
 			},
 			title: {
 				text: "Decks Played",
@@ -104,16 +104,8 @@ export default function PieChart({ }: PieChartInterface) {
 				offsetY: 2,
         height: 70
 			},
-      responsive: [{
-        breakpoint: 1024,
-        options: {
-          chart: {
-            height: '100%'
-          }
-        }
-      }]
 		},
 	};
 
-	return <Chart {...pieChartConfig} width={"100%"} />;
+	return <Chart {...pieChartConfig} height="100%" width="100%" />;
 }

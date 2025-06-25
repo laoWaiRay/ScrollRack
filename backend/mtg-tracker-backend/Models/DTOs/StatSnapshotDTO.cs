@@ -6,8 +6,11 @@ public class StatSnapshotDTO
     public required int GamesPlayed { get; set; }
     public required int GamesWon { get; set; }
     public required int NumDecks { get; set; }
+    public DateTime? LastWon { get; set; }
+    public required List<string> MostPlayedCommanders { get; set; }
+    public required List<string> LeastPlayedCommanders { get; set; }
     public required int CurrentWinStreak { get; set; }
-    public required int CurrentLossStreak { get; set; }
+    public bool? IsCurrentWinStreak { get; set; }
     
     // Stored in DB to avoid expensive operations
     public required int LongestWinStreak { get; set; }

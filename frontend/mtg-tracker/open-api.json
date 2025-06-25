@@ -1312,6 +1312,16 @@
         "tags": [
           "StatSnapshot"
         ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2267,8 +2277,9 @@
           "gamesPlayed",
           "gamesWon",
           "numDecks",
+          "mostPlayedCommanders",
+          "leastPlayedCommanders",
           "currentWinStreak",
-          "currentLossStreak",
           "longestWinStreak",
           "longestLossStreak"
         ],
@@ -2286,13 +2297,30 @@
             "type": "integer",
             "format": "int32"
           },
+          "lastWon": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "mostPlayedCommanders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "leastPlayedCommanders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "currentWinStreak": {
             "type": "integer",
             "format": "int32"
           },
-          "currentLossStreak": {
-            "type": "integer",
-            "format": "int32"
+          "isCurrentWinStreak": {
+            "type": "boolean",
+            "nullable": true
           },
           "longestWinStreak": {
             "type": "integer",
