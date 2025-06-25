@@ -22,7 +22,7 @@ export default function FilterSortBar({
 	useFilterButton = true,
 }: FilterSortBarInterface) {
 	return (
-		<section className="flex w-full mt-2 justify-between items-center gap-2 px-2">
+		<section className="flex w-full mt-2 justify-between items-center gap-2 px-2 max-w-md">
 			<SearchBar
 				value={filter}
 				onChange={(e) => setFilter(e.target.value)}

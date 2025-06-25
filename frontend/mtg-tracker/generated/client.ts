@@ -29,8 +29,8 @@ type DeckReadDTO = {
   latestWin?: (string | null) | undefined;
   currentStreak?: (number | null) | undefined;
   isCurrentWinStreak?: (boolean | null) | undefined;
-  longestWinStreak: number;
-  longestLossStreak: number;
+  longestWinStreak?: (number | null) | undefined;
+  longestLossStreak?: (number | null) | undefined;
   fastestWinInSeconds?: (number | null) | undefined;
   slowestWinInSeconds?: (number | null) | undefined;
   par?: (number | null) | undefined;
@@ -135,8 +135,8 @@ const DeckReadDTO: z.ZodType<DeckReadDTO> = z
     latestWin: z.string().datetime({ offset: true }).nullish(),
     currentStreak: z.number().int().nullish(),
     isCurrentWinStreak: z.boolean().nullish(),
-    longestWinStreak: z.number().int(),
-    longestLossStreak: z.number().int(),
+    longestWinStreak: z.number().int().nullish(),
+    longestLossStreak: z.number().int().nullish(),
     fastestWinInSeconds: z.number().int().nullish(),
     slowestWinInSeconds: z.number().int().nullish(),
     par: z.number().nullish(),
@@ -220,6 +220,7 @@ const GameWriteDTO = z
     roomId: z.number().int(),
     createdByUserId: z.string(),
     winnerId: z.string(),
+    imported: z.boolean().nullish(),
   })
   .passthrough();
 const GameParticipationWriteDTO = z
@@ -249,9 +250,8 @@ const StatSnapshotDTO = z
     currentLossStreak: z.number().int(),
     longestWinStreak: z.number().int(),
     longestLossStreak: z.number().int(),
-    createdAt: z.string().datetime({ offset: true }),
+    createdAt: z.string().datetime({ offset: true }).optional(),
   })
-  .partial()
   .passthrough();
 const UserMultipleDTO = z.object({ ids: z.array(z.string()) }).passthrough();
 const UserWriteDTO = z
@@ -476,7 +476,17 @@ const endpoints = makeApi([
       {
         name: "page",
         type: "Query",
-        schema: z.number().int().optional().default(0),
+        schema: z.number().int().optional(),
+      },
+      {
+        name: "startDate",
+        type: "Query",
+        schema: z.string().datetime({ offset: true }).optional(),
+      },
+      {
+        name: "endDate",
+        type: "Query",
+        schema: z.string().datetime({ offset: true }).optional(),
       },
     ],
     response: PagedResultOfGameReadDTO,

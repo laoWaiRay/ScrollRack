@@ -10,7 +10,7 @@ public class Game
 
     public int NumPlayers { get; set; }
     public int NumTurns { get; set; }
-    public int Seconds { get; set; }
+    public int? Seconds { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public string? CreatedByUserId { get; set; }
@@ -18,4 +18,8 @@ public class Game
 
     public string? WinnerId { get; set; } = null!;
     public ApplicationUser? Winner { get; set; } = null!;
+
+    // If true, the game can be ignored for the purposes of computing certain stats
+    //  (e.g. fastest/slowest games, streaks, etc. ).
+    public bool Imported { get; set; } = false;
 }

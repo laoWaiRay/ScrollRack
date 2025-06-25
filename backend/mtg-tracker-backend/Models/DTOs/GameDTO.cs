@@ -26,4 +26,6 @@ public class GameWriteDTO
 
     public required string CreatedByUserId { get; set; }
     public required string WinnerId { get; set; }
+
+    public bool? Imported { get; set; } = false;
 }

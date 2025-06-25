@@ -35,7 +35,6 @@
 		"react-dom": "^19.0.0",
 		"react-toastify": "^11.0.5",
 		"react-zxing": "^2.1.0",
-		"swr": "^2.3.3",
 		"zod": "^3.25.56"
 	},
 	"devDependencies": {

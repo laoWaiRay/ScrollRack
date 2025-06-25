@@ -14,6 +14,8 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { useGame } from "@/hooks/useGame";
+import { useRouter } from "next/navigation";
+import { useStatSnapshot } from "@/hooks/useStatSnapshot";
 
 interface CommandZoneInterface {
 	statSnapshot: StatSnapshotDTO | null;
@@ -22,57 +24,79 @@ interface CommandZoneInterface {
 interface StatCardData {
 	title: string;
 	data: string | number;
-	subData: string | number;
+	subData: (string | number)[];
 	styles?: { main: string; sub: string };
 }
 
 const statCardNumberStyles = {
-	main: "text-2xl text-fg-light my-2",
+	main: "text-2xl text-fg-light my-2 flex",
 	sub: "text-fg-dark",
 };
 
-export default function CommandZone({
-	statSnapshot,
-}: CommandZoneInterface) {
+const statCardTextStyles = {
+	main: "text-lg text-fg-light my-2",
+	sub: "text-fg-dark",
+};
+
+export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 	const { user } = useAuth();
-	const { games } = useGame();
+	const { gameState } = useGame();
+	const { snapshot } = useStatSnapshot();
+	const router = useRouter();
+
+	console.log(JSON.stringify(snapshot, undefined, 3));
 
 	const statCardData: StatCardData[] = [
 		{
-			title: "Total Games",
+			title: "Games",
 			data: statSnapshot?.gamesPlayed ?? 0,
-			subData: `this month: ${0}`,
+			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
-			title: "Total Wins",
+			title: "Wins",
 			data: statSnapshot?.gamesWon ?? 0,
-			subData: `this month: ${0}`,
+			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
 			title: "Decks",
 			data: statSnapshot?.numDecks ?? 0,
-			subData: `this month: ${0}`,
+			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
-			title: "Most Played",
-			data: `${"Urza, Lord High Artificer"}`,
-			subData: `this month: ${"Atraxa, Grand Unifier"}`,
-			styles: {
-				main: "text-lg text-fg-light my-2",
-				sub: "text-fg-dark",
-			},
+			title: "Last Won",
+			data: statSnapshot?.numDecks ?? 0,
+			subData: [],
+			styles: statCardNumberStyles,
 		},
 		{
 			title: "Recently Played",
 			data: `${"Atraxa, Grand Unifier"}`,
-			subData: `WIN`,
+			subData: [`WIN`],
 			styles: {
 				main: "text-lg text-fg-light my-2",
 				sub: "text-success font-bold tracking-wider",
 			},
+		},
+		{
+			title: "Most Played",
+			data: `${"Urza, Lord High Artificer"}`,
+			subData: ["Atraxa, Grand Unifier", "Sheoldred, the Apocalypse"],
+			styles: statCardTextStyles,
+		},
+		{
+			title: "Least Played",
+			data: `${"Krenko, Mob Boxx"}`,
+			subData: ["The Wandering Rescuer", "Jin-Gitaxias, Core Augur"],
+			styles: statCardTextStyles,
+		},
+		{
+			title: "Streaks",
+			data: statSnapshot?.numDecks ?? 0,
+			subData: [`Longest Win Streak: 10`, `Longest Loss Streak: 20`],
+			styles: statCardTextStyles,
 		},
 	];
 
@@ -81,7 +105,9 @@ export default function CommandZone({
 			<StatCard key={data.title}>
 				<h3>{data.title}</h3>
 				<div className={data.styles?.main}>{data.data}</div>
-				<div className={data.styles?.sub}>{data.subData}</div>
+				{data.subData.map((sub, i) => (
+					<div key={i} className={data.styles?.sub}>{sub}</div>
+				))}
 			</StatCard>
 		));
 	}
@@ -95,7 +121,7 @@ export default function CommandZone({
 
 					{/* Line Chart */}
 					<StatCard
-						styles="col-span-3"
+						styles="col-span-4"
 						innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
 					>
 						<LineChart height="350px" />
@@ -159,25 +185,29 @@ export default function CommandZone({
 
 					{/* Recent Game Log */}
 					<StatCard
-						styles="col-span-3 !hidden lg:!flex"
+						styles="col-span-4 !hidden lg:!flex max-h-[29rem]"
 						innerStyles="lg:justify-start h-full"
 					>
 						<h3 className="pb-4 mb-4 border-b border-surface-500">
 							Recent Games
 						</h3>
 						<div className="overflow-y-auto flex flex-col gap-2 pr-2">
-							{games.length > 0 && games.map((data) => (
-								<GameLogCard
-									key={data.id}
-                  game={data}
-								/>
-							))}
+							{gameState.games.length > 0 &&
+								gameState.games.map((data) => (
+									<GameLogCard key={data.id} game={data} />
+								))}
 						</div>
 					</StatCard>
 
 					<div className="lg:hidden w-full">
-						<div className="mx-10">
-							<ButtonPrimary onClick={() => {}}>View Game Log</ButtonPrimary>
+						<div className="mx-10 mt-8">
+							<ButtonPrimary
+								onClick={() => router.push("/log")}
+								style="transparent"
+								uppercase={false}
+							>
+								View Games
+							</ButtonPrimary>
 						</div>
 					</div>
 				</div>

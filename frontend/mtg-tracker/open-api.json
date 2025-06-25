@@ -813,8 +813,23 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 0
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -1760,9 +1775,7 @@
           "scryfallId",
           "numGames",
           "numWins",
-          "createdAt",
-          "longestWinStreak",
-          "longestLossStreak"
+          "createdAt"
         ],
         "type": "object",
         "properties": {
@@ -1810,11 +1823,13 @@
           },
           "longestWinStreak": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "longestLossStreak": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "fastestWinInSeconds": {
             "type": "integer",
@@ -2046,6 +2061,10 @@
           },
           "winnerId": {
             "type": "string"
+          },
+          "imported": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -2244,6 +2263,15 @@
         }
       },
       "StatSnapshotDTO": {
+        "required": [
+          "gamesPlayed",
+          "gamesWon",
+          "numDecks",
+          "currentWinStreak",
+          "currentLossStreak",
+          "longestWinStreak",
+          "longestLossStreak"
+        ],
         "type": "object",
         "properties": {
           "gamesPlayed": {

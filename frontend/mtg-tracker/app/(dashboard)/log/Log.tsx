@@ -16,10 +16,9 @@ import { useGame } from "@/hooks/useGame";
 import useToast from "@/hooks/useToast";
 import Switch from "@/components/Switch";
 import Drawer from "@/components/Drawer";
-import { PickerValue } from "@mui/x-date-pickers/internals";
 import dayjs from "dayjs";
 import Fuse from "fuse.js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import East from "@/public/icons/east.svg";
 
 interface LogInterface {}
@@ -40,15 +39,12 @@ export default function Log({}: LogInterface) {
 	const { user } = useAuth();
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const [filter, setFilter] = useState("");
-
 	const [dateFilters, setDateFilters] = useState(initialDateFilters);
-
 	const [draftDateFilters, setDraftDateFilters] = useState(dateFilters);
-
 	const [filtered, setFiltered] = useState(gameState.games);
 	const { toast } = useToast();
-
 	const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
 	async function handleLoadMore() {
 		if (!gameState.hasMore) {
@@ -59,6 +55,7 @@ export default function Log({}: LogInterface) {
 		try {
 			let nextGames: GameState | null = null;
 			const { showAllDates, startDate, endDate } = dateFilters;
+      setIsFetching(true);
 
 			if (showAllDates) {
 				nextGames = await getGames(gameState.page + 1);
@@ -76,8 +73,11 @@ export default function Log({}: LogInterface) {
 				type: ActionType.SET_HAS_MORE,
 				payload: nextGames.hasMore,
 			});
+      
+      setIsFetching(false);
 		} catch (error) {
 			toast("Something went wrong fetching more games", "warn");
+      setIsFetching(false);
 		}
 	}
 
@@ -158,6 +158,15 @@ export default function Log({}: LogInterface) {
 			<GameLogCard key={data.id} game={data} showButtons={true} />
 		));
 	}
+  
+  // Set client state back to default on dismount
+  useEffect(() => {
+    return () => {
+      (async function () {
+        await updateGames(initialDateFilters);
+      })()
+    }
+  }, [])
 
 	return (
 		<DashboardLayout>
@@ -292,6 +301,7 @@ export default function Log({}: LogInterface) {
 									onClick={handleLoadMore}
 									style="transparent"
 									uppercase={false}
+                  disabled={isFetching}
 								>
 									Load More
 								</ButtonPrimary>

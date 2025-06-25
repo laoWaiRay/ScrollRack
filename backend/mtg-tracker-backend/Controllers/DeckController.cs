@@ -40,6 +40,8 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             .OrderByDescending(gp => gp.CreatedAt)
             .ToListAsync();
 
+        var userStatSnapshot = await _context.StatSnapshots.FirstOrDefaultAsync(s => s.UserId == userId);
+
         List<DeckReadDTO> deckReadDTOs = [];
 
         foreach (var deck in userDecks)
@@ -52,9 +54,10 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             var latestWin = deckGameParticipations?
                 .FirstOrDefault(gp => gp.DeckId == deck.Id && gp.Won)?.CreatedAt;
 
-            var isWinStreak = deckGameParticipations?.FirstOrDefault(gp => gp.DeckId == deck.Id)?.Won;
+            var isWinStreak = deckGameParticipations?
+                .FirstOrDefault(gp => gp.DeckId == deck.Id && !gp.Game.Imported)?.Won;
             var streak = deckGameParticipations?
-                .TakeWhile(gp => gp.Won == isWinStreak)
+                .TakeWhile(gp => gp.Won == isWinStreak && !gp.Game.Imported)
                 .Count();
 
             if (isWinStreak.HasValue && streak.HasValue)
@@ -62,10 +65,20 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
                 if (isWinStreak == true && streak > deck.LongestWinStreak)
                 {
                     deck.LongestWinStreak = streak.Value;
+
+                    if (userStatSnapshot != null && streak > userStatSnapshot.LongestWinStreak)
+                    {
+                        userStatSnapshot.LongestWinStreak = streak.Value;
+                    }
                 }
                 if (isWinStreak == false && streak > deck.LongestLossStreak)
                 {
                     deck.LongestLossStreak = streak.Value;
+
+                    if (userStatSnapshot != null && streak > userStatSnapshot.LongestLossStreak)
+                    {
+                        userStatSnapshot.LongestLossStreak = streak.Value;
+                    }
                 }
             }
 

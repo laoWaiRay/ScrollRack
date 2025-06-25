@@ -14,7 +14,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private const int PAGE_SIZE = 3;
+    private const int PAGE_SIZE = 20;
 
     // GET: api/game?page=0&startDate=...&endDate=...
     // Games are sorted by most recent first. Returns the most recent Nth page of games.

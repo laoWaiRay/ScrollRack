@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Mtg_tracker.Models;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Mtg_tracker.Migrations
 {
     [DbContext(typeof(MtgContext))]
-    partial class MtgContextModelSnapshot : ModelSnapshot
+    [Migration("20250625071518_UpdateStatSnaphotModelRemoveComputedProperties")]
+    partial class UpdateStatSnaphotModelRemoveComputedProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -420,10 +423,6 @@ namespace Mtg_tracker.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_id");
 
-                    b.Property<bool>("Imported")
-                        .HasColumnType("boolean")
-                        .HasColumnName("imported");
-
                     b.Property<int>("NumPlayers")
                         .HasColumnType("integer")
                         .HasColumnName("num_players");
@@ -436,7 +435,7 @@ namespace Mtg_tracker.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("room_id");
 
-                    b.Property<int?>("Seconds")
+                    b.Property<int>("Seconds")
                         .HasColumnType("integer")
                         .HasColumnName("seconds");
 

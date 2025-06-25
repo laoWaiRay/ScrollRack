@@ -50,7 +50,7 @@ export default function InGameScreen({
 	});
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
 	const { toast } = useToast();
-	const { games, dispatch: dispatchGame } = useGame();
+	const { gameState, dispatch: dispatchGameState } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
   const { decks, dispatch: dispatchDeck } = useDeck();
@@ -132,9 +132,9 @@ export default function InGameScreen({
 			}
 
 			toast("Game saved", "success");
-			dispatchGame({
+			dispatchGameState({
 				type: GameActionType.UPDATE,
-				payload: [...games, gameReadDTO],
+				payload: [...gameState.games, gameReadDTO],
 			});
 			if (hostGpReadDTO) {
 				dispatchGameParticipation({
@@ -144,7 +144,7 @@ export default function InGameScreen({
         
         const updatedDecks = await getDecks();
         dispatchDeck({
-          type: GameActionType.UPDATE,
+          type: DeckActionType.UPDATE,
           payload: updatedDecks,
         })
 			}

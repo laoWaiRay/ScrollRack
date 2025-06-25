@@ -2,13 +2,16 @@ namespace Mtg_tracker.Models.DTOs;
 
 public class StatSnapshotDTO
 { 
-    public int GamesPlayed { get; set; }
-    public int GamesWon { get; set; }
-    public int NumDecks { get; set; }
-    public int CurrentWinStreak { get; set; }
-    public int CurrentLossStreak { get; set; }
-    public int LongestWinStreak { get; set; }
-    public int LongestLossStreak { get; set; }
+    // Computed Values
+    public required int GamesPlayed { get; set; }
+    public required int GamesWon { get; set; }
+    public required int NumDecks { get; set; }
+    public required int CurrentWinStreak { get; set; }
+    public required int CurrentLossStreak { get; set; }
+    
+    // Stored in DB to avoid expensive operations
+    public required int LongestWinStreak { get; set; }
+    public required int LongestLossStreak { get; set; }
 
     // Leave this as default value on writes so that EF generates the
     // value on DB insert.

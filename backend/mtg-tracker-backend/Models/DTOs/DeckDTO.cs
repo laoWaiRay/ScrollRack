@@ -13,8 +13,8 @@ public class DeckReadDTO
     public DateTime? LatestWin { get; set; }
     public int? CurrentStreak { get; set; }
     public bool? IsCurrentWinStreak { get; set; }
-    public required int LongestWinStreak { get; set; }
-    public required int LongestLossStreak { get; set; }
+    public int? LongestWinStreak { get; set; } = 0;
+    public int? LongestLossStreak { get; set; } = 0;
     public int? FastestWinInSeconds { get; set; }
     public int? SlowestWinInSeconds { get; set; }
     public double? Par { get; set; }

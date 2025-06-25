@@ -43,11 +43,11 @@ export default function DeckCard({ deck }: DeckCardInterface) {
 		},
 		{
 			title: "Longest Win Streak",
-			data: deck.longestWinStreak.toString(),
+			data: deck.longestWinStreak ? deck.longestWinStreak.toString() : "-",
 		},
 		{
 			title: "Longest Loss Streak",
-			data: deck.longestLossStreak.toString(),
+			data: deck.longestLossStreak ? deck.longestLossStreak.toString() : "-",
 		},
 		{
 			title: "Last Win",
