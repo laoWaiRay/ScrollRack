@@ -23,10 +23,9 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 });
 
 interface PieChartInterface {
-  height: string;
 }
 
-export default function PieChart({ height }: PieChartInterface) {
+export default function PieChart({ }: PieChartInterface) {
 	const pieChartConfig = {
 		type: "donut",
 		series: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -49,6 +48,7 @@ export default function PieChart({ height }: PieChartInterface) {
 				toolbar: {
 					show: false,
 				},
+        height: "350px",
 			},
 			title: {
 				text: "Decks Played",
@@ -104,8 +104,16 @@ export default function PieChart({ height }: PieChartInterface) {
 				offsetY: 2,
         height: 70
 			},
+      responsive: [{
+        breakpoint: 1024,
+        options: {
+          chart: {
+            height: '100%'
+          }
+        }
+      }]
 		},
 	};
 
-	return <Chart {...pieChartConfig} width={"100%"} height={height} />;
+	return <Chart {...pieChartConfig} width={"100%"} />;
 }

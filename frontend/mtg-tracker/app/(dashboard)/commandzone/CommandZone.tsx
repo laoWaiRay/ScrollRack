@@ -132,7 +132,7 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 						styles="col-span-2"
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
 					>
-						<PieChart height="350px" />
+						<PieChart />
 					</StatCard>
 
 					{/* Commander Showcase */}
