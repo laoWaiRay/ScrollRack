@@ -91,6 +91,11 @@ type DeckPlayCount = {
   numGames: number;
   percentOfGamesPlayed: number;
 };
+type StatSnapshotsByPeriodDTO = {
+  allTime: StatSnapshotDTO;
+  currentYear: StatSnapshotDTO;
+  currentMonth: StatSnapshotDTO;
+};
 
 const RegisterRequest = z
   .object({ email: z.string(), password: z.string() })
@@ -301,6 +306,13 @@ const StatSnapshotDTO: z.ZodType<StatSnapshotDTO> = z
     createdAt: z.string().datetime({ offset: true }).optional(),
   })
   .passthrough();
+const StatSnapshotsByPeriodDTO: z.ZodType<StatSnapshotsByPeriodDTO> = z
+  .object({
+    allTime: StatSnapshotDTO,
+    currentYear: StatSnapshotDTO,
+    currentMonth: StatSnapshotDTO,
+  })
+  .passthrough();
 const UserMultipleDTO = z.object({ ids: z.array(z.string()) }).passthrough();
 const UserWriteDTO = z
   .object({
@@ -357,6 +369,7 @@ export const schemas = {
   WinLossGameCount,
   DeckPlayCount,
   StatSnapshotDTO,
+  StatSnapshotsByPeriodDTO,
   UserMultipleDTO,
   UserWriteDTO,
   UserRegisterDTO,
@@ -696,14 +709,7 @@ const endpoints = makeApi([
     path: "/api/StatSnapshot",
     alias: "getApiStatSnapshot",
     requestFormat: "json",
-    parameters: [
-      {
-        name: "startDate",
-        type: "Query",
-        schema: z.string().datetime({ offset: true }).optional(),
-      },
-    ],
-    response: StatSnapshotDTO,
+    response: StatSnapshotsByPeriodDTO,
   },
   {
     method: "put",

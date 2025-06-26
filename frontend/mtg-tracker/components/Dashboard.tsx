@@ -30,7 +30,7 @@ interface DashboardMainInterface {
 interface DashboardHeaderInterface {
 	user: UserReadDTO | null;
 	title: string;
-  align?: "left" | "right";
+  justify?: "justify-start" | "justify-between";
 	children?: ReactNode;
 	childrenStyles?: string;
 }
@@ -56,7 +56,7 @@ export function DashboardHeader({
 	title,
 	children,
 	childrenStyles,
-  align = "left"
+  justify = "justify-between"
 }: DashboardHeaderInterface) {
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 	const { friendRequests } = useFriendRequest();
@@ -64,13 +64,13 @@ export function DashboardHeader({
 
 	return (
 		<div className="border-b border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
-			<div className="flex justify-between items-center mx-4">
-				<div className="flex gap-8 items-center">
+			<div className={`flex ${justify} lg:justify-between items-center mx-4`}>
+				<div className="flex gap-8 items-center justify-start">
 					<div className="text-lg font-semibold select-none">{title}</div>
           <div className={`${childrenStyles} hidden lg:block`}>{children}</div>
 				</div>
-        <div className={`${childrenStyles} block lg:hidden`}>{children}</div>
-				<div className="text-lg items-center justify-between hidden lg:flex">
+        <div className={`${childrenStyles} flex justify-start lg:hidden`}>{children}</div>
+				<div className={`text-lg items-center justify-between hidden lg:flex`}>
 					{/* User Controls */}
 					<ButtonIcon onClick={() => router.push("/friends/add")} styles={buttonIconStyle}>
 						<UserAdd className="w-[1.5em] h-[1.5em] stroke-1" />

@@ -15,7 +15,7 @@ import { GameParticipationProvider } from "@/context/GameParticipationContext";
 import DatePickerProvider from "@/components/DatePickerProvider";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { getStatSnapshot } from "@/actions/statSnapshots";
+import { getStatSnapshots } from "@/actions/statSnapshots";
 import { SnapshotProvider } from "@/context/StatSnapshotContext";
 
 export default async function layout({ children }: { children: ReactNode }) {
@@ -25,7 +25,7 @@ export default async function layout({ children }: { children: ReactNode }) {
 	const decks = await getDecks();
 	const gameState = await getGames();
 	const gameParticipations = await getGameParticipations();
-	const statSnapshot = await getStatSnapshot();
+	const statSnapshots = await getStatSnapshots();
 
 	return (
 		<AppRouterCacheProvider>
@@ -39,7 +39,7 @@ export default async function layout({ children }: { children: ReactNode }) {
 										<GameParticipationProvider
 											initialGameParticipations={gameParticipations}
 										>
-											<SnapshotProvider initialSnapshot={statSnapshot}>
+											<SnapshotProvider initialSnapshots={statSnapshots}>
 												<DashboardRootLayout>{children}</DashboardRootLayout>
 											</SnapshotProvider>
 										</GameParticipationProvider>

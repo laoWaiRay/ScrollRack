@@ -2,7 +2,6 @@
 import styles from "./styles.module.css";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
-import { StatSnapshotDTO } from "@/types/client";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
 import ButtonPrimary from "@/components/ButtonPrimary";
@@ -16,12 +15,13 @@ import {
 import { useGame } from "@/hooks/useGame";
 import { useRouter } from "next/navigation";
 import { useStatSnapshot } from "@/hooks/useStatSnapshot";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
 import dayjs from "dayjs";
+import DropdownMenu from "@/components/DropdownMenu";
+import { defaultStatSnapshots } from "@/context/StatSnapshotContext";
 
 interface CommandZoneInterface {
-	statSnapshot: StatSnapshotDTO | null;
 }
 
 interface StatCardData {
@@ -41,22 +41,29 @@ const statCardTextStyles = {
 	sub: "text-fg-dark",
 };
 
-export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
+export type TimePeriod = "All" | "Year" | "Month";
+const timePeriods: TimePeriod[] = ["All", "Year", "Month"];
+
+export default function CommandZone({}: CommandZoneInterface) {
 	const { user } = useAuth();
 	const { gameState } = useGame();
 	const { gameParticipations } = useGameParticipation();
-	const { snapshot } = useStatSnapshot();
+	const { snapshots } = useStatSnapshot();
 	const router = useRouter();
-
-	// if (snapshot.winLossGamesByPeriod) {
-	// 	for (const bucket of snapshot.winLossGamesByPeriod) {
-	// 		const periodStart = dayjs(bucket.periodStart).format("MMM D");
-	// 		const periodEnd = dayjs(bucket.periodEnd).format("MMM D");
-	// 		console.log(
-	// 			`start: ${periodStart}, end: ${periodEnd}, games: ${bucket.games}, wins: ${bucket.wins}, losses: ${bucket.losses}`
-	// 		);
-	// 	}
-	// }
+	const [timePeriod, setTimePeriod] = useState(timePeriods[0]);
+  
+  const snapshot = useMemo(() => {
+    switch (timePeriod) {
+      case "All":
+        return snapshots.allTime; 
+      case "Year":
+        return snapshots.currentYear;
+      case "Month":
+        return snapshots.currentMonth
+      default:
+        return defaultStatSnapshots.allTime;
+    }
+  }, [timePeriod])
 
 	const mostRecentDeck = useMemo(() => {
 		const sorted = gameParticipations.sort(
@@ -77,26 +84,26 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 	const statCardData: StatCardData[] = [
 		{
 			title: "Games",
-			data: statSnapshot?.gamesPlayed ?? 0,
+			data: snapshot.gamesPlayed ?? 0,
 			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
 			title: "Wins",
-			data: statSnapshot?.gamesWon ?? 0,
+			data: snapshot.gamesWon ?? 0,
 			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
 			title: "Decks",
-			data: statSnapshot?.numDecks ?? 0,
+			data: snapshot.numDecks ?? 0,
 			subData: [],
 			styles: statCardNumberStyles,
 		},
 		{
 			title: "Last Won",
-			data: statSnapshot?.lastWon
-				? dayjs(statSnapshot.lastWon).format("MMM D, YYYY")
+			data: snapshot.lastWon
+				? dayjs(snapshot.lastWon).format("MMM D, YYYY")
 				: "n/a",
 			subData: [],
 			styles: statCardTextStyles,
@@ -137,11 +144,11 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 		{
 			title: "Streaks",
 			data:
-				statSnapshot?.currentWinStreak &&
-				statSnapshot?.isCurrentWinStreak != null
-					? statSnapshot.isCurrentWinStreak
-						? `${statSnapshot.currentWinStreak} Wins`
-						: `${statSnapshot.currentWinStreak} Losses`
+				snapshot.currentWinStreak &&
+				snapshot.isCurrentWinStreak != null
+					? snapshot.isCurrentWinStreak
+						? `${snapshot.currentWinStreak} Wins`
+						: `${snapshot.currentWinStreak} Losses`
 					: "n/a",
 			subData: [
 				`Longest Win Streak: ${snapshot.longestWinStreak}`,
@@ -149,9 +156,9 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 			],
 			styles: {
 				main: `text-lg ${
-					statSnapshot?.isCurrentWinStreak == null
+					snapshot.isCurrentWinStreak == null
 						? "text-fg-light"
-						: statSnapshot.isCurrentWinStreak
+						: snapshot.isCurrentWinStreak
 						? "text-success"
 						: "text-error"
 				} my-2`,
@@ -176,7 +183,15 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 
 	return (
 		<DashboardLayout>
-			<DashboardHeader user={user} title="Command Zone" />
+			<DashboardHeader user={user} title="Command Zone" justify="justify-start">
+				<div className="ml-4">
+					<DropdownMenu<TimePeriod>
+						options={timePeriods}
+						selected={timePeriod}
+						setSelected={setTimePeriod}
+					/>
+				</div>
+			</DashboardHeader>
 			<DashboardMain styles="!items-center">
 				<div className={`dashboard-main-content-layout ${styles.gridLayout} `}>
 					{renderStatCards()}
@@ -197,7 +212,10 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
 					>
 						<div className="h-[350px] lg:h-full">
-							<PieChart deckPlayCounts={snapshot.deckPlayCounts ?? []} gamesPlayed={snapshot.gamesPlayed} />
+							<PieChart
+								deckPlayCounts={snapshot.deckPlayCounts ?? []}
+								gamesPlayed={snapshot.gamesPlayed}
+							/>
 						</div>
 					</StatCard>
 

@@ -1312,33 +1312,23 @@
         "tags": [
           "StatSnapshot"
         ],
-        "parameters": [
-          {
-            "name": "startDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotDTO"
+                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotDTO"
+                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotDTO"
+                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
                 }
               }
             }
@@ -2366,6 +2356,25 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "StatSnapshotsByPeriodDTO": {
+        "required": [
+          "allTime",
+          "currentYear",
+          "currentMonth"
+        ],
+        "type": "object",
+        "properties": {
+          "allTime": {
+            "$ref": "#/components/schemas/StatSnapshotDTO"
+          },
+          "currentYear": {
+            "$ref": "#/components/schemas/StatSnapshotDTO"
+          },
+          "currentMonth": {
+            "$ref": "#/components/schemas/StatSnapshotDTO"
           }
         }
       },

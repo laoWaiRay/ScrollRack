@@ -16,7 +16,6 @@ interface PieChartInterface {
 }
 
 export default function PieChart({ deckPlayCounts, gamesPlayed }: PieChartInterface) {
-  console.log(gamesPlayed)
 	const pieChartConfig = {
 		type: "donut",
 		series: deckPlayCounts.map((playCount) => playCount.numGames),

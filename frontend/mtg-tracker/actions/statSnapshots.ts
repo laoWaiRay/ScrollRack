@@ -2,9 +2,9 @@
 
 import { api } from "@/generated/client";
 import { callWithAuth } from "./helpers/callWithAuth";
-import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
+import { defaultStatSnapshots } from "@/context/StatSnapshotContext";
 
-// Get stat snapshot for current user
-export async function getStatSnapshot() {
-  return await callWithAuth(api.getApiStatSnapshot) ?? defaultStatSnapshot;
+// Get stat snapshots for current user
+export async function getStatSnapshots() {
+  return await callWithAuth(api.getApiStatSnapshot) ?? defaultStatSnapshots;
 }

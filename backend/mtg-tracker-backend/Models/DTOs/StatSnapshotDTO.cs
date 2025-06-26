@@ -37,3 +37,10 @@ public class StatSnapshotDTO
     // value on DB insert.
     public DateTime CreatedAt { get; set; }
 }
+
+public class StatSnapshotsByPeriodDTO
+{
+    public required StatSnapshotDTO AllTime { get; set; }    
+    public required StatSnapshotDTO CurrentYear { get; set; }    
+    public required StatSnapshotDTO CurrentMonth { get; set; }    
+}

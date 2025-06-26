@@ -272,7 +272,7 @@ export default function Decks({}: DecksInterface) {
 
 	return (
 		<DashboardLayout>
-			<DashboardHeader title="Decks" user={user} align={"left"}>
+			<DashboardHeader title="Decks" user={user}>
 				<div className="flex gap-4">
 					<ButtonLink
 						href="/decks/edit"
