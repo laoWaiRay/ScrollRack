@@ -24,3 +24,27 @@ export const GREEN4 = "#00E65C";  // Vivid leaf green
 export const RED5 = "#CC0000";    // Deep red
 export const BLUE5 = "#0066CC";   // Bold blue
 export const GREEN5 = "#00CC55";  // Deep jungle green
+
+// Visually distinct and appealing pie chart colors for dark mode
+export const PIE_CHART_COLORS = [
+  "#4C9BFF", // Bright blue
+  "#4CFF88", // Minty green
+  "#FFC94C", // Warm yellow
+  "#C74CFF", // Electric purple
+  "#FF7A4C", // Vivid orange
+  "#4CFFD5", // Aqua
+  "#FF4CE8", // Neon pink
+  "#94FF4C", // Lime
+  "#4CFFE0", // Cyan
+  "#FFB34C", // Orange-yellow
+  "#B04CFF", // Soft violet
+  "#4CFFB0", // Light mint
+  "#FF4C94", // Hot pink
+  "#4CFFFC", // Pale teal
+  "#FFA64C", // Orange-peach
+  "#7C4CFF", // Indigo
+  "#4CFF4C", // Bright green
+  "#FF4CB2", // Magenta
+  "#4CD8FF", // Sky blue
+  "#FF4C4C", // Bright red
+];

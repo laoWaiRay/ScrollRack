@@ -31,3 +31,5 @@ export type UserWriteDTO = z.infer<typeof schemas.UserWriteDTO>;
 export type UserRegisterDTO = z.infer<typeof schemas.UserRegisterDTO>;
 export type UserLoginDTO = z.infer<typeof schemas.UserLoginDTO>;
 export type HttpValidationProblemDetails = z.infer<typeof schemas.HttpValidationProblemDetails>;
+export type WinLossGameCount = z.infer<typeof schemas.WinLossGameCount>;
+export type DeckPlayCount = z.infer<typeof schemas.DeckPlayCount>;

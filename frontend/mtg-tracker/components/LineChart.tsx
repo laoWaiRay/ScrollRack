@@ -1,21 +1,13 @@
 "use client";
 
 import {
-	BLACK,
 	BLUE,
-	BLUE2,
-	BLUE3,
-	BLUE5,
 	GREEN,
-	GREEN2,
-	GREEN3,
-	GREEN5,
 	RED,
-	RED2,
-	RED3,
-	RED5,
 	WHITE,
 } from "@/constants/colors";
+import { WinLossGameCount } from "@/types/client";
+import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -24,7 +16,7 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 });
 
 interface LineChartInterface {
-	height: string;
+  buckets: WinLossGameCount[];
 }
 
 const initialMonthNames = [
@@ -42,7 +34,15 @@ const initialMonthNames = [
 	"Dec",
 ];
 
-export default function LineChart({ height }: LineChartInterface) {
+function formatTimeShort(isoString: string) {
+  return dayjs(isoString).format("M-DD");
+}
+
+function formatTimeLong(isoString: string) {
+  return dayjs(isoString).format("MMM D");
+}
+
+export default function LineChart({ buckets }: LineChartInterface) {
 	const [monthNames, setMonthNames] = useState(initialMonthNames);
 	useEffect(() => {
 		if (window.innerWidth <= 768) {
@@ -68,15 +68,15 @@ export default function LineChart({ height }: LineChartInterface) {
 		series: [
 			{
 				name: "Played",
-				data: [6, 2, 3, 8, 1, 4, 2, 5, 6, 10, 5, 2],
+				data: buckets.map(b => b.games),
 			},
 			{
 				name: "Win",
-				data: [3, 1, 2, 5, 0, 3, 0, 2, 3, 5, 3, 2],
+				data: buckets.map(b => b.wins),
 			},
 			{
 				name: "Loss",
-				data: [3, 1, 1, 3, 1, 1, 2, 3, 3, 5, 2, 0],
+				data: buckets.map(b => b.losses),
 			},
 		],
 		options: {
@@ -84,6 +84,8 @@ export default function LineChart({ height }: LineChartInterface) {
 				toolbar: {
 					show: false,
 				},
+        floating: true,
+        width: "100%",
 			},
 			title: {
 				text: "Game History",
@@ -104,7 +106,8 @@ export default function LineChart({ height }: LineChartInterface) {
 					colors: WHITE,
 				},
 				itemMargin: {
-					horizontal: 10,
+					horizontal: 20,
+          vertical: 10,
 				},
 			},
 			colors: [BLUE, GREEN, RED],
@@ -117,20 +120,27 @@ export default function LineChart({ height }: LineChartInterface) {
 			},
 			xaxis: {
 				axisTicks: {
-					show: true,
+					show: false,
 				},
 				axisBorder: {
 					show: false,
 				},
 				labels: {
+          show: true,
+          trim: false,
+          hideOverlappingLabels: true,
+          offsetY: 0,
+          offsetX: 6,
+          rotate: 0,
 					style: {
 						colors: WHITE,
-						fontSize: "1em",
+						// fontSize: "0.5em",
 						fontFamily: "inherit",
 						fontWeight: "inherit",
 					},
 				},
-				categories: monthNames,
+        overwriteCategories: buckets.map((b, i) => i % 2 == 0 ? `${formatTimeLong(b.periodStart)}` : ""),
+        categories: buckets.map((b, i) => i < buckets.length - 1 ? `${formatTimeLong(b.periodStart)} - ${formatTimeLong(b.periodEnd)}` : "Recent"),
         tooltip: {
           enabled: false,
         },
@@ -139,7 +149,7 @@ export default function LineChart({ height }: LineChartInterface) {
 				labels: {
 					style: {
 						colors: WHITE,
-						fontSize: "1em",
+						// fontSize: "1em",
 						fontFamily: "inherit",
 						fontWeight: "inherit",
 					},
@@ -163,13 +173,14 @@ export default function LineChart({ height }: LineChartInterface) {
 				opacity: 0.8,
 			},
 			tooltip: {
+        enabled: true,
 				theme: "dark",
         x: {
-          show: false
+          show: true,
         },
 			},
 		},
 	};
 
-	return <Chart {...lineChartConfig} width={"100%"} height={height} />;
+	return <Chart {...lineChartConfig} width="100%" height="100%"/>;
 }

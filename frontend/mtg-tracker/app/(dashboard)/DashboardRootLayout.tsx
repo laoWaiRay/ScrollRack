@@ -17,7 +17,7 @@ import Filter from "@/public/icons/filter.svg";
 import UserAdd from "@/public/icons/user-add.svg";
 import Bell from "@/public/icons/bell.svg";
 import SidebarLink from "@/components/SidebarLink";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Tooltip from "@/components/Tooltip";
 import Hamburger from "@/components/animations/Hamburger";
 import { getPath } from "@/helpers/url";
@@ -94,6 +94,7 @@ export default function DashboardRootLayout({
 }: DashboardRootLayoutProps) {
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const router = useRouter();
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (
@@ -197,7 +198,7 @@ export default function DashboardRootLayout({
 					className="lg:hidden flex fixed w-screen justify-between items-center font-dancing-script text-white 
         text-xl select-none p-4 z-90 bg-surface-600 border-b border-surface-500"
 				>
-					<div className="flex items-center justify-center ml-4">
+					<div className="flex items-center justify-center ml-4" onClick={() => router.push("/commandzone")}>
 						<LogoImage
 							title="Scroll with quill writing"
 							className="text-white w-[1em] h-[1em] mr-[4px]"

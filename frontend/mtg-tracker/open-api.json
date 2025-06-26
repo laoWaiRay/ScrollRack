@@ -1776,6 +1776,27 @@
           }
         }
       },
+      "DeckPlayCount": {
+        "required": [
+          "commander",
+          "numGames",
+          "percentOfGamesPlayed"
+        ],
+        "type": "object",
+        "properties": {
+          "commander": {
+            "type": "string"
+          },
+          "numGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "percentOfGamesPlayed": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
       "DeckReadDTO": {
         "required": [
           "id",
@@ -2322,6 +2343,18 @@
             "type": "boolean",
             "nullable": true
           },
+          "winLossGamesByPeriod": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WinLossGameCount"
+            }
+          },
+          "deckPlayCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeckPlayCount"
+            }
+          },
           "longestWinStreak": {
             "type": "integer",
             "format": "int32"
@@ -2529,6 +2562,38 @@
           "profile": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "WinLossGameCount": {
+        "required": [
+          "periodStart",
+          "periodEnd",
+          "wins",
+          "losses",
+          "games"
+        ],
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "wins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "losses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "games": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }

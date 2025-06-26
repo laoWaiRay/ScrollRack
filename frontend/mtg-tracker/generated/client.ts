@@ -64,6 +64,33 @@ type UserReadDTO = {
   profile?: (string | null) | undefined;
   decks: Array<DeckReadDTO>;
 };
+type StatSnapshotDTO = {
+  gamesPlayed: number;
+  gamesWon: number;
+  numDecks: number;
+  lastWon?: (string | null) | undefined;
+  mostPlayedCommanders: Array<string>;
+  leastPlayedCommanders: Array<string>;
+  currentWinStreak: number;
+  isCurrentWinStreak?: (boolean | null) | undefined;
+  winLossGamesByPeriod?: Array<WinLossGameCount> | undefined;
+  deckPlayCounts?: Array<DeckPlayCount> | undefined;
+  longestWinStreak: number;
+  longestLossStreak: number;
+  createdAt?: string | undefined;
+};
+type WinLossGameCount = {
+  periodStart: string;
+  periodEnd: string;
+  wins: number;
+  losses: number;
+  games: number;
+};
+type DeckPlayCount = {
+  commander: string;
+  numGames: number;
+  percentOfGamesPlayed: number;
+};
 
 const RegisterRequest = z
   .object({ email: z.string(), password: z.string() })
@@ -241,7 +268,23 @@ const RoomDTO: z.ZodType<RoomDTO> = z
   })
   .passthrough();
 const AddPlayerDTO = z.object({ id: z.string() }).passthrough();
-const StatSnapshotDTO = z
+const WinLossGameCount: z.ZodType<WinLossGameCount> = z
+  .object({
+    periodStart: z.string().datetime({ offset: true }),
+    periodEnd: z.string().datetime({ offset: true }),
+    wins: z.number().int(),
+    losses: z.number().int(),
+    games: z.number().int(),
+  })
+  .passthrough();
+const DeckPlayCount: z.ZodType<DeckPlayCount> = z
+  .object({
+    commander: z.string(),
+    numGames: z.number().int(),
+    percentOfGamesPlayed: z.number(),
+  })
+  .passthrough();
+const StatSnapshotDTO: z.ZodType<StatSnapshotDTO> = z
   .object({
     gamesPlayed: z.number().int(),
     gamesWon: z.number().int(),
@@ -251,6 +294,8 @@ const StatSnapshotDTO = z
     leastPlayedCommanders: z.array(z.string()),
     currentWinStreak: z.number().int(),
     isCurrentWinStreak: z.boolean().nullish(),
+    winLossGamesByPeriod: z.array(WinLossGameCount).optional(),
+    deckPlayCounts: z.array(DeckPlayCount).optional(),
     longestWinStreak: z.number().int(),
     longestLossStreak: z.number().int(),
     createdAt: z.string().datetime({ offset: true }).optional(),
@@ -309,6 +354,8 @@ export const schemas = {
   GameParticipationWriteDTO,
   RoomDTO,
   AddPlayerDTO,
+  WinLossGameCount,
+  DeckPlayCount,
   StatSnapshotDTO,
   UserMultipleDTO,
   UserWriteDTO,

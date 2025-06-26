@@ -48,7 +48,15 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 	const { snapshot } = useStatSnapshot();
 	const router = useRouter();
 
-	console.log(JSON.stringify(snapshot, undefined, 3));
+	// if (snapshot.winLossGamesByPeriod) {
+	// 	for (const bucket of snapshot.winLossGamesByPeriod) {
+	// 		const periodStart = dayjs(bucket.periodStart).format("MMM D");
+	// 		const periodEnd = dayjs(bucket.periodEnd).format("MMM D");
+	// 		console.log(
+	// 			`start: ${periodStart}, end: ${periodEnd}, games: ${bucket.games}, wins: ${bucket.wins}, losses: ${bucket.losses}`
+	// 		);
+	// 	}
+	// }
 
 	const mostRecentDeck = useMemo(() => {
 		const sorted = gameParticipations.sort(
@@ -178,7 +186,9 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 						styles="col-span-4"
 						innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
 					>
-						<LineChart height="350px" />
+						<div className="h-[350px] block pb-4">
+							<LineChart buckets={snapshot.winLossGamesByPeriod ?? []} />
+						</div>
 					</StatCard>
 
 					{/* Donut Chart */}
@@ -186,9 +196,9 @@ export default function CommandZone({ statSnapshot }: CommandZoneInterface) {
 						styles="col-span-2"
 						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
 					>
-            <div className="h-[350px] lg:h-full">
-              <PieChart />
-            </div>
+						<div className="h-[350px] lg:h-full">
+							<PieChart deckPlayCounts={snapshot.deckPlayCounts ?? []} gamesPlayed={snapshot.gamesPlayed} />
+						</div>
 					</StatCard>
 
 					{/* Commander Showcase */}

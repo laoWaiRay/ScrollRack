@@ -36,14 +36,16 @@ public class StatSnapshotController(MtgContext context, IMapper mapper) : Contro
             return Unauthorized();
         }
 
-        if (user.StatSnapshot is null) {
+        if (user.StatSnapshot is null)
+        {
             return NotFound();
         }
 
         var gameParticipationsQuery = _context.GameParticipations
             .Include(gp => gp.Game)
+            .Include(gp => gp.Deck)
             .Where(gp => gp.UserId == userId);
-        
+
         if (startDate != null)
         {
             gameParticipationsQuery = gameParticipationsQuery
@@ -90,6 +92,62 @@ public class StatSnapshotController(MtgContext context, IMapper mapper) : Contro
             .TakeLast(3)
             .ToList();
 
+        // Group games/wins/losses by time period for displaying on Line Chart
+        int bucketCount = 12;
+
+        var firstDate = gameParticipations.Last().CreatedAt;
+        var lastDate = gameParticipations.First().CreatedAt;
+        var totalSpan = lastDate - firstDate;
+        var bucketSpan = TimeSpan.FromSeconds(totalSpan.TotalSeconds / bucketCount);
+
+        var buckets = new List<WinLossGameCount>();
+        for (int i = 0; i < bucketCount; i++)
+        {
+            var periodStart = firstDate.AddSeconds(i * bucketSpan.TotalSeconds);
+            var periodEnd = (i == bucketCount - 1)
+                ? lastDate
+                : firstDate.AddSeconds((i + 1) * bucketSpan.TotalSeconds);
+
+            buckets.Add(new WinLossGameCount()
+            {
+                PeriodStart = periodStart,
+                PeriodEnd = periodEnd,
+                Games = 0,
+                Wins = 0,
+                Losses = 0
+            });
+        }
+
+        foreach (var gp in gameParticipations)
+        {
+            var offset = gp.CreatedAt - firstDate;
+            var index = (int)(offset.TotalSeconds / bucketSpan.TotalSeconds);
+
+            if (index >= bucketCount)
+            {
+                index = bucketCount - 1;
+            }
+
+            if (gp.Won)
+            {
+                buckets[index].Wins++;
+            }
+            else
+            {
+                buckets[index].Losses++;
+            }
+            buckets[index].Games++;
+        }
+
+        var deckPlayCounts = commandersByPlayrate
+            .Select(grouping => new DeckPlayCount()
+            {
+                Commander = grouping.Key,
+                NumGames = grouping.Count,
+                PercentOfGamesPlayed = (double)grouping.Count / gameParticipations.Count
+            })
+            .ToList();
+
         var snapshot = new StatSnapshotDTO()
         {
             GamesPlayed = gameParticipations.Count,
@@ -100,6 +158,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper) : Contro
             LeastPlayedCommanders = leastPlayedCommanders ?? [],
             CurrentWinStreak = streak,
             IsCurrentWinStreak = isWinStreak,
+            WinLossGamesByPeriod = buckets,
+            DeckPlayCounts = deckPlayCounts,
             LongestWinStreak = user.StatSnapshot.LongestWinStreak,
             LongestLossStreak = user.StatSnapshot.LongestLossStreak,
             CreatedAt = user.StatSnapshot.CreatedAt,

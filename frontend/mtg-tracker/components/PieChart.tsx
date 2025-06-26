@@ -1,21 +1,9 @@
 "use client";
 
 import {
-	BLACK,
-	BLUE,
-	BLUE2,
-	BLUE3,
-	BLUE5,
-	GREEN,
-	GREEN2,
-	GREEN3,
-	GREEN5,
-	RED,
-	RED2,
-	RED3,
-	RED5,
-	WHITE,
+  PIE_CHART_COLORS
 } from "@/constants/colors";
+import { DeckPlayCount } from "@/types/client";
 import dynamic from "next/dynamic";
 
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -23,48 +11,38 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 });
 
 interface PieChartInterface {
+	deckPlayCounts: DeckPlayCount[];
+  gamesPlayed: number;
 }
 
-export default function PieChart({ }: PieChartInterface) {
+export default function PieChart({ deckPlayCounts, gamesPlayed }: PieChartInterface) {
+  console.log(gamesPlayed)
 	const pieChartConfig = {
 		type: "donut",
-		series: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		series: deckPlayCounts.map((playCount) => playCount.numGames),
 		options: {
-			labels: [
-				"Sheoldred",
-				"Atraxa",
-				"Jin-Gitaxias",
-				"Urabrask",
-				"Vorinclex",
-				"Urza, Lord High Artificer",
-				"Wilson, Refined Grizzly",
-				"Traxos, Scourge of Kroog",
-				"The Prismatic Bridge",
-				"Mr. House",
-				"Chun Li",
-				"Jon Irenicus",
-			],
+			labels: deckPlayCounts.map((playCount) => playCount.commander),
 			chart: {
 				toolbar: {
 					show: false,
 				},
-        height: "100%",
+				height: "100%",
 			},
 			title: {
 				text: "Decks Played",
 				align: "center",
-        margin: 10,
+				margin: 10,
 				style: {
 					fontSize: "16px",
 					fontWeight: "normal",
 					fontFamily: "inherit",
-					color: WHITE,
+					color: "#ffffff",
 				},
 			},
 			dataLabels: {
 				enabled: false,
 			},
-			colors: [BLACK, WHITE, BLUE, RED, BLUE, GREEN, WHITE, WHITE, WHITE],
+			colors: deckPlayCounts.map((playCount, i) => PIE_CHART_COLORS[i % PIE_CHART_COLORS.length]),
 			tooltip: {
 				enabled: true,
 				custom: function ({
@@ -85,7 +63,7 @@ export default function PieChart({ }: PieChartInterface) {
 						`Played: ${series[seriesIndex]}` +
 						"</div>" +
 						"<div>" +
-						`${80}% of games` +
+						(gamesPlayed > 0 ? `${(series[seriesIndex] / gamesPlayed * 100).toFixed(1)}% of games` : "") +
 						"</div>" +
 						"</div>"
 					);
@@ -99,10 +77,10 @@ export default function PieChart({ }: PieChartInterface) {
 				show: true,
 				position: "bottom",
 				labels: {
-					colors: WHITE,
+					colors: "#ffffff",
 				},
 				offsetY: 2,
-        height: 70
+				height: 70,
 			},
 		},
 	};
