@@ -104,19 +104,19 @@ export default function CommandZone({}: CommandZoneInterface) {
 			title: "Last Won",
 			data: snapshot.lastWon
 				? dayjs(snapshot.lastWon).format("MMM D, YYYY")
-				: "n/a",
+				: "-",
 			subData: [],
 			styles: statCardTextStyles,
 		},
 		{
 			title: "Recently Played",
-			data: mostRecentDeck ? mostRecentDeck.commander : "n/a",
+			data: mostRecentDeck ? mostRecentDeck.commander : "-",
 			subData: [
 				mostRecentDeck
 					? mostRecentDeck.isCurrentWinStreak
 						? "WON"
 						: "LOSS"
-					: "n/a",
+					: "-",
 			],
 			styles: {
 				main: "text-lg text-fg-light my-2",
@@ -134,7 +134,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 			data:
 				snapshot.mostPlayedCommanders.length > 0
 					? snapshot.mostPlayedCommanders[0]
-					: "n/a",
+					: "-",
 			subData: snapshot.mostPlayedCommanders.slice(1, 4),
 			styles: statCardTextStyles,
 		},
@@ -143,7 +143,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 			data:
 				snapshot.leastPlayedCommanders.length > 0
 					? snapshot.leastPlayedCommanders[0]
-					: "n/a",
+					: "-",
 			subData: snapshot.leastPlayedCommanders.slice(1, 4),
 			styles: statCardTextStyles,
 		},
@@ -152,9 +152,13 @@ export default function CommandZone({}: CommandZoneInterface) {
 			data:
 				snapshot.currentWinStreak && snapshot.isCurrentWinStreak != null
 					? snapshot.isCurrentWinStreak
-						? `${snapshot.currentWinStreak} Wins`
-						: `${snapshot.currentWinStreak} Losses`
-					: "n/a",
+						? snapshot.currentWinStreak == 1 
+              ? `${snapshot.currentWinStreak} Win`
+              : `${snapshot.currentWinStreak} Wins`
+						: snapshot.currentWinStreak == 1
+              ? `${snapshot.currentWinStreak} Loss`
+              : `${snapshot.currentWinStreak} Losses`
+					: "-",
 			subData: [
 				`Longest Win Streak: ${snapshot.longestWinStreak}`,
 				`Longest Loss Streak: ${snapshot.longestLossStreak}`,

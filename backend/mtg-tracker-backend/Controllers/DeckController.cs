@@ -6,16 +6,17 @@ using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
-using System.Text.Json;
+using Mtg_tracker.Services;
 
 namespace Mtg_tracker.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
+public class DeckController(MtgContext context, IMapper mapper, DeckStatsService deckStatsService) : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly DeckStatsService _deckStatsService = deckStatsService;
 
     // GET: api/deck
     // Returns all decks for the current user
@@ -34,7 +35,7 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync();
 
-        var allDeckGameParticipations = await _context.GameParticipations
+        List<GameParticipation> allDeckGameParticipations = await _context.GameParticipations
             .Include(gp => gp.Game)
             .Where(gp => gp.UserId == userId)
             .OrderByDescending(gp => gp.CreatedAt)
@@ -46,74 +47,31 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
 
         foreach (var deck in userDecks)
         {
-            var deckGameParticipations = allDeckGameParticipations
+            List<GameParticipation> deckGameParticipations = allDeckGameParticipations
                 .Where(gp => gp.DeckId == deck.Id)
                 .OrderByDescending(d => d.CreatedAt)
                 .ToList();
 
-            var latestWin = deckGameParticipations?
+            var latestWin = deckGameParticipations
                 .FirstOrDefault(gp => gp.DeckId == deck.Id && gp.Won)?.CreatedAt;
 
-            var isWinStreak = deckGameParticipations?
+            var isWinStreak = deckGameParticipations
                 .FirstOrDefault(gp => gp.DeckId == deck.Id && !gp.Game.Imported)?.Won;
-            var streak = deckGameParticipations?
+            var streak = deckGameParticipations
                 .TakeWhile(gp => gp.Won == isWinStreak && !gp.Game.Imported)
                 .Count();
 
-            if (isWinStreak.HasValue && streak.HasValue)
-            {
-                if (isWinStreak == true && streak > deck.LongestWinStreak)
-                {
-                    deck.LongestWinStreak = streak.Value;
-                }
-                if (isWinStreak == false && streak > deck.LongestLossStreak)
-                {
-                    deck.LongestLossStreak = streak.Value;
-                }
-            }
-
-            var winningGameLengths = deckGameParticipations?
+            var winningGameLengths = deckGameParticipations
                 .Where(gp => gp.Won)
                 .Select(gp => gp.Game.Seconds)
                 .ToList();
 
             // Calculate Par
-            var parsByPodSize = deckGameParticipations?
-                .GroupBy(gp => gp.Game.NumPlayers)
-                .Select(group => 1.0 / group.Key * group.Count());
+            var par = _deckStatsService.ComputePar(deckGameParticipations);
 
-            double par = 0.0;
-
-            if (parsByPodSize != null && deckGameParticipations != null)
-            {
-                par = parsByPodSize.Aggregate(0.0, (current, next) =>
-                {
-                    return current + next;
-                });
-
-                if (deckGameParticipations.Count > 0)
-                {
-                    par /= deckGameParticipations.Count;
-                }
-                else
-                {
-                    par = 0.0;
-                }
-            }
-
-            var dto = _mapper.Map<DeckReadDTO>(deck);
-            dto.LatestWin = latestWin;
-            dto.IsCurrentWinStreak = isWinStreak;
-            dto.CurrentStreak = streak;
-            dto.NumGames = deckGameParticipations != null ? deckGameParticipations.Count : 0;
-            dto.NumWins = deckGameParticipations != null ? deckGameParticipations.Where(gp => gp.Won).Count() : 0;
-            dto.FastestWinInSeconds = winningGameLengths?.Count > 0 ? winningGameLengths.Min() : 0;
-            dto.SlowestWinInSeconds = winningGameLengths?.Count > 0 ? winningGameLengths.Max() : 0;
-            dto.Par = par;
+            DeckReadDTO dto = _deckStatsService.ComputeDeckStats(deckGameParticipations, deck);
             deckReadDTOs.Add(dto);
         }
-
-        await _context.SaveChangesAsync();
 
         return deckReadDTOs;
     }

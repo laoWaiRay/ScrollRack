@@ -12,6 +12,11 @@ public class DeckStatsService(IMapper mapper)
 
     public double ComputePar(List<GameParticipation> gameParticipations)
     {
+        if (gameParticipations.Count == 0)
+        {
+            return 0.0;
+        }
+
         var parsByPodSize = gameParticipations
             .GroupBy(gp => gp.Game.NumPlayers)
             .Select(group => 1.0 / group.Key * group.Count());
@@ -57,19 +62,11 @@ public class DeckStatsService(IMapper mapper)
         );
     }
 
-    public DeckReadDTO? ComputeMostRecentPlayedDeckStats(List<GameParticipation> filteredGameParticipations)
+    public DeckReadDTO ComputeDeckStats(List<GameParticipation> deckGameParticipations, Deck deck)
     {
-        var mostRecentPlayedDeck = filteredGameParticipations.FirstOrDefault()?.Deck;
-        if (mostRecentPlayedDeck == null)
-            return null;
+        var streakStats = ComputeStreakStats(deckGameParticipations);
 
-        var mrpdGameParticipations = filteredGameParticipations
-            .Where(gp => gp.DeckId == mostRecentPlayedDeck.Id)
-            .ToList();
-
-        var streakStats = ComputeStreakStats(filteredGameParticipations);
-
-        var winningGameLengths = mrpdGameParticipations
+        var winningGameLengths = deckGameParticipations
             .Where(gp => gp.Won)
             .Select(gp => gp.Game.Seconds)
             .ToList();
@@ -77,15 +74,13 @@ public class DeckStatsService(IMapper mapper)
         var fastestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Min() : 0;
         var slowestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Max() : 0;
 
-        double par = ComputePar(mrpdGameParticipations);
+        double par = ComputePar(deckGameParticipations);
 
-        var mrpdNumGames = filteredGameParticipations.Count(gp => gp.DeckId == mostRecentPlayedDeck.Id);
-        var mrpdNumWins = filteredGameParticipations.Count(gp => gp.DeckId == mostRecentPlayedDeck.Id && gp.Won);
-        var latestWin = mrpdGameParticipations?.Where(gp => gp.Won && !gp.Game.Imported).FirstOrDefault()?.CreatedAt;
+        var latestWin = deckGameParticipations.Where(gp => gp.Won && !gp.Game.Imported).FirstOrDefault()?.CreatedAt;
 
-        var mrpdDTO = _mapper.Map<DeckReadDTO>(mostRecentPlayedDeck);
-        mrpdDTO.NumGames = mrpdNumGames;
-        mrpdDTO.NumWins = mrpdNumWins;
+        var mrpdDTO = _mapper.Map<DeckReadDTO>(deck);
+        mrpdDTO.NumGames = deckGameParticipations.Count;
+        mrpdDTO.NumWins = deckGameParticipations.Where(gp => gp.Won).Count();
         mrpdDTO.LatestWin = latestWin;
         mrpdDTO.CurrentStreak = streakStats.CurrentStreak;
         mrpdDTO.IsCurrentWinStreak = streakStats.IsCurrentWinStreak;

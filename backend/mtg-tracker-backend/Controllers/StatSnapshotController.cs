@@ -110,8 +110,18 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     .FirstOrDefault()?.CreatedAt;
 
                 // Compute stats for Most Recently Played Deck
-                var mrpdDTO = _deckStatsService
-                    .ComputeMostRecentPlayedDeckStats(filteredGameParticipations);
+                var mostRecentPlayedDeck = filteredGameParticipations.FirstOrDefault()?.Deck;
+
+                var mrpdGameParticipations = filteredGameParticipations
+                    .Where(gp => gp.DeckId == mostRecentPlayedDeck?.Id)
+                    .ToList();
+
+                DeckReadDTO? mrpdDTO = null;
+                if (mostRecentPlayedDeck != null)
+                {
+                    mrpdDTO = _deckStatsService
+                        .ComputeDeckStats(mrpdGameParticipations, mostRecentPlayedDeck);
+                }
 
                 // Compute streak stats
                 var streakStats = _deckStatsService.ComputeStreakStats(filteredGameParticipations);

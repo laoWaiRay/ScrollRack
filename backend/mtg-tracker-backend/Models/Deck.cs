@@ -11,8 +11,5 @@ public class Deck
     public required string Commander { get; set; }
     public required string ScryfallId { get; set; }
     public string? Moxfield { get; set; }
-    // TODO: Remove this
-    public int LongestLossStreak { get; set; }
-    public int LongestWinStreak { get; set; }
     public DateTime CreatedAt { get; set; }
 }
