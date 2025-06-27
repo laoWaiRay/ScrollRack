@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using Mtg_tracker.Services;
+using System.Diagnostics;
 
 namespace Mtg_tracker.Controllers;
 
@@ -25,6 +26,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
     [HttpGet]
     public async Task<ActionResult<List<FilteredStatSnapshotDTO>>> GetStatSnapshot()
     {
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
         var userId = User.GetUserId();
         if (userId is null)
         {
@@ -184,6 +187,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             }
         }
 
+        stopwatch.Stop();
+        Console.WriteLine($"Total Time for GET StatSnapshots: {stopwatch.Elapsed.TotalMilliseconds}");
         return filteredSnapshotDTOs;
     }
 

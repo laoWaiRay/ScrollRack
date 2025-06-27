@@ -1,12 +1,9 @@
-import { DeckContext } from "@/context/DeckContext";
-import { useContext } from "react";
+import { getDecks } from "@/actions/decks";
+import useSWR from "swr";
 
 export function useDeck() {
-  const context = useContext(DeckContext);
+  const fetcher = () => getDecks();
+  const { data, error, isLoading } = useSWR('/api/deck', fetcher)
   
-  if (context === undefined) {
-    throw new Error("useDeck must be used inside a DeckProvider");
-  }
-  
-  return context;
+  return { decks: data ?? [], isError: error, isLoading };
 }

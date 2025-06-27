@@ -28,7 +28,7 @@ export default function DropdownMenu<OptionT extends string>({
 				{options.map((option) => (
 					<MenuItem key={option}>
 						<div
-							className="px-2.5 py-2 rounded-lg select-none data-focus:bg-white/5"
+							className="px-2.5 py-2 select-none data-focus:bg-white/5 border-b border-surface-500/50"
 							onClick={() => setSelected(option)}
 						>
 							<span>{option}</span>

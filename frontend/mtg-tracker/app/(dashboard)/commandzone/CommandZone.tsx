@@ -16,12 +16,11 @@ import { useGame } from "@/hooks/useGame";
 import { useRouter } from "next/navigation";
 import { useStatSnapshot } from "@/hooks/useStatSnapshot";
 import { useMemo, useState } from "react";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
 import dayjs from "dayjs";
 import DropdownMenu from "@/components/DropdownMenu";
-import { useDeck } from "@/hooks/useDeck";
 import DeckCard from "@/components/DeckCard";
 import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface CommandZoneInterface {}
 
@@ -62,9 +61,7 @@ const labelToPodSize: Record<string, number> = {
 export default function CommandZone({}: CommandZoneInterface) {
 	const { user } = useAuth();
 	const { gameState } = useGame();
-	const { decks } = useDeck();
-	const { gameParticipations } = useGameParticipation();
-	const { snapshots } = useStatSnapshot();
+	const { snapshots, isLoading } = useStatSnapshot();
 	const router = useRouter();
 	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[0]);
 	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
@@ -77,7 +74,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 					s.playerCount == labelToPodSize[podSizeLabel]
 			)?.snapshot ?? defaultStatSnapshot
 		);
-	}, [timePeriodLabel, podSizeLabel]);
+	}, [timePeriodLabel, podSizeLabel, snapshots]);
 
 	const mostRecentDeck = snapshot.mostRecentPlayedDeck;
 
@@ -152,12 +149,12 @@ export default function CommandZone({}: CommandZoneInterface) {
 			data:
 				snapshot.currentWinStreak && snapshot.isCurrentWinStreak != null
 					? snapshot.isCurrentWinStreak
-						? snapshot.currentWinStreak == 1 
-              ? `${snapshot.currentWinStreak} Win`
-              : `${snapshot.currentWinStreak} Wins`
+						? snapshot.currentWinStreak == 1
+							? `${snapshot.currentWinStreak} Win`
+							: `${snapshot.currentWinStreak} Wins`
 						: snapshot.currentWinStreak == 1
-              ? `${snapshot.currentWinStreak} Loss`
-              : `${snapshot.currentWinStreak} Losses`
+						? `${snapshot.currentWinStreak} Loss`
+						: `${snapshot.currentWinStreak} Losses`
 					: "-",
 			subData: [
 				`Longest Win Streak: ${snapshot.longestWinStreak}`,
@@ -195,7 +192,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 			<DashboardHeader user={user} title="Command Zone" justify="justify-start">
 				<div className="gap-4 w-full hidden lg:flex items-center">
 					<div className="flex gap-2 items-center">
-						<span className="text-sm text-fg-dark">Time</span>
+						<span className="text-sm">Time</span>
 						<DropdownMenu
 							options={timePeriodLabels}
 							selected={timePeriodLabel}
@@ -204,7 +201,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 					</div>
 
 					<div className="flex gap-2 items-center">
-						<span className="text-sm text-fg-dark">Pod Size</span>
+						<span className="text-sm">Pod Size</span>
 						<DropdownMenu
 							options={podSizeLabels}
 							selected={podSizeLabel}
@@ -213,89 +210,97 @@ export default function CommandZone({}: CommandZoneInterface) {
 					</div>
 				</div>
 			</DashboardHeader>
-			<DashboardMain styles="!items-center">
-				<div className={`dashboard-main-content-layout ${styles.gridLayout} `}>
-					<div className="flex ml-4 gap-4 w-full mb-1 lg:hidden">
-						<div className="flex gap-2 items-center">
-							<span className="text-sm text-fg-dark">Time</span>
-							<DropdownMenu
-								options={timePeriodLabels}
-								selected={timePeriodLabel}
-								setSelected={setTimePeriodLabel}
-							/>
+			{isLoading ? (
+				<LoadingSpinner />
+			) : (
+				<DashboardMain styles="!items-center">
+					<div
+						className={`dashboard-main-content-layout ${styles.gridLayout} `}
+					>
+						<div className="flex ml-4 gap-4 w-full mb-1 lg:hidden">
+							<div className="flex gap-2 items-center">
+								<span className="text-sm text-fg-dark">Time</span>
+								<DropdownMenu
+									options={timePeriodLabels}
+									selected={timePeriodLabel}
+									setSelected={setTimePeriodLabel}
+								/>
+							</div>
+
+							<div className="flex gap-2 items-center">
+								<span className="text-sm text-fg-dark">Pod Size</span>
+								<DropdownMenu
+									options={podSizeLabels}
+									selected={podSizeLabel}
+									setSelected={setPodSizeLabel}
+								/>
+							</div>
 						</div>
 
-						<div className="flex gap-2 items-center">
-							<span className="text-sm text-fg-dark">Pod Size</span>
-							<DropdownMenu
-								options={podSizeLabels}
-								selected={podSizeLabel}
-								setSelected={setPodSizeLabel}
-							/>
+						{renderStatCards()}
+						{/* Line Chart */}
+						<StatCard
+							styles="col-span-4"
+							innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
+						>
+							<div className="w-full aspect-[3/1] min-h-[350px] block pb-4">
+								<LineChart buckets={snapshot.winLossGamesByPeriod ?? []} />
+							</div>
+						</StatCard>
+						{/* Donut Chart */}
+						<StatCard
+							styles="col-span-2"
+							innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
+						>
+							<div className="h-[350px] lg:h-full">
+								<PieChart
+									deckPlayCounts={snapshot.deckPlayCounts ?? []}
+									gamesPlayed={snapshot.gamesPlayed}
+								/>
+							</div>
+						</StatCard>
+						{/* Commander Showcase */}
+						<StatCard styles="col-span-2">
+							<h3 className="pb-4 border-b border-surface-500 text-fg-light">
+								Commander Showcase
+							</h3>
+							{mostRecentDeck && (
+								<DeckCard
+									deck={mostRecentDeck}
+									styles="!bg-transparent"
+								/>
+							)}
+						</StatCard>
+						{/* Recent Game Log */}
+						<StatCard
+							styles="col-span-4 !hidden lg:!flex max-h-[29rem]"
+							innerStyles="lg:justify-start h-full"
+						>
+							<h3 className="pb-4 mb-4 border-b border-surface-500">
+								Recent Games
+							</h3>
+							<div className="overflow-y-auto flex flex-col gap-2 pr-2">
+								{gameState.games.length > 0 &&
+									gameState.games.map((data) => (
+										<GameLogCard key={data.id} game={data} />
+									))}
+							</div>
+						</StatCard>
+
+						<div className="lg:hidden w-full">
+							<div className="mx-10 mt-8">
+								<ButtonPrimary
+									onClick={() => router.push("/log")}
+									style="transparent"
+									uppercase={false}
+								>
+									View Games
+								</ButtonPrimary>
+							</div>
 						</div>
 					</div>
-					{renderStatCards()}
-
-					{/* Line Chart */}
-					<StatCard
-						styles="col-span-4"
-						innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
-					>
-						<div className="h-[350px] block pb-4">
-							<LineChart buckets={snapshot.winLossGamesByPeriod ?? []} />
-						</div>
-					</StatCard>
-
-					{/* Donut Chart */}
-					<StatCard
-						styles="col-span-2"
-						innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
-					>
-						<div className="h-[350px] lg:h-full">
-							<PieChart
-								deckPlayCounts={snapshot.deckPlayCounts ?? []}
-								gamesPlayed={snapshot.gamesPlayed}
-							/>
-						</div>
-					</StatCard>
-
-					{/* Commander Showcase */}
-					<StatCard styles="col-span-2">
-						<h3 className="pb-4 mb-4 border-b border-surface-500 text-fg-light">
-							Commander Showcase
-						</h3>
-						{mostRecentDeck && <DeckCard deck={mostRecentDeck} />}
-					</StatCard>
-
-					{/* Recent Game Log */}
-					<StatCard
-						styles="col-span-4 !hidden lg:!flex max-h-[29rem]"
-						innerStyles="lg:justify-start h-full"
-					>
-						<h3 className="pb-4 mb-4 border-b border-surface-500">
-							Recent Games
-						</h3>
-						<div className="overflow-y-auto flex flex-col gap-2 pr-2">
-							{gameState.games.length > 0 &&
-								gameState.games.map((data) => (
-									<GameLogCard key={data.id} game={data} />
-								))}
-						</div>
-					</StatCard>
-
-					<div className="lg:hidden w-full">
-						<div className="mx-10 mt-8">
-							<ButtonPrimary
-								onClick={() => router.push("/log")}
-								style="transparent"
-								uppercase={false}
-							>
-								View Games
-							</ButtonPrimary>
-						</div>
-					</div>
-				</div>
-			</DashboardMain>
+				</DashboardMain>
+			)}
 		</DashboardLayout>
 	);
 }

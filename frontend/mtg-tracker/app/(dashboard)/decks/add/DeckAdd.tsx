@@ -5,7 +5,6 @@ import ComboBox from "@/components/ComboBox";
 import OptionsLayout from "@/components/OptionsLayout";
 import TextInput from "@/components/TextInput";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
-import { ActionType } from "@/context/DeckContext";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
@@ -40,7 +39,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 	const [moxfield, setMoxfield] = useState("");
 	const delayRef = useRef(false);
 	const { toast } = useToast();
-  const { decks, dispatch } = useDeck();
+  const { decks } = useDeck();
 
 	const handleComboboxSelect: Dispatch<SetStateAction<string | null>> = (
 		value
@@ -127,13 +126,10 @@ export default function DeckAdd({}: DeckAddInterface) {
 		};
 
 		try {
-			const deckReadDTO = await api.postApiDeck(deckWriteDTO, { withCredentials: true });
+			await api.postApiDeck(deckWriteDTO, { withCredentials: true });
       setSelected(null);
       setQuery("");
       setMoxfield("");
-      
-      dispatch({ type: ActionType.UPDATE, payload: [...decks, deckReadDTO] });
-
 			toast(`Saved deck: ${selected}`, "success");
 		} catch (error) {
 			if (isAxiosError(error) && error.response?.status === CONFLICT) {

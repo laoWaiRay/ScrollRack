@@ -181,7 +181,7 @@ export default function CreatePod({}: CreatePodInterface) {
 
 	return (
 		<DashboardLayout>
-			<DashboardHeader title="Create Pod" user={user} align="left">
+			<DashboardHeader title="Create Pod" user={user}>
 				<ButtonIcon
 					styles={`size-[2em] active:text-white hover:text-white translate-y-0.5 ${
 						!hostedRoom && "hidden"

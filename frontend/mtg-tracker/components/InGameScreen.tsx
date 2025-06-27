@@ -19,7 +19,6 @@ import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
-import { ActionType as DeckActionType } from "@/context/DeckContext";
 import { formatTime } from "@/helpers/time";
 import { useDeck } from "@/hooks/useDeck";
 import { getDecks } from "@/actions/decks";
@@ -53,7 +52,6 @@ export default function InGameScreen({
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
-  const { decks, dispatch: dispatchDeck } = useDeck();
   
   console.log(JSON.stringify(players.map(p => (p.userName))))
 
@@ -141,12 +139,6 @@ export default function InGameScreen({
 					type: GameParticipationActionType.UPDATE,
 					payload: [...gameParticipations, hostGpReadDTO],
 				});
-        
-        const updatedDecks = await getDecks();
-        dispatchDeck({
-          type: DeckActionType.UPDATE,
-          payload: updatedDecks,
-        })
 			}
 			setLocalStorageValue(null);
 			setCurrentGameData(null);

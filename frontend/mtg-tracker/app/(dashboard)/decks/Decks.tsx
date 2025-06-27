@@ -22,6 +22,8 @@ import DateSelect from "@/components/DateSelect";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import dayjs from "dayjs";
 import ButtonPrimary from "@/components/ButtonPrimary";
+import CircularProgress from "@mui/material/CircularProgress";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface DecksInterface {}
 
@@ -34,7 +36,7 @@ interface SortValues {
 
 export default function Decks({}: DecksInterface) {
 	const { user } = useAuth();
-	const { decks, dispatch } = useDeck();
+	const { decks, isLoading } = useDeck();
 	const [filter, setFilter] = useState("");
 	const [filtered, setFiltered] = useState(decks);
 	const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -420,7 +422,7 @@ export default function Decks({}: DecksInterface) {
 						/>
 
 						<section className="w-full flex flex-col gap-2 px-2">
-							{renderDeckCards()}
+							{isLoading ? <LoadingSpinner /> : renderDeckCards()}
 						</section>
 					</div>
 				</div>

@@ -5,7 +5,6 @@ import Dialog from "@/components/Dialog";
 import ListBox from "@/components/ListBox";
 import OptionsLayout from "@/components/OptionsLayout";
 import TextInput from "@/components/TextInput";
-import { ActionType } from "@/context/DeckContext";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
@@ -19,7 +18,7 @@ interface DeckEditInterface {}
 export default function DeckEdit({}: DeckEditInterface) {
 	const { user } = useAuth();
 	const { toast } = useToast();
-	const { decks, dispatch } = useDeck();
+	const { decks } = useDeck();
 	const [moxfield, setMoxfield] = useState<string>("");
 	const [selected, setSelected] = useState<string | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -53,13 +52,6 @@ export default function DeckEdit({}: DeckEditInterface) {
 			});
 			setSelected(null);
 			setMoxfield("");
-			dispatch({
-				type: ActionType.UPDATE,
-				payload: [
-					...decks.filter((d) => d.id !== selectedDeck.id),
-					{ ...selectedDeck, moxfield },
-				],
-			});
 
 			toast(`Updated deck "${selectedDeck.commander}"`, "success");
 		} catch (error) {
@@ -78,9 +70,6 @@ export default function DeckEdit({}: DeckEditInterface) {
 				params: { id: selectedDeck.id },
 				withCredentials: true,
 			});
-			const updatedDecks = decks.filter(d => d.id !== selectedDeck.id);
-			dispatch({ type: ActionType.UPDATE, payload: updatedDecks });
-
 			setSelected(null);
 			setMoxfield("");
 			toast(`Deleted deck: ${selectedDeck.commander}`, "success");

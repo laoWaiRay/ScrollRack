@@ -1,12 +1,9 @@
-import { SnapshotContext } from "@/context/StatSnapshotContext";
-import { useContext } from "react";
+import { getStatSnapshots } from "@/actions/statSnapshots";
+import useSWR from "swr";
 
 export function useStatSnapshot() {
-  const context = useContext(SnapshotContext);
+  const fetcher = () => getStatSnapshots();
+  const { data, error, isLoading } = useSWR('/api/statSnapshot', fetcher)
   
-  if (context === undefined) {
-    throw new Error("useStatSnapshot must be used inside a SnapshotProvider");
-  }
-  
-  return context;
+  return { snapshots: data ?? [], isError: error, isLoading };
 }

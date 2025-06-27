@@ -8,6 +8,7 @@ import { toPercent } from "@/helpers/math";
 
 interface DeckCardInterface {
 	deck: DeckReadDTO;
+  styles?: string;
 }
 
 interface DeckStat {
@@ -15,7 +16,7 @@ interface DeckStat {
 	data: string;
 }
 
-export default function DeckCard({ deck }: DeckCardInterface) {
+export default function DeckCard({ deck, styles }: DeckCardInterface) {
 	const deckStats: DeckStat[] = [
 		{
 			title: "Games",
@@ -104,7 +105,7 @@ export default function DeckCard({ deck }: DeckCardInterface) {
 	}
 
 	return (
-		<div className="flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg">
+		<div className={`flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg ${styles}`}>
 			<div className="w-full flex justify-center items-center px-4 mb-2 gap-3 lg:justify-center">
 				<h2 className="font-semibold">{deck.commander}</h2>
 				{deck.moxfield && (
