@@ -22,14 +22,13 @@ public class StatSnapshotDTO
     public required int GamesWon { get; set; }
     public required int NumDecks { get; set; }
     public DateTime? LastWon { get; set; }
+    public DeckReadDTO? MostRecentPlayedDeck { get; set; }
     public required List<string> MostPlayedCommanders { get; set; }
     public required List<string> LeastPlayedCommanders { get; set; }
     public required int CurrentWinStreak { get; set; }
     public bool? IsCurrentWinStreak { get; set; }
     public List<WinLossGameCount> WinLossGamesByPeriod { get; set; } = [];
     public List<DeckPlayCount> DeckPlayCounts { get; set; } = [];
-
-    // Stored in DB to avoid expensive operations
     public required int LongestWinStreak { get; set; }
     public required int LongestLossStreak { get; set; }
 
@@ -38,9 +37,13 @@ public class StatSnapshotDTO
     public DateTime CreatedAt { get; set; }
 }
 
-public class StatSnapshotsByPeriodDTO
+public class FilteredStatSnapshotDTO
 {
-    public required StatSnapshotDTO AllTime { get; set; }    
-    public required StatSnapshotDTO CurrentYear { get; set; }    
-    public required StatSnapshotDTO CurrentMonth { get; set; }    
+    // E.g., "AllTime", "CurrentYear", "CurrentMonth"
+    public required string Period { get; set; }
+
+    // E.g., 0, 2, 3, 4, or 5 (5 = 5 or more players, 0 = no filter)
+    public required int PlayerCount { get; set; }
+
+    public required StatSnapshotDTO Snapshot { get; set; }
 }

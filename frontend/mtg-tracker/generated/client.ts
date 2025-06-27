@@ -1,6 +1,57 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
+type FilteredStatSnapshotDTO = {
+  period: string;
+  playerCount: number;
+  snapshot: StatSnapshotDTO;
+};
+type StatSnapshotDTO = {
+  gamesPlayed: number;
+  gamesWon: number;
+  numDecks: number;
+  lastWon?: (string | null) | undefined;
+  mostRecentPlayedDeck?: DeckReadDTO2 | undefined;
+  mostPlayedCommanders: Array<string>;
+  leastPlayedCommanders: Array<string>;
+  currentWinStreak: number;
+  isCurrentWinStreak?: (boolean | null) | undefined;
+  winLossGamesByPeriod?: Array<WinLossGameCount> | undefined;
+  deckPlayCounts?: Array<DeckPlayCount> | undefined;
+  longestWinStreak: number;
+  longestLossStreak: number;
+  createdAt?: string | undefined;
+};
+type DeckReadDTO2 = {
+  id: number;
+  userId: string;
+  commander: string;
+  moxfield: string;
+  scryfallId: string;
+  numGames: number;
+  numWins: number;
+  createdAt: string;
+  latestWin?: (string | null) | undefined;
+  currentStreak?: (number | null) | undefined;
+  isCurrentWinStreak?: (boolean | null) | undefined;
+  longestWinStreak?: (number | null) | undefined;
+  longestLossStreak?: (number | null) | undefined;
+  fastestWinInSeconds?: (number | null) | undefined;
+  slowestWinInSeconds?: (number | null) | undefined;
+  par?: (number | null) | undefined;
+};
+type WinLossGameCount = {
+  periodStart: string;
+  periodEnd: string;
+  wins: number;
+  losses: number;
+  games: number;
+};
+type DeckPlayCount = {
+  commander: string;
+  numGames: number;
+  percentOfGamesPlayed: number;
+};
 type GameParticipationReadDTO = {
   id: string;
   gameId: number;
@@ -63,38 +114,6 @@ type UserReadDTO = {
   email: string;
   profile?: (string | null) | undefined;
   decks: Array<DeckReadDTO>;
-};
-type StatSnapshotDTO = {
-  gamesPlayed: number;
-  gamesWon: number;
-  numDecks: number;
-  lastWon?: (string | null) | undefined;
-  mostPlayedCommanders: Array<string>;
-  leastPlayedCommanders: Array<string>;
-  currentWinStreak: number;
-  isCurrentWinStreak?: (boolean | null) | undefined;
-  winLossGamesByPeriod?: Array<WinLossGameCount> | undefined;
-  deckPlayCounts?: Array<DeckPlayCount> | undefined;
-  longestWinStreak: number;
-  longestLossStreak: number;
-  createdAt?: string | undefined;
-};
-type WinLossGameCount = {
-  periodStart: string;
-  periodEnd: string;
-  wins: number;
-  losses: number;
-  games: number;
-};
-type DeckPlayCount = {
-  commander: string;
-  numGames: number;
-  percentOfGamesPlayed: number;
-};
-type StatSnapshotsByPeriodDTO = {
-  allTime: StatSnapshotDTO;
-  currentYear: StatSnapshotDTO;
-  currentMonth: StatSnapshotDTO;
 };
 
 const RegisterRequest = z
@@ -273,6 +292,26 @@ const RoomDTO: z.ZodType<RoomDTO> = z
   })
   .passthrough();
 const AddPlayerDTO = z.object({ id: z.string() }).passthrough();
+const DeckReadDTO2: z.ZodType<DeckReadDTO2> = z
+  .object({
+    id: z.number().int(),
+    userId: z.string(),
+    commander: z.string(),
+    moxfield: z.string(),
+    scryfallId: z.string(),
+    numGames: z.number().int(),
+    numWins: z.number().int(),
+    createdAt: z.string().datetime({ offset: true }),
+    latestWin: z.string().datetime({ offset: true }).nullish(),
+    currentStreak: z.number().int().nullish(),
+    isCurrentWinStreak: z.boolean().nullish(),
+    longestWinStreak: z.number().int().nullish(),
+    longestLossStreak: z.number().int().nullish(),
+    fastestWinInSeconds: z.number().int().nullish(),
+    slowestWinInSeconds: z.number().int().nullish(),
+    par: z.number().nullish(),
+  })
+  .passthrough();
 const WinLossGameCount: z.ZodType<WinLossGameCount> = z
   .object({
     periodStart: z.string().datetime({ offset: true }),
@@ -295,6 +334,7 @@ const StatSnapshotDTO: z.ZodType<StatSnapshotDTO> = z
     gamesWon: z.number().int(),
     numDecks: z.number().int(),
     lastWon: z.string().datetime({ offset: true }).nullish(),
+    mostRecentPlayedDeck: DeckReadDTO2.nullish(),
     mostPlayedCommanders: z.array(z.string()),
     leastPlayedCommanders: z.array(z.string()),
     currentWinStreak: z.number().int(),
@@ -306,11 +346,11 @@ const StatSnapshotDTO: z.ZodType<StatSnapshotDTO> = z
     createdAt: z.string().datetime({ offset: true }).optional(),
   })
   .passthrough();
-const StatSnapshotsByPeriodDTO: z.ZodType<StatSnapshotsByPeriodDTO> = z
+const FilteredStatSnapshotDTO: z.ZodType<FilteredStatSnapshotDTO> = z
   .object({
-    allTime: StatSnapshotDTO,
-    currentYear: StatSnapshotDTO,
-    currentMonth: StatSnapshotDTO,
+    period: z.string(),
+    playerCount: z.number().int(),
+    snapshot: StatSnapshotDTO,
   })
   .passthrough();
 const UserMultipleDTO = z.object({ ids: z.array(z.string()) }).passthrough();
@@ -366,10 +406,11 @@ export const schemas = {
   GameParticipationWriteDTO,
   RoomDTO,
   AddPlayerDTO,
+  DeckReadDTO2,
   WinLossGameCount,
   DeckPlayCount,
   StatSnapshotDTO,
-  StatSnapshotsByPeriodDTO,
+  FilteredStatSnapshotDTO,
   UserMultipleDTO,
   UserWriteDTO,
   UserRegisterDTO,
@@ -709,7 +750,7 @@ const endpoints = makeApi([
     path: "/api/StatSnapshot",
     alias: "getApiStatSnapshot",
     requestFormat: "json",
-    response: StatSnapshotsByPeriodDTO,
+    response: z.array(FilteredStatSnapshotDTO),
   },
   {
     method: "put",

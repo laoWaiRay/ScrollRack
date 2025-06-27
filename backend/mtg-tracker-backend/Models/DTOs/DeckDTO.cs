@@ -10,6 +10,7 @@ public class DeckReadDTO
     public required int NumGames { get; set; }
     public required int NumWins { get; set; }
     public required DateTime CreatedAt { get; set; }
+
     public DateTime? LatestWin { get; set; }
     public int? CurrentStreak { get; set; }
     public bool? IsCurrentWinStreak { get; set; }

@@ -3,6 +3,7 @@ using Mtg_tracker.Models;
 using Mtg_tracker.MappingProfiles;
 using Microsoft.AspNetCore.Identity;
 using Mtg_tracker.Hubs;
+using Mtg_tracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,9 @@ builder.Services.AddCors(options =>
 
 // SignalR
 builder.Services.AddSignalR();
+
+// Custom Services
+builder.Services.AddScoped<DeckStatsService>();
 
 // Cookies
 // builder.Services.ConfigureApplicationCookie(options =>

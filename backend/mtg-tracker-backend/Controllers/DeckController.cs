@@ -65,20 +65,10 @@ public class DeckController(MtgContext context, IMapper mapper) : ControllerBase
                 if (isWinStreak == true && streak > deck.LongestWinStreak)
                 {
                     deck.LongestWinStreak = streak.Value;
-
-                    if (userStatSnapshot != null && streak > userStatSnapshot.LongestWinStreak)
-                    {
-                        userStatSnapshot.LongestWinStreak = streak.Value;
-                    }
                 }
                 if (isWinStreak == false && streak > deck.LongestLossStreak)
                 {
                     deck.LongestLossStreak = streak.Value;
-
-                    if (userStatSnapshot != null && streak > userStatSnapshot.LongestLossStreak)
-                    {
-                        userStatSnapshot.LongestLossStreak = streak.Value;
-                    }
                 }
             }
 

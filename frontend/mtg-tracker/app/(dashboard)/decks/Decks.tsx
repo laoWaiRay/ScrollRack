@@ -366,7 +366,7 @@ export default function Decks({}: DecksInterface) {
 							</div>
 
 							<div className="flex justify-between px-2 w-full">
-								<div>Filter Decks by Date</div>
+								<div>Filter Decks by Creation Date</div>
 								<Switch
 									enabled={!showAllDecks}
 									setEnabled={() => setShowAllDecks(false)}

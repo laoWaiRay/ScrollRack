@@ -1,20 +1,20 @@
 "use client";
 
-import { StatSnapshotDTO, StatSnapshotsByPeriodDTO } from "@/types/client";
+import { FilteredStatSnapshotDTO, StatSnapshotDTO } from "@/types/client";
 import { createContext, ReactNode, useReducer, Reducer, Dispatch } from "react";
 
 export enum ActionType {
 	UPDATE,
 }
 
-type Action = { type: ActionType.UPDATE; payload: StatSnapshotsByPeriodDTO };
+type Action = { type: ActionType.UPDATE; payload: FilteredStatSnapshotDTO[] };
 
 interface SnapshotContextType {
-	snapshots: StatSnapshotsByPeriodDTO;
+	snapshots: FilteredStatSnapshotDTO[];
 	dispatch: Dispatch<Action>;
 }
 
-const defaultStatSnapshot: StatSnapshotDTO = {
+export const defaultStatSnapshot: StatSnapshotDTO = {
   gamesPlayed: 0,
   gamesWon: 0,
   numDecks: 0,
@@ -26,14 +26,8 @@ const defaultStatSnapshot: StatSnapshotDTO = {
   leastPlayedCommanders: [],
 };
 
-export const defaultStatSnapshots: StatSnapshotsByPeriodDTO = {
-  allTime: defaultStatSnapshot,
-  currentYear: defaultStatSnapshot,
-  currentMonth: defaultStatSnapshot,
-};
-
 export const SnapshotContext = createContext<SnapshotContextType>({
-	snapshots: defaultStatSnapshots,
+	snapshots: [],
 	dispatch: () => {
 		throw new Error("dispatch must be used within a SnapshotProvider");
 	},
@@ -41,7 +35,7 @@ export const SnapshotContext = createContext<SnapshotContextType>({
 
 interface SnapshotProviderInterface {
 	children: ReactNode;
-	initialSnapshots: StatSnapshotsByPeriodDTO;
+	initialSnapshots: FilteredStatSnapshotDTO[];
 }
 
 export function SnapshotProvider({
@@ -57,7 +51,7 @@ export function SnapshotProvider({
 	);
 }
 
-const snapshotReducer: Reducer<StatSnapshotsByPeriodDTO, Action> = (state, action) => {
+const snapshotReducer: Reducer<FilteredStatSnapshotDTO[], Action> = (state, action) => {
 	switch (action.type) {
 		case ActionType.UPDATE: {
 			return action.payload;

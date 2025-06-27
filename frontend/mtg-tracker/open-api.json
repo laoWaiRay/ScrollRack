@@ -1318,17 +1318,26 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilteredStatSnapshotDTO"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilteredStatSnapshotDTO"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StatSnapshotsByPeriodDTO"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilteredStatSnapshotDTO"
+                  }
                 }
               }
             }
@@ -1869,6 +1878,89 @@
           }
         }
       },
+      "DeckReadDTO2": {
+        "required": [
+          "id",
+          "userId",
+          "commander",
+          "moxfield",
+          "scryfallId",
+          "numGames",
+          "numWins",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "commander": {
+            "type": "string"
+          },
+          "moxfield": {
+            "type": "string"
+          },
+          "scryfallId": {
+            "type": "string"
+          },
+          "numGames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numWins": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latestWin": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentStreak": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isCurrentWinStreak": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "longestWinStreak": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "longestLossStreak": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fastestWinInSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "slowestWinInSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "par": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
       "DeckWriteDTO": {
         "required": [
           "userId",
@@ -1899,6 +1991,26 @@
           "numWins": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "FilteredStatSnapshotDTO": {
+        "required": [
+          "period",
+          "playerCount",
+          "snapshot"
+        ],
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string"
+          },
+          "playerCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/StatSnapshotDTO"
           }
         }
       },
@@ -2313,6 +2425,9 @@
             "format": "date-time",
             "nullable": true
           },
+          "mostRecentPlayedDeck": {
+            "$ref": "#/components/schemas/DeckReadDTO2"
+          },
           "mostPlayedCommanders": {
             "type": "array",
             "items": {
@@ -2356,25 +2471,6 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "StatSnapshotsByPeriodDTO": {
-        "required": [
-          "allTime",
-          "currentYear",
-          "currentMonth"
-        ],
-        "type": "object",
-        "properties": {
-          "allTime": {
-            "$ref": "#/components/schemas/StatSnapshotDTO"
-          },
-          "currentYear": {
-            "$ref": "#/components/schemas/StatSnapshotDTO"
-          },
-          "currentMonth": {
-            "$ref": "#/components/schemas/StatSnapshotDTO"
           }
         }
       },

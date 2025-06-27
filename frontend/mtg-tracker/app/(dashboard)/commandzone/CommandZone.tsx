@@ -19,10 +19,11 @@ import { useMemo, useState } from "react";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
 import dayjs from "dayjs";
 import DropdownMenu from "@/components/DropdownMenu";
-import { defaultStatSnapshots } from "@/context/StatSnapshotContext";
+import { useDeck } from "@/hooks/useDeck";
+import DeckCard from "@/components/DeckCard";
+import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
 
-interface CommandZoneInterface {
-}
+interface CommandZoneInterface {}
 
 interface StatCardData {
 	title: string;
@@ -41,45 +42,45 @@ const statCardTextStyles = {
 	sub: "text-fg-dark",
 };
 
-export type TimePeriod = "All" | "Year" | "Month";
-const timePeriods: TimePeriod[] = ["All", "Year", "Month"];
+export type TimePeriod = "AllTime" | "CurrentYear" | "CurrentMonth";
+const timePeriodLabels: string[] = ["All", "Year", "Month"];
+const labelToTimePeriod: Record<string, TimePeriod> = {
+	All: "AllTime",
+	Year: "CurrentYear",
+	Month: "CurrentMonth",
+};
+
+const podSizeLabels: string[] = ["All Pods", "2", "3", "4", "5+"];
+const labelToPodSize: Record<string, number> = {
+	"All Pods": 0,
+	"2": 2,
+	"3": 3,
+	"4": 4,
+	"5+": 5,
+};
 
 export default function CommandZone({}: CommandZoneInterface) {
 	const { user } = useAuth();
 	const { gameState } = useGame();
+	const { decks } = useDeck();
 	const { gameParticipations } = useGameParticipation();
 	const { snapshots } = useStatSnapshot();
 	const router = useRouter();
-	const [timePeriod, setTimePeriod] = useState(timePeriods[0]);
-  
-  const snapshot = useMemo(() => {
-    switch (timePeriod) {
-      case "All":
-        return snapshots.allTime; 
-      case "Year":
-        return snapshots.currentYear;
-      case "Month":
-        return snapshots.currentMonth
-      default:
-        return defaultStatSnapshots.allTime;
-    }
-  }, [timePeriod])
+	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[0]);
+	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
 
-	const mostRecentDeck = useMemo(() => {
-		const sorted = gameParticipations.sort(
-			(a, b) =>
-				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+	const snapshot = useMemo(() => {
+		return (
+			snapshots.find(
+				(s) =>
+					s.period == labelToTimePeriod[timePeriodLabel] &&
+					s.playerCount == labelToPodSize[podSizeLabel]
+			)?.snapshot ?? defaultStatSnapshot
 		);
-
-		if (sorted.length > 0) {
-			return {
-				commander: sorted[0].deck.commander,
-				won: sorted[0].won ? "WON" : "LOSS",
-			};
-		} else {
-			return null;
-		}
-	}, [gameParticipations]);
+	}, [timePeriodLabel, podSizeLabel]);
+  
+  const mostRecentDeck = snapshot.mostRecentPlayedDeck;
+  console.log(mostRecentDeck)
 
 	const statCardData: StatCardData[] = [
 		{
@@ -111,13 +112,19 @@ export default function CommandZone({}: CommandZoneInterface) {
 		{
 			title: "Recently Played",
 			data: mostRecentDeck ? mostRecentDeck.commander : "n/a",
-			subData: [mostRecentDeck ? mostRecentDeck.won : "n/a"],
+			subData: [
+				mostRecentDeck
+					? mostRecentDeck.isCurrentWinStreak
+						? "WON"
+						: "LOSS"
+					: "n/a",
+			],
 			styles: {
 				main: "text-lg text-fg-light my-2",
 				sub: `${
 					!mostRecentDeck
 						? ""
-						: mostRecentDeck.won == "WON"
+						: mostRecentDeck.isCurrentWinStreak
 						? "text-success"
 						: "text-error"
 				} font-bold tracking-wider`,
@@ -144,8 +151,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 		{
 			title: "Streaks",
 			data:
-				snapshot.currentWinStreak &&
-				snapshot.isCurrentWinStreak != null
+				snapshot.currentWinStreak && snapshot.isCurrentWinStreak != null
 					? snapshot.isCurrentWinStreak
 						? `${snapshot.currentWinStreak} Wins`
 						: `${snapshot.currentWinStreak} Losses`
@@ -184,11 +190,16 @@ export default function CommandZone({}: CommandZoneInterface) {
 	return (
 		<DashboardLayout>
 			<DashboardHeader user={user} title="Command Zone" justify="justify-start">
-				<div className="ml-4">
-					<DropdownMenu<TimePeriod>
-						options={timePeriods}
-						selected={timePeriod}
-						setSelected={setTimePeriod}
+				<div className="flex ml-4 gap-2">
+					<DropdownMenu
+						options={timePeriodLabels}
+						selected={timePeriodLabel}
+						setSelected={setTimePeriodLabel}
+					/>
+					<DropdownMenu
+						options={podSizeLabels}
+						selected={podSizeLabel}
+						setSelected={setPodSizeLabel}
 					/>
 				</div>
 			</DashboardHeader>
@@ -224,47 +235,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 						<h3 className="pb-4 mb-4 border-b border-surface-500 text-fg-light">
 							Commander Showcase
 						</h3>
-						<div className="flex gap-6 h-full items-center lg:items-start flex-col lg:flex-row">
-							<div className="flex flex-col justify-start grow max-w-[265px] h-full w-full">
-								<div className="aspect-[5/7] relative rounded-xl overflow-hidden w-full">
-									<Image
-										src="https://cards.scryfall.io/large/front/7/b/7b7a348a-51f7-4dc5-8fe7-1c70fea5e050.jpg?1689996774"
-										alt="Commander Card"
-										fill={true}
-									/>
-								</div>
-							</div>
-
-							<div className="flex flex-col text-fg-light w-full gap-4 items-center lg:items-start shrink-[2]">
-								<h3 className="hidden lg:block">Urza, Lord High Artificer</h3>
-
-								<div className="w-[250px] lg:w-full lg:gap-4 flex flex-wrap -translate-x-2 lg:translate-x-0">
-									<div className="flex flex-col w-1/2 lg:w-full items-center lg:items-start pb-4 lg:pb-0">
-										<h4>Games</h4>
-										<p className="text-lg">14</p>
-									</div>
-
-									<div className="flex flex-col w-1/2 lg:w-full lg:items-start items-center pb-4 lg:pb-0">
-										<h4>Wins</h4>
-										<p className="text-lg">14</p>
-									</div>
-
-									<div className="flex flex-col w-1/2 lg:w-full lg:items-start items-center">
-										<h4>Streak</h4>
-										<p
-											className={`text-lg font-bold tracking-wider text-success`}
-										>
-											1
-										</p>
-									</div>
-
-									<div className="flex flex-col w-1/2 lg:w-full lg:items-start items-center">
-										<h4>Last Played</h4>
-										<p>Feb 2, 2025</p>
-									</div>
-								</div>
-							</div>
-						</div>
+						{mostRecentDeck && <DeckCard deck={mostRecentDeck} />}
 					</StatCard>
 
 					{/* Recent Game Log */}

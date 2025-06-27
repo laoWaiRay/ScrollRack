@@ -45,7 +45,7 @@ export default function ComboBox({
 		>
 			<div className="relative w-full">
 				<ComboboxInput
-					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
+					className={`w-full bg-surface-600 border border-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
 					displayValue={(item: string | null) => item ?? ""}
 					onChange={(event) => setQuery(event.target.value)}
           placeholder="Search..."
@@ -60,7 +60,7 @@ export default function ComboBox({
         modal={true}
 				transition
 				className={
-					"w-(--input-width) flex flex-col gap-1 rounded-lg border border-white/5 bg-surface-500 [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full z-60"
+					"w-(--input-width) flex flex-col rounded-lg border border-surface-500 bg-surface-600 [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full z-60"
 				}
 			>
 				{filteredList
@@ -69,7 +69,7 @@ export default function ComboBox({
 						<ComboboxOption
 							key={listItem}
 							value={listItem}
-							className="group w-full bg-white/[2%] px-4 py-2 rounded-md text-fg-light focus-outline flex gap-2 items-center select-none data-focus:bg-white/20"
+							className="group w-full border-b border-surface-500 px-4 py-2 text-fg-light focus-outline flex gap-2 items-center select-none data-focus:bg-white/5"
 						>
 							<Check className="invisible size-4 fill-white group-data-selected:visible" />
 							<div className="text-base text-white">{listItem}</div>
