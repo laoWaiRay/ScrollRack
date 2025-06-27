@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using Mtg_tracker.Services;
+using System.Diagnostics;
 
 namespace Mtg_tracker.Controllers;
 
@@ -18,13 +19,15 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
     private readonly IMapper _mapper = mapper;
     private readonly DeckStatsService _deckStatsService = deckStatsService;
 
-    // TODO: Add filters for Pod Size
     // GET: api/deck
     // Returns all decks for the current user
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetDecks()
     {
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
+
         var userId = User.GetUserId();
         if (userId is null)
         {
@@ -33,7 +36,7 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
 
         List<Deck> userDecks = await _context.Decks
             .Where(d => d.UserId == userId)
-            .OrderByDescending(d => d.CreatedAt)
+            .OrderBy(d => d.Commander)
             .ToListAsync();
 
         List<GameParticipation> allDeckGameParticipations = await _context.GameParticipations
@@ -74,6 +77,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
             deckReadDTOs.Add(dto);
         }
 
+        stopwatch.Stop();
+        Console.WriteLine($"GET /api/decks took {stopwatch.Elapsed.Milliseconds}ms");
         return deckReadDTOs;
     }
 

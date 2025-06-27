@@ -34,3 +34,5 @@ export type HttpValidationProblemDetails = z.infer<typeof schemas.HttpValidation
 export type WinLossGameCount = z.infer<typeof schemas.WinLossGameCount>;
 export type DeckPlayCount = z.infer<typeof schemas.DeckPlayCount>;
 export type FilteredStatSnapshotDTO = z.infer<typeof schemas.FilteredStatSnapshotDTO>;
+export type DeckStats = z.infer<typeof schemas.DeckStats>;
+export type FilteredDeckStats = z.infer<typeof schemas.FilteredDeckStats>;

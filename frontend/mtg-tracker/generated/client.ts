@@ -1,6 +1,40 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
+type DeckReadDTO = {
+  id: number;
+  userId: string;
+  commander: string;
+  moxfield: string;
+  scryfallId: string;
+  createdAt: string;
+  statistics?: (Array<FilteredDeckStats> | null) | undefined;
+};
+type FilteredDeckStats = {
+  podSize: number;
+  stats: DeckStats;
+};
+type DeckStats = {
+  numGames: number;
+  numWins: number;
+  latestWin?: (string | null) | undefined;
+  currentStreak?: (number | null) | undefined;
+  isCurrentWinStreak?: (boolean | null) | undefined;
+  longestWinStreak?: (number | null) | undefined;
+  longestLossStreak?: (number | null) | undefined;
+  fastestWinInSeconds?: (number | null) | undefined;
+  slowestWinInSeconds?: (number | null) | undefined;
+  par?: (number | null) | undefined;
+};
+type DeckReadDTO2 = {
+  id: number;
+  userId: string;
+  commander: string;
+  moxfield: string;
+  scryfallId: string;
+  createdAt: string;
+  statistics?: (Array<FilteredDeckStats> | null) | undefined;
+};
 type FilteredStatSnapshotDTO = {
   period: string;
   playerCount: number;
@@ -21,24 +55,6 @@ type StatSnapshotDTO = {
   longestWinStreak: number;
   longestLossStreak: number;
   createdAt?: string | undefined;
-};
-type DeckReadDTO2 = {
-  id: number;
-  userId: string;
-  commander: string;
-  moxfield: string;
-  scryfallId: string;
-  numGames: number;
-  numWins: number;
-  createdAt: string;
-  latestWin?: (string | null) | undefined;
-  currentStreak?: (number | null) | undefined;
-  isCurrentWinStreak?: (boolean | null) | undefined;
-  longestWinStreak?: (number | null) | undefined;
-  longestLossStreak?: (number | null) | undefined;
-  fastestWinInSeconds?: (number | null) | undefined;
-  slowestWinInSeconds?: (number | null) | undefined;
-  par?: (number | null) | undefined;
 };
 type WinLossGameCount = {
   periodStart: string;
@@ -67,24 +83,6 @@ type UserReadMinimalDTO = {
   userName: string;
   email: string;
   profile?: (string | null) | undefined;
-};
-type DeckReadDTO = {
-  id: number;
-  userId: string;
-  commander: string;
-  moxfield: string;
-  scryfallId: string;
-  numGames: number;
-  numWins: number;
-  createdAt: string;
-  latestWin?: (string | null) | undefined;
-  currentStreak?: (number | null) | undefined;
-  isCurrentWinStreak?: (boolean | null) | undefined;
-  longestWinStreak?: (number | null) | undefined;
-  longestLossStreak?: (number | null) | undefined;
-  fastestWinInSeconds?: (number | null) | undefined;
-  slowestWinInSeconds?: (number | null) | undefined;
-  par?: (number | null) | undefined;
 };
 type GameReadDTO = {
   id: number;
@@ -173,16 +171,10 @@ const InfoRequest = z
   })
   .partial()
   .passthrough();
-const DeckReadDTO: z.ZodType<DeckReadDTO> = z
+const DeckStats: z.ZodType<DeckStats> = z
   .object({
-    id: z.number().int(),
-    userId: z.string(),
-    commander: z.string(),
-    moxfield: z.string(),
-    scryfallId: z.string(),
     numGames: z.number().int(),
     numWins: z.number().int(),
-    createdAt: z.string().datetime({ offset: true }),
     latestWin: z.string().datetime({ offset: true }).nullish(),
     currentStreak: z.number().int().nullish(),
     isCurrentWinStreak: z.boolean().nullish(),
@@ -191,6 +183,20 @@ const DeckReadDTO: z.ZodType<DeckReadDTO> = z
     fastestWinInSeconds: z.number().int().nullish(),
     slowestWinInSeconds: z.number().int().nullish(),
     par: z.number().nullish(),
+  })
+  .passthrough();
+const FilteredDeckStats: z.ZodType<FilteredDeckStats> = z
+  .object({ podSize: z.number().int(), stats: DeckStats })
+  .passthrough();
+const DeckReadDTO: z.ZodType<DeckReadDTO> = z
+  .object({
+    id: z.number().int(),
+    userId: z.string(),
+    commander: z.string(),
+    moxfield: z.string(),
+    scryfallId: z.string(),
+    createdAt: z.string().datetime({ offset: true }),
+    statistics: z.array(FilteredDeckStats).nullish(),
   })
   .passthrough();
 const DeckWriteDTO = z
@@ -299,17 +305,8 @@ const DeckReadDTO2: z.ZodType<DeckReadDTO2> = z
     commander: z.string(),
     moxfield: z.string(),
     scryfallId: z.string(),
-    numGames: z.number().int(),
-    numWins: z.number().int(),
     createdAt: z.string().datetime({ offset: true }),
-    latestWin: z.string().datetime({ offset: true }).nullish(),
-    currentStreak: z.number().int().nullish(),
-    isCurrentWinStreak: z.boolean().nullish(),
-    longestWinStreak: z.number().int().nullish(),
-    longestLossStreak: z.number().int().nullish(),
-    fastestWinInSeconds: z.number().int().nullish(),
-    slowestWinInSeconds: z.number().int().nullish(),
-    par: z.number().nullish(),
+    statistics: z.array(FilteredDeckStats).nullish(),
   })
   .passthrough();
 const WinLossGameCount: z.ZodType<WinLossGameCount> = z
@@ -393,6 +390,8 @@ export const schemas = {
   TwoFactorResponse,
   InfoResponse,
   InfoRequest,
+  DeckStats,
+  FilteredDeckStats,
   DeckReadDTO,
   DeckWriteDTO,
   UserReadDTO,

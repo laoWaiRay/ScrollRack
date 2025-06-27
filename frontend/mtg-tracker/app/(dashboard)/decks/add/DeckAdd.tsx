@@ -39,7 +39,6 @@ export default function DeckAdd({}: DeckAddInterface) {
 	const [moxfield, setMoxfield] = useState("");
 	const delayRef = useRef(false);
 	const { toast } = useToast();
-  const { decks } = useDeck();
 
 	const handleComboboxSelect: Dispatch<SetStateAction<string | null>> = (
 		value

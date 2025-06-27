@@ -1,5 +1,5 @@
 import { getImageUrl } from "@/helpers/scryfallApi";
-import { DeckReadDTO } from "@/types/client";
+import { DeckReadDTO, DeckStats } from "@/types/client";
 import Image from "next/image";
 import Moxfield from "@/public/icons/moxfield.svg";
 import dayjs from "dayjs";
@@ -8,35 +8,53 @@ import { toPercent } from "@/helpers/math";
 
 interface DeckCardInterface {
 	deck: DeckReadDTO;
-  styles?: string;
+	deckStats: DeckStats;
+	styles?: string;
 }
 
-interface DeckStat {
+interface DeckCardStat {
 	title: string;
 	data: string;
 }
 
-export default function DeckCard({ deck, styles }: DeckCardInterface) {
-	const deckStats: DeckStat[] = [
+export default function DeckCard({
+	deck,
+	deckStats,
+	styles,
+}: DeckCardInterface) {
+	const {
+		numGames,
+		numWins,
+		par,
+		longestWinStreak,
+		longestLossStreak,
+		latestWin,
+		fastestWinInSeconds,
+		slowestWinInSeconds,
+		isCurrentWinStreak,
+		currentStreak,
+	} = deckStats;
+
+	const deckCardStats: DeckCardStat[] = [
 		{
 			title: "Games",
-			data: deck.numGames.toString(),
+			data: numGames.toString(),
 		},
 		{
 			title: "Wins",
-			data: deck.numWins.toString(),
+			data: numWins.toString(),
 		},
 		{
 			title: "Losses",
-			data: (deck.numGames - deck.numWins).toString(),
+			data: (numGames - numWins).toString(),
 		},
 		{
 			title: "Win Rate",
-			data: deck.numGames > 0 ? toPercent(deck.numWins / deck.numGames) : "-",
+			data: numGames > 0 ? toPercent(numWins / numGames) : "-",
 		},
 		{
 			title: "Par",
-			data: deck.par ? toPercent(deck.par) : "-",
+			data: par ? toPercent(par) : "-",
 		},
 		{
 			title: "Current Streak",
@@ -44,39 +62,37 @@ export default function DeckCard({ deck, styles }: DeckCardInterface) {
 		},
 		{
 			title: "Longest Win Streak",
-			data: deck.longestWinStreak ? deck.longestWinStreak.toString() : "-",
+			data: longestWinStreak ? longestWinStreak.toString() : "-",
 		},
 		{
 			title: "Longest Loss Streak",
-			data: deck.longestLossStreak ? deck.longestLossStreak.toString() : "-",
+			data: longestLossStreak ? longestLossStreak.toString() : "-",
 		},
 		{
 			title: "Last Win",
-			data: deck.latestWin ? dayjs(deck.latestWin).format("YYYY-MM-DD") : "-",
+			data: latestWin ? dayjs(latestWin).format("YYYY-MM-DD") : "-",
 		},
 		{
 			title: "Fastest Win",
-			data: deck.fastestWinInSeconds ? formatTime(deck.fastestWinInSeconds, "hms") : "-",
+			data: fastestWinInSeconds ? formatTime(fastestWinInSeconds, "hms") : "-",
 		},
 		{
 			title: "Slowest Win",
-			data: deck.slowestWinInSeconds ? formatTime(deck.slowestWinInSeconds, "hms") : "-",
+			data: slowestWinInSeconds ? formatTime(slowestWinInSeconds, "hms") : "-",
 		},
 	];
 
 	let streakStyle = "";
 
-	if (deck.isCurrentWinStreak == true) {
+	if (isCurrentWinStreak == true) {
 		streakStyle = "text-success";
 	}
 
-	if (deck.isCurrentWinStreak == false) {
+	if (isCurrentWinStreak == false) {
 		streakStyle = "text-error";
 	}
 
 	function getStreakString() {
-		const { currentStreak, isCurrentWinStreak } = deck;
-
 		if (currentStreak == null || isCurrentWinStreak == null) {
 			return "-";
 		}
@@ -94,7 +110,7 @@ export default function DeckCard({ deck, styles }: DeckCardInterface) {
 	}
 
 	function renderStats() {
-		return deckStats.map((stat) => (
+		return deckCardStats.map((stat) => (
 			<div key={stat.title} className="flex justify-between">
 				<span>{`${stat.title}:`}</span>
 				<span className={`${stat.title === "Current Streak" && streakStyle}`}>
@@ -105,7 +121,9 @@ export default function DeckCard({ deck, styles }: DeckCardInterface) {
 	}
 
 	return (
-		<div className={`flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg ${styles}`}>
+		<div
+			className={`flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg ${styles}`}
+		>
 			<div className="w-full flex justify-center items-center px-4 mb-2 gap-3 lg:justify-center">
 				<h2 className="font-semibold">{deck.commander}</h2>
 				{deck.moxfield && (

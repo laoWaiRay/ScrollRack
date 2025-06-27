@@ -78,18 +78,9 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             .Select((startTime, i) => new { startTime, label = periodLabels[i] })
             .ToDictionary(x => x.startTime, x => x.label);
 
-        // (min, max) number of players in game
-        List<PodSizeConstraint> podSizeConstraints = [
-            new PodSizeConstraint(2, 2),
-            new PodSizeConstraint(3, 3),
-            new PodSizeConstraint(4, 4),
-            new PodSizeConstraint(5, int.MaxValue),
-            new PodSizeConstraint(0, int.MaxValue),
-        ];
-
         List<FilteredStatSnapshotDTO> filteredSnapshotDTOs = [];
 
-        foreach (var podSize in podSizeConstraints)
+        foreach (var podSize in _deckStatsService.PodSizeConstraints)
         {
             foreach (DateTime startTime in periodStartTimes)
             {

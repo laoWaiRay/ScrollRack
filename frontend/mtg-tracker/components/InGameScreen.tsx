@@ -20,8 +20,6 @@ import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { formatTime } from "@/helpers/time";
-import { useDeck } from "@/hooks/useDeck";
-import { getDecks } from "@/actions/decks";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -52,9 +50,8 @@ export default function InGameScreen({
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
+  const [isFetching, setIsFetching] = useState(false);
   
-  console.log(JSON.stringify(players.map(p => (p.userName))))
-
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
 		setCurrentGameData(null);
@@ -75,6 +72,8 @@ export default function InGameScreen({
 		let gameSavedId = 0;
 
 		try {
+      setIsFetching(true);
+
 			const gameWriteDTO: GameWriteDTO = {
         roomId,
 				numPlayers: players.length,
@@ -142,6 +141,7 @@ export default function InGameScreen({
 			}
 			setLocalStorageValue(null);
 			setCurrentGameData(null);
+      setIsFetching(false);
 		} catch (error) {
 			if (gameSaved) {
 				// Revert, delete game data
@@ -152,6 +152,7 @@ export default function InGameScreen({
 			}
 			console.log(error);
 			toast("Error saving game", "warn");
+      setIsFetching(false);
 		}
 	}
 
@@ -217,7 +218,7 @@ export default function InGameScreen({
 					<div className="grow-4">
 						<ButtonPrimary
 							onClick={handleSaveGame}
-							disabled={!winner}
+							disabled={!winner || isFetching}
 							uppercase={false}
 						>
 							Save

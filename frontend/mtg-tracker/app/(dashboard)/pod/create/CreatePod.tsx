@@ -20,7 +20,10 @@ import { useRouter } from "next/navigation";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
 import { getRooms } from "@/actions/rooms";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+	tryGetLocalStoragePlayerData,
+	useLocalStorage,
+} from "@/hooks/useLocalStorage";
 import Lobby from "@/components/Lobby";
 import InGameScreen from "@/components/InGameScreen";
 
@@ -52,20 +55,13 @@ export default function CreatePod({}: CreatePodInterface) {
 	>({});
 
 	const hostedRoom = rooms.find((r) => r.roomOwnerId === user?.id);
-  const playerIds = hostedRoom?.players?.map(p => p.id) ?? [];
+	const playerIds = hostedRoom?.players?.map((p) => p.id) ?? [];
 	const canStartGame =
 		!!hostedRoom &&
 		!!hostedRoom.players &&
 		hostedRoom.players.length > 1 &&
-		!!playerIdToDeck  &&
-    playerIds.every(id => Object.keys(playerIdToDeck).includes(id));
-
-  console.log(`hostedRoom: ${hostedRoom}`);
-  console.log(`playerIds: ${hostedRoom?.players?.map(p => p.id) ?? []}`)
-  console.log(`hostedRoom.players: ${hostedRoom?.players}`)
-  console.log(`hostedRoom.players.length: ${hostedRoom?.players?.length}`)
-  console.log(`playerIdToDeck: ${JSON.stringify(playerIdToDeck)}`)
-  console.log(`finalCheck: ${playerIds.every(id => Object.keys(playerIdToDeck).includes(id))}`)
+		!!playerIdToDeck &&
+		playerIds.every((id) => Object.keys(playerIdToDeck).includes(id));
 
 	const handleReceiveUpdateRoom = (room: RoomDTO) => {
 		dispatch({ type: ActionType.UPDATE, payload: [room] });
@@ -137,37 +133,20 @@ export default function CreatePod({}: CreatePodInterface) {
 	useEffect(() => {
 		if (hostedRoom && hostedRoom.players) {
 			for (const player of hostedRoom.players) {
-				const playerDeckDataString = window.localStorage.getItem(player.id);
+				const localStorageData = tryGetLocalStoragePlayerData(player.id);
+				let playerId = null;
+				let playerDeckData = null;
+				if (localStorageData != null) {
+					({ playerId, playerDeckData } = localStorageData);
+				}
 
-				if (playerDeckDataString != null) {
-					try {
-						const playerDeckDataParsed: unknown =
-							JSON.parse(playerDeckDataString);
-						if (
-							playerDeckDataParsed &&
-							typeof playerDeckDataParsed === "object" &&
-							"deckData" in playerDeckDataParsed &&
-							"id" in playerDeckDataParsed &&
-							typeof playerDeckDataParsed["id"] === "string"
-						) {
-							const playerId = playerDeckDataParsed["id"];
-							const playerDeckData = schemas.DeckReadDTO.parse(
-								playerDeckDataParsed["deckData"]
-							);
-							setPlayerIdToDeck((prev) => ({
-								...prev,
-								[playerId]: playerDeckData,
-							}));
-						} else {
-							throw Error("Invalid localStorage data");
-						}
-					} catch (error) {
-						console.log("Zod Error parsing DeckReadDTO", error);
-						setLocalStorageGameData(null);
-						setCurrentGameData(null);
-					}
+				if (playerId != null && playerDeckData != null) {
+					setPlayerIdToDeck((prev) => ({
+						...prev,
+						[playerId as string]: playerDeckData,
+					}));
 				} else {
-					// No valid deck for some player -> abort game
+					console.log("No valid player data found in local storage");
 					setLocalStorageGameData(null);
 					setCurrentGameData(null);
 				}
@@ -220,7 +199,7 @@ export default function CreatePod({}: CreatePodInterface) {
 									setLocalStorageValue={setLocalStorageGameData}
 									playerIdToDeck={playerIdToDeck}
 									setPlayerIdToDeck={setPlayerIdToDeck}
-                  canStartGame={canStartGame}
+									canStartGame={canStartGame}
 								/>
 							) : (
 								<InGameScreen
@@ -230,7 +209,7 @@ export default function CreatePod({}: CreatePodInterface) {
 									setCurrentGameData={setCurrentGameData}
 									setLocalStorageValue={setLocalStorageGameData}
 									playerIdToDeck={playerIdToDeck}
-                  roomId={hostedRoom.id}
+									roomId={hostedRoom.id}
 								/>
 							)}
 						</>

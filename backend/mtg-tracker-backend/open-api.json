@@ -1803,8 +1803,6 @@
           "commander",
           "moxfield",
           "scryfallId",
-          "numGames",
-          "numWins",
           "createdAt"
         ],
         "type": "object",
@@ -1825,6 +1823,67 @@
           "scryfallId": {
             "type": "string"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "statistics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilteredDeckStats"
+            },
+            "nullable": true
+          }
+        }
+      },
+      "DeckReadDTO2": {
+        "required": [
+          "id",
+          "userId",
+          "commander",
+          "moxfield",
+          "scryfallId",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "commander": {
+            "type": "string"
+          },
+          "moxfield": {
+            "type": "string"
+          },
+          "scryfallId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "statistics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilteredDeckStats"
+            },
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "DeckStats": {
+        "required": [
+          "numGames",
+          "numWins"
+        ],
+        "type": "object",
+        "properties": {
           "numGames": {
             "type": "integer",
             "format": "int32"
@@ -1832,10 +1891,6 @@
           "numWins": {
             "type": "integer",
             "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "latestWin": {
             "type": "string",
@@ -1878,89 +1933,6 @@
           }
         }
       },
-      "DeckReadDTO2": {
-        "required": [
-          "id",
-          "userId",
-          "commander",
-          "moxfield",
-          "scryfallId",
-          "numGames",
-          "numWins",
-          "createdAt"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "commander": {
-            "type": "string"
-          },
-          "moxfield": {
-            "type": "string"
-          },
-          "scryfallId": {
-            "type": "string"
-          },
-          "numGames": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "numWins": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "latestWin": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "currentStreak": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "isCurrentWinStreak": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "longestWinStreak": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "longestLossStreak": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "fastestWinInSeconds": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "slowestWinInSeconds": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "par": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
       "DeckWriteDTO": {
         "required": [
           "userId",
@@ -1991,6 +1963,22 @@
           "numWins": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "FilteredDeckStats": {
+        "required": [
+          "podSize",
+          "stats"
+        ],
+        "type": "object",
+        "properties": {
+          "podSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/DeckStats"
           }
         }
       },

@@ -5,10 +5,19 @@ using Mtg_tracker.Models.DTOs;
 namespace Mtg_tracker.Services;
 
 public record StreakStats(int CurrentStreak, bool? IsCurrentWinStreak, int LongestWinStreak, int LongestLossStreak);
+public record PodSizeConstraint(int Min, int Max);
 
 public class DeckStatsService(IMapper mapper)
 {
     private readonly IMapper _mapper = mapper;
+
+    public List<PodSizeConstraint> PodSizeConstraints = [
+        new PodSizeConstraint(2, 2),
+        new PodSizeConstraint(3, 3),
+        new PodSizeConstraint(4, 4),
+        new PodSizeConstraint(5, int.MaxValue),
+        new PodSizeConstraint(0, int.MaxValue),
+    ];
 
     public double ComputePar(List<GameParticipation> gameParticipations)
     {
@@ -64,33 +73,52 @@ public class DeckStatsService(IMapper mapper)
 
     public DeckReadDTO ComputeDeckStats(List<GameParticipation> deckGameParticipations, Deck deck)
     {
-        var streakStats = ComputeStreakStats(deckGameParticipations);
+        List<FilteredDeckStats> filteredDeckStats = [];
+        foreach (var podSize in PodSizeConstraints)
+        {
+            List<GameParticipation> filteredGameParticipations = deckGameParticipations
+                .Where(gp => gp.Game.NumPlayers >= podSize.Min && gp.Game.NumPlayers <= podSize.Max)
+                .ToList();
 
-        var winningGameLengths = deckGameParticipations
-            .Where(gp => gp.Won)
-            .Select(gp => gp.Game.Seconds)
-            .ToList();
+            var streakStats = ComputeStreakStats(filteredGameParticipations);
 
-        var fastestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Min() : 0;
-        var slowestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Max() : 0;
+            var winningGameLengths = filteredGameParticipations
+                .Where(gp => gp.Won)
+                .Select(gp => gp.Game.Seconds)
+                .ToList();
 
-        double par = ComputePar(deckGameParticipations);
+            var fastestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Min() : 0;
+            var slowestWinInSeconds = winningGameLengths.Count > 0 ? winningGameLengths.Max() : 0;
 
-        var latestWin = deckGameParticipations.Where(gp => gp.Won && !gp.Game.Imported).FirstOrDefault()?.CreatedAt;
+            double par = ComputePar(filteredGameParticipations);
 
-        var mrpdDTO = _mapper.Map<DeckReadDTO>(deck);
-        mrpdDTO.NumGames = deckGameParticipations.Count;
-        mrpdDTO.NumWins = deckGameParticipations.Where(gp => gp.Won).Count();
-        mrpdDTO.LatestWin = latestWin;
-        mrpdDTO.CurrentStreak = streakStats.CurrentStreak;
-        mrpdDTO.IsCurrentWinStreak = streakStats.IsCurrentWinStreak;
-        mrpdDTO.LongestWinStreak = streakStats.LongestWinStreak;
-        mrpdDTO.LongestLossStreak = streakStats.LongestLossStreak;
-        mrpdDTO.FastestWinInSeconds = fastestWinInSeconds;
-        mrpdDTO.SlowestWinInSeconds = slowestWinInSeconds;
-        mrpdDTO.Par = par;
+            var latestWin = filteredGameParticipations.Where(gp => gp.Won && !gp.Game.Imported).FirstOrDefault()?.CreatedAt;
 
-        return mrpdDTO;
+            DeckStats deckStats = new()
+            {
+                NumGames = filteredGameParticipations.Count,
+                NumWins = filteredGameParticipations.Where(gp => gp.Won).Count(),
+                LatestWin = latestWin,
+                CurrentStreak = streakStats.CurrentStreak,
+                IsCurrentWinStreak = streakStats.IsCurrentWinStreak,
+                LongestWinStreak = streakStats.LongestWinStreak,
+                LongestLossStreak = streakStats.LongestLossStreak,
+                FastestWinInSeconds = fastestWinInSeconds,
+                SlowestWinInSeconds = slowestWinInSeconds,
+                Par = par,
+            };
+            FilteredDeckStats filteredStats = new()
+            {
+                PodSize = podSize.Min,
+                Stats = deckStats,
+            };
+            filteredDeckStats.Add(filteredStats);
+        }
+
+        DeckReadDTO deckReadDTO = _mapper.Map<DeckReadDTO>(deck);
+        deckReadDTO.Statistics = filteredDeckStats;
+
+        return deckReadDTO;
     }
 
     // Groups games/wins/losses by time period for displaying on Line Chart

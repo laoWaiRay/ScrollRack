@@ -8,6 +8,8 @@ import TextInput from "@/components/TextInput";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
+import { tryGetLocalStoragePlayerData } from "@/hooks/useLocalStorage";
+import { useRoom } from "@/hooks/useRoom";
 import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
 import { Field, Label } from "@headlessui/react";
@@ -18,7 +20,7 @@ interface DeckEditInterface {}
 export default function DeckEdit({}: DeckEditInterface) {
 	const { user } = useAuth();
 	const { toast } = useToast();
-	const { decks } = useDeck();
+	const { decks, mutate } = useDeck();
 	const [moxfield, setMoxfield] = useState<string>("");
 	const [selected, setSelected] = useState<string | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -42,7 +44,11 @@ export default function DeckEdit({}: DeckEditInterface) {
 			}
 
 			const deckWriteDTO: DeckWriteDTO = {
-				...selectedDeck,
+				commander: selectedDeck.commander,
+				numGames: 0,
+				numWins: 0,
+				scryfallId: selectedDeck.scryfallId,
+				userId: selectedDeck.userId,
 				moxfield: moxfield,
 			};
 
@@ -50,9 +56,10 @@ export default function DeckEdit({}: DeckEditInterface) {
 				params: { id: selectedDeck.id },
 				withCredentials: true,
 			});
+			mutate();
+
 			setSelected(null);
 			setMoxfield("");
-
 			toast(`Updated deck "${selectedDeck.commander}"`, "success");
 		} catch (error) {
 			console.log(error);
@@ -70,6 +77,22 @@ export default function DeckEdit({}: DeckEditInterface) {
 				params: { id: selectedDeck.id },
 				withCredentials: true,
 			});
+			mutate();
+
+			if (user) {
+				const localStorageData = tryGetLocalStoragePlayerData(user.id ?? "");
+				let playerId = null;
+				let playerDeckData = null;
+				if (localStorageData != null) {
+					({ playerId, playerDeckData } = localStorageData);
+				}
+				if (playerId != null && playerDeckData != null) {
+					if (playerDeckData.commander === selectedDeck.commander) {
+						window.localStorage.removeItem(user.id);
+					}
+				}
+			}
+
 			setSelected(null);
 			setMoxfield("");
 			toast(`Deleted deck: ${selectedDeck.commander}`, "success");

@@ -49,8 +49,8 @@ const labelToTimePeriod: Record<string, TimePeriod> = {
 	Month: "CurrentMonth",
 };
 
-const podSizeLabels: string[] = ["All", "2", "3", "4", "5+"];
-const labelToPodSize: Record<string, number> = {
+export const podSizeLabels: string[] = ["All", "2", "3", "4", "5+"];
+export const labelToPodSize: Record<string, number> = {
 	All: 0,
 	"2": 2,
 	"3": 3,
@@ -66,17 +66,21 @@ export default function CommandZone({}: CommandZoneInterface) {
 	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[0]);
 	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
 
+  const podSize = labelToPodSize[podSizeLabel];
+  const timePeriod = labelToTimePeriod[timePeriodLabel];
+
 	const snapshot = useMemo(() => {
 		return (
 			snapshots.find(
 				(s) =>
-					s.period == labelToTimePeriod[timePeriodLabel] &&
-					s.playerCount == labelToPodSize[podSizeLabel]
+					s.period == timePeriod &&
+					s.playerCount == podSize
 			)?.snapshot ?? defaultStatSnapshot
 		);
 	}, [timePeriodLabel, podSizeLabel, snapshots]);
 
 	const mostRecentDeck = snapshot.mostRecentPlayedDeck;
+  const mostRecentDeckStats = mostRecentDeck?.statistics?.find(s => s.podSize == podSize)?.stats;
 
 	const statCardData: StatCardData[] = [
 		{
@@ -109,8 +113,8 @@ export default function CommandZone({}: CommandZoneInterface) {
 			title: "Recently Played",
 			data: mostRecentDeck ? mostRecentDeck.commander : "-",
 			subData: [
-				mostRecentDeck
-					? mostRecentDeck.isCurrentWinStreak
+				mostRecentDeckStats
+					? mostRecentDeckStats.isCurrentWinStreak
 						? "WON"
 						: "LOSS"
 					: "-",
@@ -118,9 +122,9 @@ export default function CommandZone({}: CommandZoneInterface) {
 			styles: {
 				main: "text-lg text-fg-light my-2",
 				sub: `${
-					!mostRecentDeck
+					!mostRecentDeckStats
 						? ""
-						: mostRecentDeck.isCurrentWinStreak
+						: mostRecentDeckStats.isCurrentWinStreak
 						? "text-success"
 						: "text-error"
 				} font-bold tracking-wider`,
@@ -264,9 +268,10 @@ export default function CommandZone({}: CommandZoneInterface) {
 							<h3 className="pb-4 border-b border-surface-500 text-fg-light">
 								Commander Showcase
 							</h3>
-							{mostRecentDeck && (
+							{mostRecentDeck && mostRecentDeckStats && (
 								<DeckCard
 									deck={mostRecentDeck}
+                  deckStats={mostRecentDeckStats}
 									styles="!bg-transparent"
 								/>
 							)}

@@ -12,7 +12,7 @@ import Add from "@/public/icons/add.svg";
 import Edit from "@/public/icons/edit.svg";
 import DeckCard from "@/components/DeckCard";
 import Fuse from "fuse.js";
-import { useDeck } from "@/hooks/useDeck";
+import { defaultDeckStats, useDeck } from "@/hooks/useDeck";
 import FilterSortBar from "@/components/FilterSortBar";
 import Drawer from "@/components/Drawer";
 import Switch from "@/components/Switch";
@@ -22,8 +22,11 @@ import DateSelect from "@/components/DateSelect";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import dayjs from "dayjs";
 import ButtonPrimary from "@/components/ButtonPrimary";
-import CircularProgress from "@mui/material/CircularProgress";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { labelToPodSize, podSizeLabels } from "../commandzone/CommandZone";
+import DropdownMenu from "@/components/DropdownMenu";
+import Sort from "@/public/icons/sort.svg";
+import Filter from "@/public/icons/filter.svg";
 
 interface DecksInterface {}
 
@@ -44,6 +47,7 @@ export default function Decks({}: DecksInterface) {
 	const [startDate, setStartDate] = useState<PickerValue>(dayjs());
 	const [endDate, setEndDate] = useState<PickerValue>(dayjs());
 	const [showAllDecks, setShowAllDecks] = useState(true);
+	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
 
 	const initialSortValues: SortValues = {
 		recency: "newest",
@@ -68,9 +72,18 @@ export default function Decks({}: DecksInterface) {
 		}
 	}
 
+	const podSize = labelToPodSize[podSizeLabel];
+
+	function deckToDeckStats(deck: DeckReadDTO) {
+		return (
+			deck.statistics?.find((s) => s.podSize === podSize)?.stats ??
+			defaultDeckStats
+		);
+	}
+
 	const sortFormData = [
 		{
-			heading: "RECENCY",
+			heading: "DATE CREATED",
 			switches: [
 				{
 					name: "Newest First",
@@ -134,28 +147,40 @@ export default function Decks({}: DecksInterface) {
 	];
 
 	const sortNumGames = (a: DeckReadDTO, b: DeckReadDTO) => {
+		const aStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(a);
+		if (!aStats || !bStats) {
+			return null;
+		}
+
 		switch (numGames) {
 			case "most":
-				return b.numGames - a.numGames;
+				return bStats.numGames - aStats.numGames;
 			case "least":
-				return a.numGames - b.numGames;
+				return aStats.numGames - bStats.numGames;
 			default:
 				return null;
 		}
 	};
 
 	const sortWinRate = (a: DeckReadDTO, b: DeckReadDTO) => {
+		const aStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(a);
+		if (!aStats || !bStats) {
+			return null;
+		}
+
 		switch (winRate) {
 			case "highest":
-				return b.numWins - a.numWins;
+				return bStats.numWins - aStats.numWins;
 			case "lowest":
-				return a.numWins - b.numWins;
+				return aStats.numWins - bStats.numWins;
 			default:
 				return null;
 		}
 	};
 
-	const sortRecency = (a: DeckReadDTO, b: DeckReadDTO) => {
+	const sortDateCreated = (a: DeckReadDTO, b: DeckReadDTO) => {
 		switch (recency) {
 			case "newest":
 				return (
@@ -171,29 +196,37 @@ export default function Decks({}: DecksInterface) {
 	};
 
 	const sortRecentWins = (a: DeckReadDTO, b: DeckReadDTO) => {
+		const aStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(b);
+		if (!aStats || !bStats) {
+			return null;
+		}
+
 		switch (recentWins) {
 			case "most recent":
-				if (a.latestWin == null && b.latestWin == null) {
+				if (aStats.latestWin == null && bStats.latestWin == null) {
 					return 0;
-				} else if (a.latestWin == null) {
+				} else if (aStats.latestWin == null) {
 					return 1;
-				} else if (b.latestWin == null) {
+				} else if (bStats.latestWin == null) {
 					return -1;
 				} else {
 					return (
-						new Date(b.latestWin).getTime() - new Date(a.latestWin).getTime()
+						new Date(bStats.latestWin).getTime() -
+						new Date(aStats.latestWin).getTime()
 					);
 				}
 			case "least recent":
-				if (a.latestWin == null && b.latestWin == null) {
+				if (aStats.latestWin == null && bStats.latestWin == null) {
 					return 0;
-				} else if (a.latestWin == null) {
+				} else if (aStats.latestWin == null) {
 					return -1;
-				} else if (b.latestWin == null) {
+				} else if (bStats.latestWin == null) {
 					return 1;
 				} else {
 					return (
-						new Date(a.latestWin).getTime() - new Date(b.latestWin).getTime()
+						new Date(aStats.latestWin).getTime() -
+						new Date(bStats.latestWin).getTime()
 					);
 				}
 			default:
@@ -226,7 +259,7 @@ export default function Decks({}: DecksInterface) {
 				sortNumGames(a, b) ||
 				sortWinRate(a, b) ||
 				sortRecentWins(a, b) ||
-				sortRecency(a, b)
+				sortDateCreated(a, b)
 		);
 
 		const fuse = new Fuse(timeFilteredDecks, {
@@ -242,7 +275,9 @@ export default function Decks({}: DecksInterface) {
 		}
 
 		if (filter !== "" && filtered.length > 0) {
-			return filtered.map((deck) => <DeckCard key={deck.id} deck={deck} />);
+			return filtered.map((deck) => (
+				<DeckCard key={deck.id} deck={deck} deckStats={deckToDeckStats(deck)} />
+			));
 		} else {
 			// Apply date filter here for non-filtered decks
 			const timeFilteredDecks = filterDeckByDateRange(decks);
@@ -253,11 +288,11 @@ export default function Decks({}: DecksInterface) {
 					sortNumGames(a, b) ||
 					sortWinRate(a, b) ||
 					sortRecentWins(a, b) ||
-					sortRecency(a, b)
+					sortDateCreated(a, b)
 			);
 
 			return timeFilteredDecks.map((deck) => (
-				<DeckCard key={deck.id} deck={deck} />
+				<DeckCard key={deck.id} deck={deck} deckStats={deckToDeckStats(deck)} />
 			));
 		}
 	}
@@ -331,15 +366,27 @@ export default function Decks({}: DecksInterface) {
 								</div>
 							))}
 						</div>
+
 						<ButtonPrimary
 							onClick={() => {
 								setIsSortDrawerOpen(false);
 								resetSortToDefault();
 							}}
 							style="transparent"
-							styles="mt-8"
+              styles="mt-8"
+              uppercase={false}
 						>
 							Reset To Default
+						</ButtonPrimary>
+						<ButtonPrimary
+							onClick={() => {
+								setIsSortDrawerOpen(false);
+							}}
+							style="transparent"
+              uppercase={false}
+              styles="mt-0"
+						>
+							Back
 						</ButtonPrimary>
 					</section>
 				</Drawer>
@@ -405,21 +452,57 @@ export default function Decks({}: DecksInterface) {
 								resetTimeFilterToDefault();
 							}}
 							style="transparent"
-							styles="mt-8"
+							uppercase={false}
 						>
 							Reset To Default
+						</ButtonPrimary>
+
+						<ButtonPrimary
+							onClick={() => {
+								setIsFilterDrawerOpen(false);
+							}}
+							style="transparent"
+							uppercase={false}
+							styles="-mt-8"
+						>
+							Back
 						</ButtonPrimary>
 					</section>
 				</Drawer>
 
 				<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
 					<div className="flex flex-col w-full gap-4">
-						<FilterSortBar
-							filter={filter}
-							setFilter={setFilter}
-							onSortClick={() => setIsSortDrawerOpen(true)}
-							onFilterClick={() => setIsFilterDrawerOpen(true)}
-						/>
+						<section className="w-full flex flex-col gap-4">
+							<FilterSortBar
+								filter={filter}
+								setFilter={setFilter}
+								useFilterButton={false}
+								useSortButton={false}
+							/>
+							<div className="w-full flex justify-between lg:justify-start lg:gap-4 pl-4 pr-2">
+								<div className="flex gap-2 items-center">
+									<span className="text-sm">Pod Size</span>
+									<DropdownMenu
+										options={podSizeLabels}
+										selected={podSizeLabel}
+										setSelected={setPodSizeLabel}
+									/>
+								</div>
+
+								<div className="flex items-center gap-2">
+									<ButtonIcon onClick={() => setIsSortDrawerOpen(true)}>
+										<div className="w-[2.5em] border border-surface-500 rounded p-1">
+											<Sort />
+										</div>
+									</ButtonIcon>
+									<ButtonIcon onClick={() => setIsFilterDrawerOpen(true)}>
+										<div className="w-[2.5em] border border-surface-500 rounded p-2">
+											<Filter />
+										</div>
+									</ButtonIcon>
+								</div>
+							</div>
+						</section>
 
 						<section className="w-full flex flex-col gap-2 px-2">
 							{isLoading ? <LoadingSpinner /> : renderDeckCards()}

@@ -19,7 +19,6 @@ import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { ActionType } from "@/context/RoomContext";
 import Dialog from "@/components/Dialog";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
-import { HubConnection } from "@microsoft/signalr";
 import { getRooms } from "@/actions/rooms";
 
 interface JoinPodInterface {}
@@ -109,7 +108,7 @@ export default function JoinPod({}: JoinPodInterface) {
 
 	return (
 		<DashboardLayout>
-			<DashboardHeader title="Join Pod" user={user} align="left">
+			<DashboardHeader title="Join Pod" user={user}>
 				<ButtonIcon
 					styles={`size-[2em] active:text-white hover:text-white ${
 						!joinedRoom && "hidden"
