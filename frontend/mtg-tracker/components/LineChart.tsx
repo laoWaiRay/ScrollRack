@@ -35,11 +35,11 @@ const initialMonthNames = [
 ];
 
 function formatTimeShort(isoString: string) {
-  return dayjs(isoString).format("M-DD");
+  return dayjs(isoString).format("MMM D");
 }
 
 function formatTimeLong(isoString: string) {
-  return dayjs(isoString).format("MMM D");
+  return dayjs(isoString).format("MMM D YYYY");
 }
 
 export default function LineChart({ buckets }: LineChartInterface) {
@@ -139,7 +139,7 @@ export default function LineChart({ buckets }: LineChartInterface) {
 						fontWeight: "inherit",
 					},
 				},
-        overwriteCategories: buckets.map((b, i) => i % 2 == 0 ? `${formatTimeLong(b.periodStart)}` : ""),
+        overwriteCategories: buckets.map((b, i) => i % 2 == 0 ? `${formatTimeShort(b.periodStart)}` : ""),
         categories: buckets.map((b, i) => i < buckets.length - 1 ? `${formatTimeLong(b.periodStart)} - ${formatTimeLong(b.periodEnd)}` : "Recent"),
         tooltip: {
           enabled: false,

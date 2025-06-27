@@ -20,7 +20,7 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
     private readonly IMapper _mapper = mapper;
     private readonly DeckStatsService _deckStatsService = deckStatsService;
 
-    // Returns all-time, year, and month stat snapshots for the current user
+    // Returns stat snapshots for the current user, organized by time period and pod size
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<FilteredStatSnapshotDTO>>> GetStatSnapshot()
@@ -56,8 +56,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             .Where(d => d.UserId == userId)
             .ToListAsync();
 
-        // All other statistics are computed for each time period (All-time, Current Year, Current Month)
-        // and for each pod size (2, 3, 4, or 5+)
+        // Stats are computed for each time period (All-time, Current Year, Current Month) and for
+        // each pod size
         DateTime now = DateTime.Now;
         DateTime[] periodStartTimes = [
             new DateTime(2000, 1, 1),
@@ -109,30 +109,12 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     .Where(gp => gp.Won)
                     .FirstOrDefault()?.CreatedAt;
 
-                var isWinStreak = filteredGameParticipations
-                    .FirstOrDefault()?.Won;
-
-                var streak = filteredGameParticipations
-                    .TakeWhile(gp => gp.Won == isWinStreak && !gp.Game.Imported)
-                    .Count();
-
-
                 // Compute stats for Most Recently Played Deck
                 var mrpdDTO = _deckStatsService
                     .ComputeMostRecentPlayedDeckStats(filteredGameParticipations);
 
-                // Compute longest win/loss streaks
-                var currWinStreak = 0;
-                var currLossStreak = 0;
-                var longestWinStreak = 0;
-                var longestLossStreak = 0;
-                foreach (var gp in filteredGameParticipations)
-                {
-                    currWinStreak = gp.Won ? currWinStreak + 1 : 0;
-                    currLossStreak = !gp.Won ? currLossStreak + 1 : 0;
-                    longestWinStreak = Math.Max(currWinStreak, longestWinStreak);
-                    longestLossStreak = Math.Max(currLossStreak, longestLossStreak);
-                }
+                // Compute streak stats
+                var streakStats = _deckStatsService.ComputeStreakStats(filteredGameParticipations);
 
                 // Compute most/least played commanders
                 var commandersByPlayrate = filteredGameParticipations
@@ -152,51 +134,7 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     .ToList();
 
                 // Group games/wins/losses by time period for displaying on Line Chart
-                int bucketCount = 12;
-
-                var firstDate = filteredGameParticipations.Last().CreatedAt;
-                var lastDate = filteredGameParticipations.First().CreatedAt;
-                var totalSpan = lastDate - firstDate;
-                var bucketSpan = TimeSpan.FromSeconds(totalSpan.TotalSeconds / bucketCount);
-
-                var buckets = new List<WinLossGameCount>();
-                for (int i = 0; i < bucketCount; i++)
-                {
-                    var periodStart = firstDate.AddSeconds(i * bucketSpan.TotalSeconds);
-                    var periodEnd = (i == bucketCount - 1)
-                        ? lastDate
-                        : firstDate.AddSeconds((i + 1) * bucketSpan.TotalSeconds);
-
-                    buckets.Add(new WinLossGameCount()
-                    {
-                        PeriodStart = periodStart,
-                        PeriodEnd = periodEnd,
-                        Games = 0,
-                        Wins = 0,
-                        Losses = 0
-                    });
-                }
-
-                foreach (var gp in filteredGameParticipations)
-                {
-                    var offset = gp.CreatedAt - firstDate;
-                    var index = (int)(offset.TotalSeconds / bucketSpan.TotalSeconds);
-
-                    if (index >= bucketCount)
-                    {
-                        index = bucketCount - 1;
-                    }
-
-                    if (gp.Won)
-                    {
-                        buckets[index].Wins++;
-                    }
-                    else
-                    {
-                        buckets[index].Losses++;
-                    }
-                    buckets[index].Games++;
-                }
+                var buckets = _deckStatsService.ComputeWinLossGameCounts(filteredGameParticipations);
 
                 var deckPlayCounts = commandersByPlayrate
                     .Select(grouping => new DeckPlayCount()
@@ -215,16 +153,15 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     LastWon = lastWon,
                     MostPlayedCommanders = mostPlayedCommanders ?? [],
                     LeastPlayedCommanders = leastPlayedCommanders ?? [],
-                    CurrentWinStreak = streak,
-                    IsCurrentWinStreak = isWinStreak,
+                    CurrentWinStreak = streakStats.CurrentStreak,
+                    IsCurrentWinStreak = streakStats.IsCurrentWinStreak,
                     WinLossGamesByPeriod = buckets,
                     DeckPlayCounts = deckPlayCounts,
-                    LongestWinStreak = longestWinStreak,
-                    LongestLossStreak = longestLossStreak,
+                    LongestWinStreak = streakStats.LongestWinStreak,
+                    LongestLossStreak = streakStats.LongestLossStreak,
                     CreatedAt = user.StatSnapshot.CreatedAt,
                     MostRecentPlayedDeck = mrpdDTO,
                 };
-
 
                 var filteredSnapshotDTO = new FilteredStatSnapshotDTO()
                 {

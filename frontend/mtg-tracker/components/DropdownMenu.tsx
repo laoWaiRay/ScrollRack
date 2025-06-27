@@ -23,7 +23,7 @@ export default function DropdownMenu<OptionT extends string>({
 			</MenuButton>
 			<MenuItems
 				anchor="bottom"
-				className="bg-surface-600 border border-surface-500 rounded mt-2"
+				className="bg-surface-600 border border-surface-500 rounded mt-2 min-w-(--button-width)"
 			>
 				{options.map((option) => (
 					<MenuItem key={option}>

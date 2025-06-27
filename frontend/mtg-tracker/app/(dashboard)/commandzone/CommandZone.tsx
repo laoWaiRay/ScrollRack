@@ -50,9 +50,9 @@ const labelToTimePeriod: Record<string, TimePeriod> = {
 	Month: "CurrentMonth",
 };
 
-const podSizeLabels: string[] = ["All Pods", "2", "3", "4", "5+"];
+const podSizeLabels: string[] = ["All", "2", "3", "4", "5+"];
 const labelToPodSize: Record<string, number> = {
-	"All Pods": 0,
+	All: 0,
 	"2": 2,
 	"3": 3,
 	"4": 4,
@@ -78,9 +78,8 @@ export default function CommandZone({}: CommandZoneInterface) {
 			)?.snapshot ?? defaultStatSnapshot
 		);
 	}, [timePeriodLabel, podSizeLabel]);
-  
-  const mostRecentDeck = snapshot.mostRecentPlayedDeck;
-  console.log(mostRecentDeck)
+
+	const mostRecentDeck = snapshot.mostRecentPlayedDeck;
 
 	const statCardData: StatCardData[] = [
 		{
@@ -190,21 +189,47 @@ export default function CommandZone({}: CommandZoneInterface) {
 	return (
 		<DashboardLayout>
 			<DashboardHeader user={user} title="Command Zone" justify="justify-start">
-				<div className="flex ml-4 gap-2">
-					<DropdownMenu
-						options={timePeriodLabels}
-						selected={timePeriodLabel}
-						setSelected={setTimePeriodLabel}
-					/>
-					<DropdownMenu
-						options={podSizeLabels}
-						selected={podSizeLabel}
-						setSelected={setPodSizeLabel}
-					/>
+				<div className="gap-4 w-full hidden lg:flex items-center">
+					<div className="flex gap-2 items-center">
+						<span className="text-sm text-fg-dark">Time</span>
+						<DropdownMenu
+							options={timePeriodLabels}
+							selected={timePeriodLabel}
+							setSelected={setTimePeriodLabel}
+						/>
+					</div>
+
+					<div className="flex gap-2 items-center">
+						<span className="text-sm text-fg-dark">Pod Size</span>
+						<DropdownMenu
+							options={podSizeLabels}
+							selected={podSizeLabel}
+							setSelected={setPodSizeLabel}
+						/>
+					</div>
 				</div>
 			</DashboardHeader>
 			<DashboardMain styles="!items-center">
 				<div className={`dashboard-main-content-layout ${styles.gridLayout} `}>
+					<div className="flex ml-4 gap-4 w-full mb-1 lg:hidden">
+						<div className="flex gap-2 items-center">
+							<span className="text-sm text-fg-dark">Time</span>
+							<DropdownMenu
+								options={timePeriodLabels}
+								selected={timePeriodLabel}
+								setSelected={setTimePeriodLabel}
+							/>
+						</div>
+
+						<div className="flex gap-2 items-center">
+							<span className="text-sm text-fg-dark">Pod Size</span>
+							<DropdownMenu
+								options={podSizeLabels}
+								selected={podSizeLabel}
+								setSelected={setPodSizeLabel}
+							/>
+						</div>
+					</div>
 					{renderStatCards()}
 
 					{/* Line Chart */}
