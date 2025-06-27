@@ -148,9 +148,9 @@ export default function Decks({}: DecksInterface) {
 
 	const sortNumGames = (a: DeckReadDTO, b: DeckReadDTO) => {
 		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(b);
 		if (!aStats || !bStats) {
-			return null;
+			return 0;
 		}
 
 		switch (numGames) {
@@ -159,15 +159,15 @@ export default function Decks({}: DecksInterface) {
 			case "least":
 				return aStats.numGames - bStats.numGames;
 			default:
-				return null;
+				return 0;
 		}
 	};
 
 	const sortWinRate = (a: DeckReadDTO, b: DeckReadDTO) => {
 		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(b);
 		if (!aStats || !bStats) {
-			return null;
+			return 0;
 		}
 
 		switch (winRate) {
@@ -176,7 +176,7 @@ export default function Decks({}: DecksInterface) {
 			case "lowest":
 				return aStats.numWins - bStats.numWins;
 			default:
-				return null;
+				return 0;
 		}
 	};
 
@@ -199,7 +199,7 @@ export default function Decks({}: DecksInterface) {
 		const aStats = deckToDeckStats(a);
 		const bStats = deckToDeckStats(b);
 		if (!aStats || !bStats) {
-			return null;
+			return 0;
 		}
 
 		switch (recentWins) {
@@ -246,15 +246,21 @@ export default function Decks({}: DecksInterface) {
 	};
 
 	useEffect(() => {
-		if (filter === "") {
+		if (filter === "" || isFilterDrawerOpen) {
 			return;
 		}
 
 		// Apply date filter here for filtered
 		const timeFilteredDecks = filterDeckByDateRange(decks);
 
-		// Apply sorting here for filtered decks, before filtering
-		timeFilteredDecks.sort(
+		const fuse = new Fuse(timeFilteredDecks, {
+			keys: ["commander"],
+		});
+
+		const searchResults = fuse.search(filter).map((result) => result.item);
+
+    // Sort after applying fuzzy search filter
+		searchResults.sort(
 			(a, b) =>
 				sortNumGames(a, b) ||
 				sortWinRate(a, b) ||
@@ -262,12 +268,8 @@ export default function Decks({}: DecksInterface) {
 				sortDateCreated(a, b)
 		);
 
-		const fuse = new Fuse(timeFilteredDecks, {
-			keys: ["commander"],
-		});
-
-		setFiltered(fuse.search(filter).map((result) => result.item));
-	}, [filter]);
+		setFiltered(searchResults);
+	}, [filter, podSizeLabel, sortValues, startDate, endDate, isFilterDrawerOpen]);
 
 	function renderDeckCards() {
 		if (decks.length === 0) {
@@ -373,8 +375,8 @@ export default function Decks({}: DecksInterface) {
 								resetSortToDefault();
 							}}
 							style="transparent"
-              styles="mt-8"
-              uppercase={false}
+							styles="mt-8"
+							uppercase={false}
 						>
 							Reset To Default
 						</ButtonPrimary>
@@ -383,8 +385,8 @@ export default function Decks({}: DecksInterface) {
 								setIsSortDrawerOpen(false);
 							}}
 							style="transparent"
-              uppercase={false}
-              styles="mt-0"
+							uppercase={false}
+							styles="mt-0"
 						>
 							Back
 						</ButtonPrimary>
