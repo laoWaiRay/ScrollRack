@@ -150,12 +150,12 @@ export default function Log({}: LogInterface) {
 
 		if (filter !== "" && filtered.length > 0) {
 			return filtered.map((data) => (
-				<GameLogCard key={data.id} game={data} showButtons={true} />
+				<GameLogCard key={data.id} game={data} size="lg" />
 			));
 		}
 
 		return gameState.games.map((data) => (
-			<GameLogCard key={data.id} game={data} showButtons={true} />
+			<GameLogCard key={data.id} game={data} size="lg" />
 		));
 	}
   

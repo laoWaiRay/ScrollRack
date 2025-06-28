@@ -117,7 +117,7 @@ export default function AddFriends({}: AddFriendsInterface) {
 
 	return (
 		<OptionsLayout title="Add Friends">
-			<h2 className="mt-6 mb-4 self-center">ADD BY USERNAME</h2>
+			<h2 className="mb-4 self-center">ADD BY USERNAME</h2>
 			<form
 				className="flex flex-col"
 				onSubmit={(e) => handleSendFriendRequest(e)}

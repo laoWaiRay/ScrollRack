@@ -69,7 +69,7 @@ export default function LoginPage() {
 			className={`${styles.gridB} flex flex-col justify-center items-center lg:items-start mx-0 lg:ml-20 w-full z-20`}
 		>
 			<form
-				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
+				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12 px-2`}
 				onSubmit={(e) => handleSubmit(onSubmit, e)}
 			>
 				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light pt-6">

@@ -216,7 +216,10 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
     // Custom registration endpoint to be used instead of the default endpoint
     // created by Identity minimal API endpoints
     [HttpPost("register")]
-    public async Task<ActionResult> Register(UserManager<ApplicationUser> userManager, UserRegisterDTO userRegisterDTO)
+    public async Task<ActionResult<UserReadDTO>> Register(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        UserRegisterDTO userRegisterDTO)
     {
         var user = new ApplicationUser
         {
@@ -271,7 +274,10 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             return BadRequest();
         }
 
-        return Ok();
+        await signInManager.SignOutAsync();
+        await signInManager.SignInAsync(user, isPersistent: true);
+
+        return _mapper.Map<UserReadDTO>(user);
     }
 
     [HttpPost("logout")]

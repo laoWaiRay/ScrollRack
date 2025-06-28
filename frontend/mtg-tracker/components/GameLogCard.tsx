@@ -15,18 +15,18 @@ import { GameParticipationReadDTO, GameReadDTO } from "@/types/client";
 interface GameLogCellInterface {
 	header: string;
 	data: string;
-	width?: string;
 	styles?: string;
+  size?: "lg" | "sm";
 }
 
 interface GameLogCardInterface {
 	game: GameReadDTO;
-	showButtons?: boolean;
+	size?: "lg" | "sm";
 }
 
-function GameLogCell({ header, data, width, styles }: GameLogCellInterface) {
+function GameLogCell({ header, data, styles, size = "lg"}: GameLogCellInterface) {
 	return (
-		<div className={`flex flex-col shrink ${width} ${styles}`}>
+		<div className={`flex flex-col shrink ${size === "sm" && "lg:w-1/4"} ${styles}`}>
 			<h4 className="text-fg-dark text-sm">{header}</h4>
 			<div>{data}</div>
 		</div>
@@ -35,7 +35,7 @@ function GameLogCell({ header, data, width, styles }: GameLogCellInterface) {
 
 export function GameLogCard({
 	game,
-	showButtons = false,
+	size = "lg",
 }: GameLogCardInterface) {
 	const { user } = useAuth();
 	const { gameState, dispatch: dispatchGame } = useGame();
@@ -84,7 +84,7 @@ export function GameLogCard({
 
 	return (
 		<div className="flex flex-col bg-card-surface rounded-lg px-4 py-2 lg:p-8">
-			{showButtons && (
+			{size === "lg" && (
 				<Dialog
 					title={`Deleting Game`}
 					description={`This action cannot be undone. Are you sure you want to delete your game from ${new Date(
@@ -101,14 +101,14 @@ export function GameLogCard({
 				<GameLogCell
 					header="DATE"
 					data={IsoToDateString(game.createdAt)}
-					width="w-[5.5rem]"
+          size={size}
 				/>
 				<GameLogCell
 					header="COMMANDER"
 					data={thisGameParticipation?.deck.commander.toString() ?? ""}
-					width="lg:w-[8rem]"
+          size={size}
 				/>
-				<GameLogCell header="PLAYERS" data={game.numPlayers.toString()} />
+				<GameLogCell header="PLAYERS" data={game.numPlayers.toString()} size={size} />
 				<div className="lg:hidden flex flex-col gap-2">
 					<h2 className="text-sm text-fg-dark">POD</h2>
 					<div className="flex flex-wrap gap-2">
@@ -130,15 +130,15 @@ export function GameLogCard({
 				<GameLogCell
 					header="WINNER"
 					data={thisGameWinner?.userName ?? ""}
-					width="w-[6rem]"
+          size={size}
 				/>
 				<GameLogCell
 					header="TIME"
 					data={formatTime(game.seconds, "hms")}
-					width="w-[4rem]"
-					styles={showButtons ? "" : "lg:hidden"}
+					styles={size === "lg" ? "" : "lg:hidden"}
+          size={size}
 				/>
-				{showButtons && user && game.createdByUserId === user.id && (
+				{size === "lg" && user && game.createdByUserId === user.id && (
 					<div className="absolute right-0 lg:static">
 						<div className="flex gap-2">
 							<ButtonIcon
@@ -153,7 +153,7 @@ export function GameLogCard({
 					</div>
 				)}
 			</div>
-			<div className={`gap-2 mt-4 hidden ${showButtons && "lg:flex"} flex-col`}>
+			<div className={`gap-2 mt-4 hidden ${size === "lg" && "lg:flex"} flex-col`}>
 				<h2 className="text-sm text-fg-dark">POD</h2>
 
 				<div className="flex gap-2 mx-1">

@@ -287,7 +287,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 							<div className="overflow-y-auto flex flex-col gap-2 pr-2">
 								{gameState.games.length > 0 &&
 									gameState.games.map((data) => (
-										<GameLogCard key={data.id} game={data} />
+										<GameLogCard key={data.id} game={data} size="sm" />
 									))}
 							</div>
 						</StatCard>

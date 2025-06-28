@@ -139,7 +139,7 @@ export default function DeckCard({
 			</div>
 
 			<div className="flex flex-col w-full lg:flex-row lg:justify-center lg:gap-2">
-				<section className="grow w-full lg:w-fit mb-2 flex justify-center self-center max-w-[336px]">
+				<section className="grow w-full lg:w-fit mb-2 flex justify-center self-center max-w-[336px] lg:min-w-1/2">
 					<div className="aspect-[5/7] relative rounded-3xl overflow-hidden max-w-[336px] w-full">
 						<Image
 							src={getImageUrl(deck.scryfallId)}
@@ -149,7 +149,7 @@ export default function DeckCard({
 					</div>
 				</section>
 
-				<section className="flex flex-col grow min-w-1/2 justify-between lg:justify-start gap-1 px-4 lg:min-w-0 lg:max-w-xs lg:mt-5">
+				<section className="flex flex-col grow min-w-1/2 justify-between lg:justify-start gap-1 px-4 lg:max-w-xs lg:mt-4 lg:min-w-0 self-center w-full max-w-sm">
 					{renderStats()}
 				</section>
 			</div>

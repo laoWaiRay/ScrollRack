@@ -23,7 +23,7 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mt-8`}
 					>
 						<div className="flex flex-col">
-							<div className="flex items-center text-[3.75rem] lg:text-3xl text-white">
+							<div className="flex items-center text-[3.5rem] lg:text-3xl text-white">
 								<LogoImage
 									title="Scroll with quill writing"
 									className="w-[1em] h-[1em] shrink-0"
@@ -39,6 +39,7 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 						<div className="mt-8 w-[30rem] xl:w-[40rem] aspect-[34/25] relative hidden lg:block">
 							<Image
 								src="/images/Hero.png"
+                sizes="(max-width: 768px) 0px, 40rem"
 								alt="ScrollRack app dashboard view"
 								fill={true}
 								priority={true}

@@ -33,7 +33,7 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 			</div>
 			<DashboardMain styles="!max-w-sm">
 				<div className="dashboard-main-content-layout relative">
-					<section className="w-full flex flex-col px-4 mx-4">
+					<section className="w-full flex flex-col px-4 mx-4 mt-4">
 						{children}
 					</section>
 				</div>

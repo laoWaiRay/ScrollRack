@@ -30,7 +30,7 @@ export default function PieChart({ deckPlayCounts, gamesPlayed }: PieChartInterf
 			title: {
 				text: "Decks Played",
 				align: "center",
-				margin: 10,
+				margin: 15,
 				style: {
 					fontSize: "16px",
 					fontWeight: "normal",
@@ -78,7 +78,10 @@ export default function PieChart({ deckPlayCounts, gamesPlayed }: PieChartInterf
 				labels: {
 					colors: "#ffffff",
 				},
-				offsetY: 2,
+        markers: {
+          offsetX: -2,
+        },
+				offsetY: 4,
 				height: 70,
 			},
 		},

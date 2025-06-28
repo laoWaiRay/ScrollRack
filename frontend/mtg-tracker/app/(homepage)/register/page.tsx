@@ -18,9 +18,10 @@ import {
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import { Form, FormField } from "@/components/Form";
-import {
-	handleAxiosErrors,
-} from "@/helpers/validationHelpers";
+import { handleAxiosErrors } from "@/helpers/validationHelpers";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { ActionType } from "@/context/AuthContext";
 
 const initialValues: FormData = {
 	email: "",
@@ -36,9 +37,38 @@ export default function RegisterPage() {
 	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
 	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
+  const { user, dispatch } = useAuth();
 
 	const { email, username, password, confirmPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
+	const router = useRouter();
+  const [isFetching, setIsFetching] = useState(false);
+
+	async function onSubmit(
+		data: FormData,
+		_errors?: Partial<Errors>,
+		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
+	) {
+		const { username, email, password } = data;
+		try {
+      setIsFetching(true);
+      dispatch({ type: ActionType.LOGOUT });
+			const userDTO = await api.postApiUserregister({ userName: username, email, password }, { withCredentials: true });
+      dispatch({ type: ActionType.LOGIN, payload: userDTO });
+			router.push("/commandzone");
+      setIsFetching(false);
+		} catch (error) {
+			handleAxiosErrors<Errors>(
+				[UNAUTHORIZED, BAD_REQUEST],
+				error,
+				errorFieldMap,
+				Errors,
+				_setErrors,
+				_errors
+			);
+      setIsFetching(false);
+		}
+	}
 
 	const formFields: FormField[] = [
 		{
@@ -79,7 +109,7 @@ export default function RegisterPage() {
 		<div className={`${styles.gridB} z-20`}>
 			<form
 				onSubmit={(e) => handleSubmit(onSubmit, e)}
-				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12`}
+				className={`flex flex-col justify-center mx-0 xl:mx-12 lg:my-12 px-2`}
 			>
 				<h1 className="text-[1.4rem] lg:text-[1.5rem] mb-8 text-fg-light select-none font-light pt-6">
 					Create an account
@@ -88,7 +118,7 @@ export default function RegisterPage() {
 
 				<Form fields={formFields} handleChange={handleChange} />
 
-				<ButtonPrimary onClick={() => {}} type="submit">
+				<ButtonPrimary onClick={() => {}} type="submit" disabled={isFetching}>
 					Sign Up
 				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
@@ -96,7 +126,7 @@ export default function RegisterPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={() => {}} style="google">
+				<ButtonPrimary onClick={() => {}} style="google" disabled={isFetching}>
 					<div className="flex items-center justify-center">
 						Sign up with Google <GoogleLogo className="ml-2" />
 					</div>
@@ -133,24 +163,4 @@ function validateForm(data: FormData) {
 	}
 
 	return errors;
-}
-
-async function onSubmit(
-	data: FormData,
-	_errors?: Partial<Errors>,
-	_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
-) {
-	const { username, email, password } = data;
-	try {
-		await api.postApiUserregister({ userName: username, email, password });
-	} catch (error) {
-		handleAxiosErrors<Errors>(
-      [UNAUTHORIZED, BAD_REQUEST],
-			error,
-			errorFieldMap,
-			Errors,
-			_setErrors,
-			_errors
-		);
-	}
 }

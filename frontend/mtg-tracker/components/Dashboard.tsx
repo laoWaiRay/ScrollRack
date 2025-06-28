@@ -84,7 +84,7 @@ export function DashboardHeader({
 						</PopoverButton>
 						<PopoverPanel
 							anchor="bottom"
-							className="flex flex-col bg-surface-500 py-2 px-2 mt-2.5 z-10 rounded-lg border border-surface-400 relative shadow-2xl min-w-64"
+							className="flex flex-col bg-surface-600 py-2 px-2 mt-2.5 z-10 rounded-lg border border-surface-500 relative shadow-2xl w-xs"
 						>
 							<CloseButton className="absolute top-[10px] right-2.5 size-[1.2em] hover:cursor-pointer hover:text-white">
 								<Close />

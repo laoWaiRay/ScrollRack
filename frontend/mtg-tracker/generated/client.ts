@@ -887,7 +887,7 @@ const endpoints = makeApi([
         schema: UserRegisterDTO,
       },
     ],
-    response: z.void(),
+    response: UserReadDTO,
   },
   {
     method: "get",

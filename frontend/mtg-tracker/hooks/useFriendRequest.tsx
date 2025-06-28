@@ -1,12 +1,9 @@
-import { FriendRequestContext } from "@/context/FriendRequestContext";
-import { useContext } from "react";
+import { getReceivedFriendRequests } from "@/actions/friendRequests";
+import useSWR from "swr";
 
 export function useFriendRequest() {
-  const context = useContext(FriendRequestContext);
+  const fetcher = () => getReceivedFriendRequests();
+  const { data, error, isLoading, mutate } = useSWR("/api/friendRequest/received", fetcher);
   
-  if (context === undefined) {
-    throw new Error("useFriendRequest must be used inside an AuthProvider");
-  }
-  
-  return context;
+  return { friendRequests: data ?? [], isError: error, isLoading, mutate }
 }

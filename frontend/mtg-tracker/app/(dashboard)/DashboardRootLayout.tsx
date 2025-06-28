@@ -45,11 +45,6 @@ const linkData: LinkData[] = [
 		icon: Cards,
 	},
 	{
-		href: "/friends",
-		name: "Friends",
-		icon: UsersMultiple,
-	},
-	{
 		href: "/log",
 		name: "Game Log",
 		icon: LogScroll,
@@ -63,6 +58,11 @@ const linkData: LinkData[] = [
 		href: "/pod/create",
 		name: "Create Pod",
 		icon: DoorOpen,
+	},
+	{
+		href: "/friends",
+		name: "Friends",
+		icon: UsersMultiple,
 	},
 	{
 		href: "/account",
@@ -94,7 +94,7 @@ export default function DashboardRootLayout({
 }: DashboardRootLayoutProps) {
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const router = useRouter();
+	const router = useRouter();
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (
@@ -154,14 +154,19 @@ export default function DashboardRootLayout({
 				{/* Desktop Sidebar */}
 				<nav
 					aria-labelledby="Sidebar navigation"
-					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-10`}
+					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-60`}
 				>
 					<header className="font-dancing-script text-white text-xl flex items-center justify-center xl:justify-start select-none my-4 mx-5">
-						<LogoImage
-							title="Scroll with quill writing"
-							className="text-white w-[1em] h-[1em] xl:mr-1"
-						/>
-						<span className="hidden xl:inline">ScrollRack</span>
+						<div
+							className="flex items-center hover:cursor-pointer"
+							onClick={() => router.push("/commandzone")}
+						>
+							<LogoImage
+								title="Scroll with quill writing"
+								className="text-white w-[1em] h-[1em] xl:mr-1"
+							/>
+							<span className="hidden xl:inline">ScrollRack</span>
+						</div>
 					</header>
 
 					<div className="grow flex flex-col justify-between">
@@ -198,7 +203,10 @@ export default function DashboardRootLayout({
 					className="lg:hidden flex fixed w-screen justify-between items-center font-dancing-script text-white 
         text-xl select-none p-4 z-90 bg-surface-600 border-b border-surface-500"
 				>
-					<div className="flex items-center justify-center ml-4" onClick={() => router.push("/commandzone")}>
+					<div
+						className="flex items-center justify-center ml-4 hover:cursor-pointer"
+						onClick={() => router.push("/commandzone")}
+					>
 						<LogoImage
 							title="Scroll with quill writing"
 							className="text-white w-[1em] h-[1em] mr-[4px]"
