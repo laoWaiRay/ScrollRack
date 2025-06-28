@@ -86,6 +86,9 @@ export default function LineChart({ buckets }: LineChartInterface) {
 				},
         floating: true,
         width: "100%",
+        zoom: {
+          enabled: false,
+        },
 			},
 			title: {
 				text: "Game History",

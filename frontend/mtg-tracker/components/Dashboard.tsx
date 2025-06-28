@@ -6,6 +6,10 @@ import {
 	PopoverButton,
 	PopoverPanel,
 	CloseButton,
+	Menu,
+	MenuButton,
+	MenuItems,
+	MenuItem,
 } from "@headlessui/react";
 import ButtonIcon from "./ButtonIcon";
 import Image from "next/image";
@@ -115,10 +119,9 @@ export function DashboardHeader({
 
 					{/* User Profile Card  */}
 
-					<Popover>
-						<PopoverButton
-							className="flex items-center justify-center gap-3 py-2 px-3 ml-1 rounded
-              data-hover:cursor-pointer data-hover:bg-surface-500"
+					<Menu>
+						<MenuButton
+							className="flex items-center justify-center gap-3 py-2 pl-3 pr-4 ml-1 rounded data-hover:cursor-pointer data-hover:bg-white/5"
 						>
 							<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 								<Image
@@ -132,11 +135,21 @@ export function DashboardHeader({
 							<div className="text-base text-fg-light select-none">
 								{user?.userName}
 							</div>
-						</PopoverButton>
-						<PopoverPanel anchor="bottom" className="flex flex-col">
-							<div className="">Notifications</div>
-						</PopoverPanel>
-					</Popover>
+						</MenuButton>
+						<MenuItems
+							anchor="bottom"
+							className="bg-surface-600 border border-surface-500 rounded mt-2 min-w-(--button-width)"
+						>
+							<MenuItem>
+								<div
+									className="px-2.5 py-2 select-none data-focus:bg-white/5 border-b border-surface-500/50"
+									onClick={() => {}}
+								>
+									<span>Log Out</span>
+								</div>
+							</MenuItem>
+						</MenuItems>
+					</Menu>
 				</div>
 			</div>
 		</div>

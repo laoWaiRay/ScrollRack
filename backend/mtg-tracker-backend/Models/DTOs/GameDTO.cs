@@ -5,12 +5,13 @@ public class GameReadDTO
     public required int Id { get; set; }
     public required int NumPlayers { get; set; }
     public required int NumTurns { get; set; }
+
+    // Games that don't track time set Seconds to 0
     public required int Seconds { get; set; }
 
     public required DateTime CreatedAt { get; set; }
     public string? CreatedByUserId { get; set; }
 
-    // public UserReadDTO Winner { get; set; } = null!;
     public string? WinnerId { get; set; }
 
     public List<GameParticipationReadDTO> GameParticipations { get; set; } = [];

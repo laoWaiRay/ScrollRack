@@ -134,7 +134,7 @@ export function GameLogCard({
 				/>
 				<GameLogCell
 					header="TIME"
-					data={formatTime(game.seconds, "hms")}
+					data={game.seconds > 0 ? formatTime(game.seconds, "hms") : "-"}
 					styles={size === "lg" ? "" : "lg:hidden"}
           size={size}
 				/>

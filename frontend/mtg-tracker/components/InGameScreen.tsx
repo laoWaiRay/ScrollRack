@@ -2,7 +2,6 @@
 import { CurrentGameData } from "@/app/(dashboard)/pod/create/CreatePod";
 import {
 	DeckReadDTO,
-	GameReadDTO,
 	GameWriteDTO,
 	GameParticipationWriteDTO,
 	UserReadDTO,
@@ -20,6 +19,7 @@ import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { formatTime } from "@/helpers/time";
+import Checkbox from "@mui/material/Checkbox";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -28,7 +28,7 @@ interface InGameScreenInterface {
 	setLocalStorageValue: (value: CurrentGameData | null) => void;
 	setCurrentGameData: (value: CurrentGameData | null) => void;
 	playerIdToDeck: Record<string, DeckReadDTO | null>;
-  roomId: number;
+	roomId: number;
 }
 
 export default function InGameScreen({
@@ -38,7 +38,7 @@ export default function InGameScreen({
 	setLocalStorageValue,
 	setCurrentGameData,
 	playerIdToDeck,
-  roomId,
+	roomId,
 }: InGameScreenInterface) {
 	const [elapsedTimeInSeconds, setElapsedTimeInSeconds] = useState(() => {
 		// startTime is an epoch timestamp
@@ -50,8 +50,9 @@ export default function InGameScreen({
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
 		useGameParticipation();
-  const [isFetching, setIsFetching] = useState(false);
-  
+	const [isFetching, setIsFetching] = useState(false);
+	const [saveTime, setSaveTime] = useState(true);
+
 	async function handleAbortGame() {
 		setLocalStorageValue(null);
 		setCurrentGameData(null);
@@ -72,16 +73,16 @@ export default function InGameScreen({
 		let gameSavedId = 0;
 
 		try {
-      setIsFetching(true);
+			setIsFetching(true);
 
 			const gameWriteDTO: GameWriteDTO = {
-        roomId,
+				roomId,
 				numPlayers: players.length,
 				numTurns: 0,
-				seconds: elapsedTimeInSeconds,
+				seconds: saveTime ? elapsedTimeInSeconds : 0,
 				createdAt: new Date(startTime).toISOString(),
 				createdByUserId: user.id,
-        winnerId: winner.id,
+				winnerId: winner.id,
 			};
 
 			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
@@ -94,11 +95,11 @@ export default function InGameScreen({
 			const gameParticipationWriteDTOs: GameParticipationWriteDTO[] = [];
 
 			for (const player of players) {
-        if (!(player.id in playerIdToDeck)) {
-          throw Error("Player deck data not found");
-        }
+				if (!(player.id in playerIdToDeck)) {
+					throw Error("Player deck data not found");
+				}
 
-        const deckData = playerIdToDeck[player.id];
+				const deckData = playerIdToDeck[player.id];
 				const isWinner = winner.id === player.id;
 
 				if (deckData == null) {
@@ -141,7 +142,7 @@ export default function InGameScreen({
 			}
 			setLocalStorageValue(null);
 			setCurrentGameData(null);
-      setIsFetching(false);
+			setIsFetching(false);
 		} catch (error) {
 			if (gameSaved) {
 				// Revert, delete game data
@@ -152,7 +153,7 @@ export default function InGameScreen({
 			}
 			console.log(error);
 			toast("Error saving game", "warn");
-      setIsFetching(false);
+			setIsFetching(false);
 		}
 	}
 
@@ -204,8 +205,23 @@ export default function InGameScreen({
 				</div>
 			</div>
 
-			<section className="flex w-full justify-end">
-				<div className="flex w-full justify-center items-center gap-4 px-8 max-w-sm mt-6 mb-2">
+			<section className="flex flex-col w-full px-6 mt-6 mb-2 items-end">
+				<div>
+					<span>Include Game Time:</span>
+					{/* <Checkbox className="ml-3 p-1" defaultChecked ripple={true} color="purple" crossOrigin={""} /> */}
+					<Checkbox
+						checked={saveTime}
+						onChange={() => setSaveTime(!saveTime)}
+            sx={{
+              color: "var(--fg)",
+              "&.Mui-checked": {
+                color: "var(--primary-100)" 
+              }
+            }}
+            disableRipple={true} 
+					/>
+				</div>
+				<div className="flex w-full justify-center items-center gap-4">
 					<div className="grow-1">
 						<ButtonPrimary
 							onClick={handleAbortGame}

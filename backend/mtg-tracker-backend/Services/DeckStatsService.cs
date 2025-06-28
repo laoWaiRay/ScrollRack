@@ -83,6 +83,7 @@ public class DeckStatsService(IMapper mapper)
             var streakStats = ComputeStreakStats(filteredGameParticipations);
 
             var winningGameLengths = filteredGameParticipations
+                .Where(gp => gp.Game.Seconds > 0)
                 .Where(gp => gp.Won)
                 .Select(gp => gp.Game.Seconds)
                 .ToList();
