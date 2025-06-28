@@ -17,10 +17,10 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 			>
 				{/* Left side of page is the Hero image */}
 				<div
-					className={`${styles.gridA} flex flex-col justify-center items-center lg:items-end mx-0 lg:mr-20 w-full z-20`}
+					className={`${styles.gridA} flex flex-col justify-center items-center lg:items-end mx-0 lg:mr-20 w-full z-20 mt-8`}
 				>
 					<div
-						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mt-8`}
+						className={`flex flex-col lg:justify-end justify-center items-start lg:items-center lg:mb-16 mt-6`}
 					>
 						<div className="flex flex-col">
 							<div className="flex items-center text-[3.5rem] lg:text-3xl text-white">
@@ -28,7 +28,7 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 									title="Scroll with quill writing"
 									className="w-[1em] h-[1em] shrink-0"
 								/>
-								<h2 className="font-dancing-script select-none leading-[1.5em]">
+								<h2 className="font-dancing-script select-none leading-[1em]">
 									ScrollRack
 								</h2>
 							</div>
@@ -36,7 +36,7 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 								the Commander game tracker
 							</h2>
 						</div>
-						<div className="mt-8 w-[30rem] xl:w-[40rem] aspect-[34/25] relative hidden lg:block">
+						<div className="mt-4 w-[30rem] xl:w-[40rem] aspect-[107/90] relative hidden lg:block">
 							<Image
 								src="/images/Hero.png"
                 sizes="(max-width: 768px) 0px, 40rem"
