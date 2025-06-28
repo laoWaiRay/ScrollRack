@@ -43,7 +43,7 @@ export default function ComboBox({
 			onChange={(value) => setSelected(value ?? null)}
 			onClose={() => setQuery("")}
 		>
-			<div className="relative w-full">
+			<div className="relative w-full shrink max-w-sm">
 				<ComboboxInput
 					className={`w-full bg-surface-600 border border-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
 					displayValue={(item: string | null) => item ?? ""}

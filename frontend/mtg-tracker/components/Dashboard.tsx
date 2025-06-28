@@ -41,7 +41,7 @@ export function DashboardLayout({
 }: DashboardLayoutInterface) {
 	return (
 		<div
-			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3 pb-8`}
+			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3 pb-6`}
 		>
 			{/* Make room for the navbar on mobile */}
 			<div className="pt-24 w-full lg:pt-0 grow flex flex-col items-center">
@@ -66,7 +66,7 @@ export function DashboardHeader({
 		<div className="border-b border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
 			<div className={`flex ${justify} lg:justify-between items-center mx-4`}>
 				<div className="flex gap-8 items-center justify-start">
-					<div className="text-lg font-semibold select-none">{title}</div>
+					<div className="text-lg font-semibold select-none shrink-0">{title}</div>
           <div className={`${childrenStyles} hidden lg:block`}>{children}</div>
 				</div>
         <div className={`${childrenStyles} flex justify-start lg:hidden`}>{children}</div>

@@ -488,6 +488,20 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/api/Deck/friend/:id",
+    alias: "getApiDeckfriendId",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "id",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.array(DeckReadDTO),
+  },
+  {
+    method: "get",
     path: "/api/Friend",
     alias: "getApiFriend",
     requestFormat: "json",

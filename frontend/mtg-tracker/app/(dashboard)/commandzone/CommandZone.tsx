@@ -264,7 +264,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 							</div>
 						</StatCard>
 						{/* Commander Showcase */}
-						<StatCard styles="col-span-2">
+						<StatCard styles="col-span-2" innerStyles="!pb-2">
 							<h3 className="pb-4 border-b border-surface-500 text-fg-light">
 								Commander Showcase
 							</h3>

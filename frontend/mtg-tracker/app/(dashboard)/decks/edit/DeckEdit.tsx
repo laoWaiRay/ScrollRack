@@ -9,7 +9,6 @@ import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
 import { tryGetLocalStoragePlayerData } from "@/hooks/useLocalStorage";
-import { useRoom } from "@/hooks/useRoom";
 import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
 import { Field, Label } from "@headlessui/react";

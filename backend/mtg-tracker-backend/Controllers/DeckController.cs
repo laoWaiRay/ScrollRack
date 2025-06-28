@@ -33,52 +33,47 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
         {
             return Unauthorized();
         }
+        
+        var deckReadDTOs = await GetUserDecksAsync(userId);
+        stopwatch.Stop();
+        Console.WriteLine($"GET /api/deck took {stopwatch.ElapsedMilliseconds}ms");
+        return deckReadDTOs;
+    }
 
-        List<Deck> userDecks = await _context.Decks
-            .Where(d => d.UserId == userId)
-            .OrderBy(d => d.Commander)
-            .ToListAsync();
+    // GET: api/deck/friend/{id}
+    // Get decks for a specific friend of current user
+    [Authorize]
+    [HttpGet("friend/{id}")]
+    public async Task<ActionResult<List<DeckReadDTO>>> GetFriendDecks(string id)
+    {
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
 
-        List<GameParticipation> allDeckGameParticipations = await _context.GameParticipations
-            .Include(gp => gp.Game)
-            .Where(gp => gp.UserId == userId)
-            .OrderByDescending(gp => gp.CreatedAt)
-            .ToListAsync();
-
-        var userStatSnapshot = await _context.StatSnapshots.FirstOrDefaultAsync(s => s.UserId == userId);
-
-        List<DeckReadDTO> deckReadDTOs = [];
-
-        foreach (var deck in userDecks)
+        var userId = User.GetUserId();
+        if (userId is null)
         {
-            List<GameParticipation> deckGameParticipations = allDeckGameParticipations
-                .Where(gp => gp.DeckId == deck.Id)
-                .OrderByDescending(d => d.CreatedAt)
-                .ToList();
-
-            var latestWin = deckGameParticipations
-                .FirstOrDefault(gp => gp.DeckId == deck.Id && gp.Won)?.CreatedAt;
-
-            var isWinStreak = deckGameParticipations
-                .FirstOrDefault(gp => gp.DeckId == deck.Id && !gp.Game.Imported)?.Won;
-            var streak = deckGameParticipations
-                .TakeWhile(gp => gp.Won == isWinStreak && !gp.Game.Imported)
-                .Count();
-
-            var winningGameLengths = deckGameParticipations
-                .Where(gp => gp.Won)
-                .Select(gp => gp.Game.Seconds)
-                .ToList();
-
-            // Calculate Par
-            var par = _deckStatsService.ComputePar(deckGameParticipations);
-
-            DeckReadDTO dto = _deckStatsService.ComputeDeckStats(deckGameParticipations, deck);
-            deckReadDTOs.Add(dto);
+            return Unauthorized();
         }
 
+        var user = await _context.Users
+            .Include(u => u.Friends)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        bool isFriend = user.Friends.Any(u => u.Id == id);
+
+        if (!isFriend)
+        {
+            return Forbid();
+        }
+
+        List<DeckReadDTO> deckReadDTOs = await GetUserDecksAsync(id);
         stopwatch.Stop();
-        Console.WriteLine($"GET /api/decks took {stopwatch.Elapsed.Milliseconds}ms");
+        Console.WriteLine($"GET /api/deck/friend took {stopwatch.ElapsedMilliseconds}ms");
         return deckReadDTOs;
     }
 
@@ -196,5 +191,34 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private async Task<List<DeckReadDTO>> GetUserDecksAsync(string userId)
+    {
+        List<Deck> userDecks = await _context.Decks
+            .Where(d => d.UserId == userId)
+            .OrderBy(d => d.Commander)
+            .ToListAsync();
+
+        List<GameParticipation> userGameParticipations = await _context.GameParticipations
+            .Include(gp => gp.Game)
+            .Where(gp => gp.UserId == userId)
+            .OrderByDescending(gp => gp.CreatedAt)
+            .ToListAsync();
+
+        List<DeckReadDTO> deckReadDTOs = [];
+
+        foreach (var deck in userDecks)
+        {
+            List<GameParticipation> deckGameParticipations = userGameParticipations
+                .Where(gp => gp.DeckId == deck.Id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            DeckReadDTO dto = _deckStatsService.ComputeDeckStats(deckGameParticipations, deck);
+            deckReadDTOs.Add(dto);
+        }
+
+        return deckReadDTOs;
     }
 }

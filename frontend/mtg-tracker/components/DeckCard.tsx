@@ -80,6 +80,10 @@ export default function DeckCard({
 			title: "Slowest Win",
 			data: slowestWinInSeconds ? formatTime(slowestWinInSeconds, "hms") : "-",
 		},
+		{
+			title: "Created",
+			data: dayjs(deck.createdAt).format("YYYY-MM-DD"),
+		},
 	];
 
 	let streakStyle = "";
@@ -124,7 +128,7 @@ export default function DeckCard({
 		<div
 			className={`flex flex-col w-full py-4 px-2 bg-card-surface rounded-lg ${styles}`}
 		>
-			<div className="w-full flex justify-center items-center px-4 mb-2 gap-3 lg:justify-center">
+			<div className="w-full flex justify-center items-center px-4 mb-4">
 				<h2 className="font-semibold">{deck.commander}</h2>
 				{deck.moxfield && (
 					<a
@@ -139,7 +143,7 @@ export default function DeckCard({
 			</div>
 
 			<div className="flex flex-col w-full lg:flex-row lg:justify-center lg:gap-2">
-				<section className="grow w-full lg:w-fit mb-2 flex justify-center self-center max-w-[336px] lg:min-w-1/2">
+				<section className="grow w-full lg:w-fit flex justify-center self-center max-w-[336px] lg:min-w-1/2">
 					<div className="aspect-[5/7] relative rounded-3xl overflow-hidden max-w-[336px] w-full">
 						<Image
 							src={getImageUrl(deck.scryfallId)}
@@ -149,7 +153,7 @@ export default function DeckCard({
 					</div>
 				</section>
 
-				<section className="flex flex-col grow min-w-1/2 justify-between lg:justify-start gap-1 px-4 lg:max-w-xs lg:mt-4 lg:min-w-0 self-center w-full max-w-sm">
+				<section className="flex flex-col grow min-w-1/2 justify-between lg:justify-start gap-1 px-4 lg:max-w-xs lg:min-w-0 self-center lg:self-start w-full max-w-sm">
 					{renderStats()}
 				</section>
 			</div>

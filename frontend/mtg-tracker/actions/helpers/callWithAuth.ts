@@ -19,6 +19,14 @@ export async function callWithAuth<BodyT, ReturnT>(
 		body: BodyT,
 		configOptions?: any,
 	) => Promise<ReturnT | null>,
+	configOptions?: any,
+): Promise<ReturnT | null>;
+
+export async function callWithAuth<BodyT, ReturnT>(
+	apiFn: (
+		body: BodyT,
+		configOptions?: any,
+	) => Promise<ReturnT | null>,
 	body: BodyT
 ): Promise<ReturnT | null>;
 

@@ -14,7 +14,7 @@ export default function Settings({}: SettingsInterface) {
 		<OptionsLayout title={"Settings"}>
 			<h2 className="mb-6 self-center">DISPLAY</h2>
 			<div className="flex justify-between px-2">
-				<div>Dark Mode</div>
+				<div>Dark Mode (not implemented yet)</div>
         <Switch enabled={enabled} setEnabled={setEnabled} />
 			</div>
 			<div className="aspect-3/2 self-end my-8">
