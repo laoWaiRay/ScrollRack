@@ -29,7 +29,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
 
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == userId);
-        
+
 
         if (user is null)
         {
@@ -45,10 +45,13 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
         return _mapper.Map<List<GameParticipationReadDTO>>(gameParticipations);
     }
 
-    // POST: api/gameparticipation
+    // POST: api/gameparticipation?imported=false
+    // Used by a Room Host to add game participations for players in the room
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<GameParticipationReadDTO>> PostGameParticipation(GameParticipationWriteDTO gpwDTO)
+    public async Task<ActionResult<GameParticipationReadDTO>> PostGameParticipation(
+        GameParticipationWriteDTO gpwDTO,
+        [FromQuery] bool imported = false)
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -60,6 +63,42 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
             .Include(u => u.HostedRoom)
             .Include(u => u.GameParticipations)
             .FirstOrDefaultAsync(u => u.Id == userId);
+
+        // Shortcut for imported games: No room, no host in this context => less checks
+        if (imported)
+        {
+            var playerToAdd = await _context.Users
+                .Include(u => u.Decks)
+                .FirstOrDefaultAsync(u => u.Id == gpwDTO.UserId);
+
+            if (playerToAdd is null)
+            {
+                return NotFound("Could not find user");
+            }
+
+            // Verify the deck belongs to the user
+            var isOwner = playerToAdd.Decks.Any(d => d.Id == gpwDTO.DeckId);
+
+            if (!isOwner)
+            {
+                return BadRequest();
+            }
+
+            var importedGp = _mapper.Map<GameParticipation>(gpwDTO);
+
+            _context.GameParticipations.Add(importedGp);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e) when (e is DbUpdateConcurrencyException || e is DbUpdateException)
+            {
+                return StatusCode(500, "Error creating game participation");
+            }
+
+            return Ok(_mapper.Map<GameParticipationReadDTO>(importedGp));
+        }
 
         var game = await _context.Games
             .Include(g => g.Room)
@@ -106,7 +145,7 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
         var gameParticipation = _mapper.Map<GameParticipation>(gpwDTO);
 
         _context.GameParticipations.Add(gameParticipation);
-        
+
         try
         {
             await _context.SaveChangesAsync();

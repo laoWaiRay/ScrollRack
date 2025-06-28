@@ -1054,6 +1054,16 @@
         "tags": [
           "GameParticipation"
         ],
+        "parameters": [
+          {
+            "name": "imported",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2216,7 +2226,6 @@
           "numTurns",
           "seconds",
           "createdAt",
-          "roomId",
           "createdByUserId",
           "winnerId"
         ],
@@ -2240,7 +2249,8 @@
           },
           "roomId": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "createdByUserId": {
             "type": "string"

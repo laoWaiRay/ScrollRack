@@ -48,7 +48,8 @@ public class DeckStatsService(IMapper mapper)
         var isWinStreak = gameParticipations.FirstOrDefault()?.Won;
 
         var streak = gameParticipations
-            .TakeWhile(gp => gp.Won == isWinStreak && !gp.Game.Imported)
+            .Where(gp => !gp.Game.Imported)
+            .TakeWhile(gp => gp.Won == isWinStreak)
             .Count();
 
         int currWinStreak = 0;

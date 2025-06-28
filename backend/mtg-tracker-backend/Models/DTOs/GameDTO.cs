@@ -23,7 +23,7 @@ public class GameWriteDTO
     public required int NumTurns { get; set; }
     public required int Seconds { get; set; }
     public required DateTime CreatedAt { get; set; }
-    public required int RoomId { get; set; }
+    public int? RoomId { get; set; }
 
     public required string CreatedByUserId { get; set; }
     public required string WinnerId { get; set; }

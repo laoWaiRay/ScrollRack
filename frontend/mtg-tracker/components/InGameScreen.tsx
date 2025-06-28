@@ -234,7 +234,7 @@ export default function InGameScreen({
 					<div className="grow-4">
 						<ButtonPrimary
 							onClick={handleSaveGame}
-							disabled={!winner || isFetching}
+							disabled={!winner || players.length <= 1 || isFetching}
 							uppercase={false}
 						>
 							Save
