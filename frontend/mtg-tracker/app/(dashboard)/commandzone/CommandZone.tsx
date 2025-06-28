@@ -293,7 +293,7 @@ export default function CommandZone({}: CommandZoneInterface) {
 						</StatCard>
 
 						<div className="lg:hidden w-full">
-							<div className="mx-10 mt-8">
+							<div className="mx-10">
 								<ButtonPrimary
 									onClick={() => router.push("/log")}
 									style="transparent"

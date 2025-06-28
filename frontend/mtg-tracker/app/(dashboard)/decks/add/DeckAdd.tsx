@@ -126,9 +126,9 @@ export default function DeckAdd({}: DeckAddInterface) {
 
 		try {
 			await api.postApiDeck(deckWriteDTO, { withCredentials: true });
-      setSelected(null);
-      setQuery("");
-      setMoxfield("");
+			setSelected(null);
+			setQuery("");
+			setMoxfield("");
 			toast(`Saved deck: ${selected}`, "success");
 		} catch (error) {
 			if (isAxiosError(error) && error.response?.status === CONFLICT) {
@@ -175,27 +175,28 @@ export default function DeckAdd({}: DeckAddInterface) {
 						value={moxfield}
 						onChange={(e) => setMoxfield(e.target.value)}
 						placeholder="https://moxfield.com/decks/..."
-            isDisabled={!selected}
+						isDisabled={!selected}
 					></TextInput>
 				</Field>
-				<section className="flex w-full justify-center items-center gap-4 -mt-4">
+				<section className="flex flex-col w-full justify-center items-center gap-4">
 					<ButtonLink
 						href="/decks"
 						style="transparent"
-						styles="border border-surface-500 py-4"
+						styles="border border-surface-500 py-4 w-full text-center -mb-4"
+						uppercase={false}
 					>
-						View Decks
+						Back to Decks
 					</ButtonLink>
-					<div>
-						<ButtonPrimary
-							type="submit"
-							style="primary"
-							onClick={() => {}}
-							disabled={!selected}
-						>
-							Save Deck
-						</ButtonPrimary>
-					</div>
+
+					<ButtonPrimary
+						type="submit"
+						style="primary"
+						onClick={() => {}}
+						disabled={!selected}
+            uppercase={false}
+					>
+						Save Deck
+					</ButtonPrimary>
 				</section>
 			</form>
 		</OptionsLayout>

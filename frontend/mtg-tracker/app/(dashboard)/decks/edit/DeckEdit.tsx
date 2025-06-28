@@ -145,26 +145,24 @@ export default function DeckEdit({}: DeckEditInterface) {
 						isDisabled={!selected}
 					></TextInput>
 				</Field>
-				<section className="flex w-full justify-center items-center gap-4 -mt-4">
+				<section className="flex flex-col w-full justify-center items-center gap-4">
 					<ButtonLink
 						href="/decks"
 						style="transparent"
-						styles="border border-surface-500 py-4"
+						styles="border border-surface-500 py-4 w-full text-center -mb-4"
 						uppercase={false}
 					>
-						View Decks
+						Back to Decks
 					</ButtonLink>
-					<div>
-						<ButtonPrimary
-							type="submit"
-							style="primary"
-							onClick={() => {}}
-							disabled={!selected}
-							uppercase={false}
-						>
-							Save Changes
-						</ButtonPrimary>
-					</div>
+					<ButtonPrimary
+						type="submit"
+						style="primary"
+						onClick={() => {}}
+						disabled={!selected}
+						uppercase={false}
+					>
+						Save Changes
+					</ButtonPrimary>
 				</section>
 			</form>
 			<section className="w-full flex justify-center mt-32 border-t border-surface-500 pt-4">

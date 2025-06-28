@@ -161,7 +161,7 @@ export default function JoinPod({}: JoinPodInterface) {
 							setRoomCode={setRoomCode}
 							onSubmit={() => handleJoin()}
 						/>
-						<div className="mt-2 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
+						<div className="mt-4 -mb-3 flex w-full justify-center items-center gap-4 px-8 max-w-sm">
 							<ButtonPrimary onClick={handleJoin} style="primary" uppercase={false}>
 								Join Pod
 							</ButtonPrimary>

@@ -62,8 +62,8 @@ export default function Dialog({
 			onClose={() => setIsDialogOpen(false)}
 			className="relative z-50"
 		>
-			<DialogBackdrop className="fixed inset-0 bg-black/80" />
-			<div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+			<DialogBackdrop className="fixed inset-0 bg-black/80 z-70" />
+			<div className="fixed inset-0 flex w-screen items-center justify-center p-4 z-70">
 				<DialogPanel className="max-w-lg space-y-4 border border-surface-500 bg-surface-600 p-8 rounded-lg relative">
 					<ButtonIcon styles="border border-fg-dark text-fg-dark absolute inset-y-0 right-0 w-fit h-fit mr-4 mt-4">
 						<div

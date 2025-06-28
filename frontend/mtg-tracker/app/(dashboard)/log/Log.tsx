@@ -296,7 +296,7 @@ export default function Log({}: LogInterface) {
 
 						<section className="w-full flex flex-col gap-2 lg:gap-4 px-2">
 							{renderLogs()}
-							<div className="mx-8 mt-4" hidden={!gameState.hasMore}>
+							<div hidden={!gameState.hasMore}>
 								<ButtonPrimary
 									onClick={handleLoadMore}
 									style="transparent"

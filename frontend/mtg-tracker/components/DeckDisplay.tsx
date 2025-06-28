@@ -332,7 +332,7 @@ export default function DeckDisplay({
   }, [decks])
 
 	return (
-		<div className="w-full flex justify-center">
+		<div className="w-full flex justify-center mb-4">
 			{/* Hidden Sort Drawer */}
 			<Drawer isDrawerOpen={isSortDrawerOpen} zIndex="z-80">
 				{/* Back Button */}

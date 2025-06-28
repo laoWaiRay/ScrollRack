@@ -48,7 +48,7 @@ export function GameLogCard({
 		game.gameParticipations?.find((gp) => gp.userId === user?.id);
 
 	const thisGameWinner = game.gameParticipations?.find(
-		(gp) => gp.userId === game.winnerId
+		(gp) => gp.won
 	)?.user;
 
 	async function handleDeleteGame() {
@@ -83,7 +83,7 @@ export function GameLogCard({
 	}
 
 	return (
-		<div className="flex flex-col bg-card-surface rounded-lg px-4 py-2 lg:p-8">
+		<div className="flex flex-col bg-card-surface rounded-lg p-4 lg:p-8">
 			{size === "lg" && (
 				<Dialog
 					title={`Deleting Game`}

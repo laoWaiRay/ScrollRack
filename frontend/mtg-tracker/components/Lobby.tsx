@@ -225,8 +225,8 @@ export default function Lobby({
 				</form>
 			</div>
 
-			<div className="flex justify-center w-full border-t border-surface-500 -mb-8 lg:-mb-12">
-				<div className="mt-2 flex w-full justify-center items-center gap-4 px-16 max-w-sm">
+			<div className="pt-2 flex justify-center w-full border-t border-surface-500">
+				<div className="flex w-full justify-center items-center gap-4 px-16 max-w-sm">
 					<ButtonPrimary
 						onClick={handleStartGame}
 						style="primary"

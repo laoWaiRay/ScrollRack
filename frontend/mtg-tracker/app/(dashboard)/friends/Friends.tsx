@@ -70,6 +70,7 @@ export default function Friends() {
 							setQuery={setQuery}
 							selected={selected}
 							setSelected={setSelected}
+              size="sm"
 						/>
 					</div>
 					<DeckDisplay decks={decks} isLoading={isLoading} />

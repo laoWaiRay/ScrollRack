@@ -17,6 +17,7 @@ interface ComboBoxInterface {
 	query: string;
 	setQuery: Dispatch<SetStateAction<string>>;
 	inputStyle?: string;
+  size?: "sm" | "md" | "lg"
 }
 
 // Expected Parent Usage:
@@ -29,6 +30,7 @@ export default function ComboBox({
 	query,
 	setQuery,
 	inputStyle,
+  size = "lg"
 }: ComboBoxInterface) {
 	const filteredList =
 		query === ""
@@ -37,13 +39,19 @@ export default function ComboBox({
 					return listItem.toLowerCase().includes(query.toLowerCase());
 			  });
 
+  const maxWidth = size === "sm"
+        ? "max-w-sm"
+        : size === "md"
+          ? "max-w-md"
+          : "max-w-lg";
+        
 	return (
 		<Combobox
 			value={selected!}
 			onChange={(value) => setSelected(value ?? null)}
 			onClose={() => setQuery("")}
 		>
-			<div className="relative w-full shrink max-w-sm">
+			<div className={`relative w-full shrink ${maxWidth}`}>
 				<ComboboxInput
 					className={`w-full bg-surface-600 border border-surface-500 px-4 py-2 rounded-md text-fg-light focus:outline ${inputStyle}`}
 					displayValue={(item: string | null) => item ?? ""}

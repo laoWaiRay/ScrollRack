@@ -154,7 +154,7 @@ export default function DashboardRootLayout({
 				{/* Desktop Sidebar */}
 				<nav
 					aria-labelledby="Sidebar navigation"
-					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-60`}
+					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-10`}
 				>
 					<header className="font-dancing-script text-white text-xl flex items-center justify-center xl:justify-start select-none my-4 mx-5">
 						<div
@@ -247,7 +247,7 @@ export default function DashboardRootLayout({
 				</Drawer>
 
 				{/* Main Content */}
-				<main className={`${styles.gridB} bg-surface-600`}>{children}</main>
+				<main className={`${styles.gridB} bg-surface-600 z-0`}>{children}</main>
 			</div>
 			<Footer />
 		</div>

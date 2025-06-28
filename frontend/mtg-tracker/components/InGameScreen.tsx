@@ -205,7 +205,7 @@ export default function InGameScreen({
 			</div>
 
 			<section className="flex w-full justify-end">
-				<div className="flex w-full justify-center items-center gap-4 px-8 max-w-sm mt-6">
+				<div className="flex w-full justify-center items-center gap-4 px-8 max-w-sm mt-6 mb-2">
 					<div className="grow-1">
 						<ButtonPrimary
 							onClick={handleAbortGame}

@@ -30,7 +30,7 @@ interface DashboardMainInterface {
 interface DashboardHeaderInterface {
 	user: UserReadDTO | null;
 	title: string;
-  justify?: "justify-start" | "justify-between";
+	justify?: "justify-start" | "justify-between";
 	children?: ReactNode;
 	childrenStyles?: string;
 }
@@ -41,7 +41,7 @@ export function DashboardLayout({
 }: DashboardLayoutInterface) {
 	return (
 		<div
-			className={`${_styles.gridB} flex flex-col items-center m-0 lg:m-4 min-h-dvh lg:mt-4 mx-3 pb-6`}
+			className={`${_styles.gridB} flex flex-col items-center lg:m-4 min-h-dvh lg:mt-4 mx-3`}
 		>
 			{/* Make room for the navbar on mobile */}
 			<div className="pt-24 w-full lg:pt-0 grow flex flex-col items-center">
@@ -56,23 +56,30 @@ export function DashboardHeader({
 	title,
 	children,
 	childrenStyles,
-  justify = "justify-between"
+	justify = "justify-between",
 }: DashboardHeaderInterface) {
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 	const { friendRequests } = useFriendRequest();
-  const router = useRouter();
+	const router = useRouter();
 
 	return (
 		<div className="border-b border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
 			<div className={`flex ${justify} lg:justify-between items-center mx-4`}>
 				<div className="flex gap-8 items-center justify-start">
-					<div className="text-lg font-semibold select-none shrink-0">{title}</div>
-          <div className={`${childrenStyles} hidden lg:block`}>{children}</div>
+					<div className="text-lg font-semibold select-none shrink-0">
+						{title}
+					</div>
+					<div className={`${childrenStyles} hidden lg:block`}>{children}</div>
 				</div>
-        <div className={`${childrenStyles} flex justify-start lg:hidden`}>{children}</div>
+				<div className={`${childrenStyles} flex justify-start lg:hidden`}>
+					{children}
+				</div>
 				<div className={`text-lg items-center justify-between hidden lg:flex`}>
 					{/* User Controls */}
-					<ButtonIcon onClick={() => router.push("/friends/add")} styles={buttonIconStyle}>
+					<ButtonIcon
+						onClick={() => router.push("/friends/add")}
+						styles={buttonIconStyle}
+					>
 						<UserAdd className="w-[1.5em] h-[1.5em] stroke-1" />
 					</ButtonIcon>
 
@@ -111,7 +118,7 @@ export function DashboardHeader({
 					<Popover>
 						<PopoverButton
 							className="flex items-center justify-center gap-3 py-2 px-3 ml-1 rounded
-          data-hover:cursor-pointer data-hover:bg-surface-500"
+              data-hover:cursor-pointer data-hover:bg-surface-500"
 						>
 							<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 								<Image
