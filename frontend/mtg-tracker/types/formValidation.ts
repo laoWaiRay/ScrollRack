@@ -3,7 +3,7 @@ export interface ValidationError {
 	description: string;
 }
 
-export type ErrorFieldMap<ErrorsT> = Record<string, keyof ErrorsT>
+export type ErrorFieldMap<ErrorsT> = Record<string, keyof ErrorsT>;
 
 // -------------------------------------------------------------------------------------------------
 // Register Form
@@ -28,27 +28,26 @@ export class RegisterErrors {
 	) {}
 }
 
-export const registerFormErrorFieldMap: ErrorFieldMap<RegisterErrors> =
-	{
-		InvalidEmail: "email",
-		DuplicateEmail: "email",
-		RequiredEmail: "email",
+export const registerFormErrorFieldMap: ErrorFieldMap<RegisterErrors> = {
+	InvalidEmail: "email",
+	DuplicateEmail: "email",
+	RequiredEmail: "email",
 
-		InvalidUserName: "username",
-		DuplicateUserName: "username",
-		RequiredUsername: "username",
+	InvalidUserName: "username",
+	DuplicateUserName: "username",
+	RequiredUsername: "username",
 
-		PasswordTooShort: "password",
-		PasswordRequiresDigit: "password",
-		PasswordRequiresLower: "password",
-		PasswordRequiresUpper: "password",
-		PasswordRequiresNonAlphanumeric: "password",
-		PasswordRequiresUniqueChars: "password",
-		RequiredPassword: "password",
+	PasswordTooShort: "password",
+	PasswordRequiresDigit: "password",
+	PasswordRequiresLower: "password",
+	PasswordRequiresUpper: "password",
+	PasswordRequiresNonAlphanumeric: "password",
+	PasswordRequiresUniqueChars: "password",
+	RequiredPassword: "password",
 
-		PasswordMismatch: "confirmPassword",
-		RequiredConfirmPassword: "confirmPassword",
-	};
+	PasswordMismatch: "confirmPassword",
+	RequiredConfirmPassword: "confirmPassword",
+};
 
 // -------------------------------------------------------------------------------------------------
 // Login Form
@@ -69,22 +68,22 @@ export class LoginErrors {
 		public unknown: ValidationError[] = []
 	) {}
 }
-export const loginFormErrorFieldMap: ErrorFieldMap<LoginErrors> =
-	{
-    InvalidLoginCredentials: "invalidUsernameOrPassword",
 
-		InvalidEmail: "email",
-		DuplicateEmail: "email",
-		RequiredEmail: "email",
+export const loginFormErrorFieldMap: ErrorFieldMap<LoginErrors> = {
+	InvalidLoginCredentials: "invalidUsernameOrPassword",
 
-		PasswordTooShort: "password",
-		PasswordRequiresDigit: "password",
-		PasswordRequiresLower: "password",
-		PasswordRequiresUpper: "password",
-		PasswordRequiresNonAlphanumeric: "password",
-		PasswordRequiresUniqueChars: "password",
-		RequiredPassword: "password",
-	}
+	InvalidEmail: "email",
+	DuplicateEmail: "email",
+	RequiredEmail: "email",
+
+	PasswordTooShort: "password",
+	PasswordRequiresDigit: "password",
+	PasswordRequiresLower: "password",
+	PasswordRequiresUpper: "password",
+	PasswordRequiresNonAlphanumeric: "password",
+	PasswordRequiresUniqueChars: "password",
+	RequiredPassword: "password",
+};
 
 // -------------------------------------------------------------------------------------------------
 // Update User Form
@@ -93,7 +92,7 @@ export interface UserUpdateFormData {
 	email: string;
 	username: string;
 	password: string;
-  newPassword: string;
+	newPassword: string;
 	confirmNewPassword: string;
 }
 
@@ -110,29 +109,85 @@ export class UserUpdateErrors {
 	) {}
 }
 
-export const updateUserErrorFieldMap: ErrorFieldMap<UserUpdateErrors> =
+export const updateUserErrorFieldMap: ErrorFieldMap<UserUpdateErrors> = {
+	InvalidEmail: "email",
+	DuplicateEmail: "email",
+	RequiredEmail: "email",
+
+	InvalidUserName: "username",
+	DuplicateUserName: "username",
+	RequiredUsername: "username",
+
+	IncorrectCurrentPassword: "password",
+
+	PasswordTooShort: "newPassword",
+	PasswordRequiresDigit: "newPassword",
+	PasswordRequiresLower: "newPassword",
+	PasswordRequiresUpper: "newPassword",
+	PasswordRequiresNonAlphanumeric: "newPassword",
+	PasswordRequiresUniqueChars: "newPassword",
+	RequiredPassword: "newPassword",
+
+	PasswordMismatch: "confirmPassword",
+	RequiredConfirmPassword: "confirmPassword",
+};
+
+// -------------------------------------------------------------------------------------------------
+// ForgotPassword Form
+// -------------------------------------------------------------------------------------------------
+
+export interface ForgotPasswordFormData {
+	email: string;
+}
+
+export class ForgotPasswordFormErrors {
+	[key: string]: ValidationError[];
+
+	constructor(
+		public email: ValidationError[] = [],
+		public unknown: ValidationError[] = []
+	) {}
+}
+
+export const ForgotPasswordFormErrorFieldMap: ErrorFieldMap<ForgotPasswordFormErrors> =
 	{
 		InvalidEmail: "email",
-		DuplicateEmail: "email",
-		RequiredEmail: "email",
+	};
 
-		InvalidUserName: "username",
-		DuplicateUserName: "username",
-		RequiredUsername: "username",
-    
-    IncorrectCurrentPassword: "password",
+// -------------------------------------------------------------------------------------------------
+// ResetPassword Form
+// -------------------------------------------------------------------------------------------------
 
-		PasswordTooShort: "newPassword",
-		PasswordRequiresDigit: "newPassword",
-		PasswordRequiresLower: "newPassword",
-		PasswordRequiresUpper: "newPassword",
-		PasswordRequiresNonAlphanumeric: "newPassword",
-		PasswordRequiresUniqueChars: "newPassword",
-		RequiredPassword: "newPassword",
+export interface ResetPasswordFormData {
+	password: string;
+  confirmPassword: string;
+}
+
+export class ResetPasswordFormErrors {
+	[key: string]: ValidationError[];
+
+	constructor(
+		public password: ValidationError[] = [],
+		public confirmPassword: ValidationError[] = [],
+		public unknown: ValidationError[] = []
+	) {}
+}
+
+export const ResetPasswordFormErrorFieldMap: ErrorFieldMap<ResetPasswordFormErrors> =
+	{
+		PasswordTooShort: "password",
+		PasswordRequiresDigit: "password",
+		PasswordRequiresLower: "password",
+		PasswordRequiresUpper: "password",
+		PasswordRequiresNonAlphanumeric: "password",
+		PasswordRequiresUniqueChars: "password",
+		RequiredPassword: "password",
 
 		PasswordMismatch: "confirmPassword",
 		RequiredConfirmPassword: "confirmPassword",
+    InvalidToken: "unknown",
 	};
+
 // -------------------------------------------------------------------------------------------------
 // Common Validation Errors
 // -------------------------------------------------------------------------------------------------

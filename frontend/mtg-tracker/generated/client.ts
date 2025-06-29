@@ -81,7 +81,6 @@ type GameParticipationReadDTO = {
 type UserReadMinimalDTO = {
   id: string;
   userName: string;
-  email: string;
   profile?: (string | null) | undefined;
 };
 type GameReadDTO = {
@@ -109,7 +108,14 @@ type RoomDTO = {
 type UserReadDTO = {
   id: string;
   userName: string;
+  profile?: (string | null) | undefined;
+  decks: Array<DeckReadDTO>;
+};
+type UserWithEmailDTO = {
   email: string;
+  emailConfirmed: boolean;
+  id: string;
+  userName: string;
   profile?: (string | null) | undefined;
   decks: Array<DeckReadDTO>;
 };
@@ -213,7 +219,6 @@ const UserReadDTO: z.ZodType<UserReadDTO> = z
   .object({
     id: z.string(),
     userName: z.string(),
-    email: z.string(),
     profile: z.string().nullish(),
     decks: z.array(DeckReadDTO),
   })
@@ -232,7 +237,6 @@ const UserReadMinimalDTO: z.ZodType<UserReadMinimalDTO> = z
   .object({
     id: z.string(),
     userName: z.string(),
-    email: z.string(),
     profile: z.string().nullish(),
   })
   .passthrough();
@@ -350,6 +354,16 @@ const FilteredStatSnapshotDTO: z.ZodType<FilteredStatSnapshotDTO> = z
     snapshot: StatSnapshotDTO,
   })
   .passthrough();
+const UserWithEmailDTO: z.ZodType<UserWithEmailDTO> = z
+  .object({
+    email: z.string(),
+    emailConfirmed: z.boolean(),
+    id: z.string(),
+    userName: z.string(),
+    profile: z.string().nullish(),
+    decks: z.array(DeckReadDTO),
+  })
+  .passthrough();
 const UserMultipleDTO = z.object({ ids: z.array(z.string()) }).passthrough();
 const UserWriteDTO = z
   .object({
@@ -365,6 +379,10 @@ const UserRegisterDTO = z
   .passthrough();
 const UserLoginDTO = z
   .object({ email: z.string(), password: z.string() })
+  .passthrough();
+const ForgotPasswordRequestDTO = z.object({ email: z.string() }).passthrough();
+const ResetPasswordRequestDTO = z
+  .object({ id: z.string(), token: z.string(), password: z.string() })
   .passthrough();
 const HttpValidationProblemDetails = z
   .object({
@@ -410,10 +428,13 @@ export const schemas = {
   DeckPlayCount,
   StatSnapshotDTO,
   FilteredStatSnapshotDTO,
+  UserWithEmailDTO,
   UserMultipleDTO,
   UserWriteDTO,
   UserRegisterDTO,
   UserLoginDTO,
+  ForgotPasswordRequestDTO,
+  ResetPasswordRequestDTO,
   HttpValidationProblemDetails,
 };
 
@@ -833,6 +854,13 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/api/User/email",
+    alias: "getApiUseremail",
+    requestFormat: "json",
+    response: UserWithEmailDTO,
+  },
+  {
+    method: "get",
     path: "/api/User/id/:id",
     alias: "getApiUseridId",
     requestFormat: "json",
@@ -843,13 +871,6 @@ const endpoints = makeApi([
         schema: z.string(),
       },
     ],
-    response: UserReadDTO,
-  },
-  {
-    method: "get",
-    path: "/api/User/identity",
-    alias: "getApiUseridentity",
-    requestFormat: "json",
     response: UserReadDTO,
   },
   {
@@ -907,6 +928,60 @@ const endpoints = makeApi([
       },
     ],
     response: UserReadDTO,
+  },
+  {
+    method: "post",
+    path: "/api/User/resend-verify-email-link",
+    alias: "postApiUserresendVerifyEmailLink",
+    requestFormat: "json",
+    response: z.void(),
+  },
+  {
+    method: "post",
+    path: "/api/User/reset-password",
+    alias: "postApiUserresetPassword",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: ResetPasswordRequestDTO,
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "post",
+    path: "/api/User/send-password-reset",
+    alias: "postApiUsersendPasswordReset",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ email: z.string() }).passthrough(),
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "post",
+    path: "/api/User/verify-email",
+    alias: "postApiUserverifyEmail",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "id",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+      {
+        name: "token",
+        type: "Query",
+        schema: z.string().optional(),
+      },
+    ],
+    response: z.void(),
   },
   {
     method: "get",

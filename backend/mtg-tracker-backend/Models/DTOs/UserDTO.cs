@@ -1,10 +1,19 @@
 namespace Mtg_tracker.Models.DTOs;
 
+public class UserWithEmailDTO
+{
+    public required string Email { get; set; }
+    public required bool EmailConfirmed { get; set; }
+    public required string Id { get; set; }
+    public required string UserName { get; set; }
+    public string? Profile { get; set; }
+    public required List<DeckReadDTO> Decks { get; set; } = [];
+}
+
 public class UserReadDTO
 {
     public required string Id { get; set; }
     public required string UserName { get; set; }
-    public required string Email { get; set; } // TODO: Remove email from DTO for production
     public string? Profile { get; set; }
     public required List<DeckReadDTO> Decks { get; set; } = [];
 }
@@ -13,7 +22,6 @@ public class UserReadMinimalDTO
 {
     public required string Id { get; set; }
     public required string UserName { get; set; }
-    public required string Email { get; set; } // TODO: Remove email from DTO for production
     public string? Profile { get; set; }
 }
 
@@ -50,4 +58,16 @@ public class UserFriendAddDTO
 public class UserMultipleDTO
 {
     public required string[] Ids { get; set; }
+}
+
+public class ForgotPasswordRequestDTO
+{
+    public required string Email { get; set; }
+}
+
+public class ResetPasswordRequestDTO
+{
+    public required string Id { get; set; }
+    public required string Token { get; set; }
+    public required string Password { get; set; }
 }

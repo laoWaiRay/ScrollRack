@@ -6,6 +6,7 @@ export default function useForm<DataT, ErrorT = unknown>(
 ) {
 	const [values, setValues] = useState(initialValues);
 	const [errors, setErrors] = useState<Partial<ErrorT>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -32,9 +33,11 @@ export default function useForm<DataT, ErrorT = unknown>(
 		) {
 			return;
 		} else {
+      setIsLoading(true);
 			await onSubmit(values, errors, setErrors);
+      setIsLoading(false);
 		}
 	};
 
-	return { values, errors, handleChange, handleSubmit };
+	return { values, errors, handleChange, handleSubmit, isLoading };
 }

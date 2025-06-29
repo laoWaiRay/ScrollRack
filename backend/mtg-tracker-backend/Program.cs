@@ -7,6 +7,13 @@ using Mtg_tracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MailjetEmail = builder.Configuration["MailjetEmail"];
+var MailjetApiKey = builder.Configuration["MailjetApiKey"];
+var MailjetSecretKey = builder.Configuration["MailjetSecretKey"];
+
+Console.WriteLine("@@@@@@@@@@@@@@@@@");
+Console.WriteLine($"Email: {MailjetEmail}, ApiKey: {MailjetApiKey}, Secret: {MailjetSecretKey}");
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
@@ -17,6 +24,11 @@ builder.Services.AddDbContext<MtgContext>(options =>
         .UseSnakeCaseNamingConvention()
 );
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+
+// Custom Services
+builder.Services.AddScoped<DeckStatsService>();
+builder.Services.AddTransient<ITemplatedEmailSender, EmailSender>();
+builder.Services.Configure<EmailSenderOptions>(builder.Configuration);
 
 // Identity Services (authentication/authorization)
 builder.Services.Configure<IdentityOptions>(options =>
@@ -42,9 +54,6 @@ builder.Services.AddCors(options =>
 
 // SignalR
 builder.Services.AddSignalR();
-
-// Custom Services
-builder.Services.AddScoped<DeckStatsService>();
 
 // Cookies
 // builder.Services.ConfigureApplicationCookie(options =>

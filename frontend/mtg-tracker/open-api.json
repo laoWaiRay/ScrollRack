@@ -1433,7 +1433,7 @@
         }
       }
     },
-    "/api/User/identity": {
+    "/api/User/email": {
       "get": {
         "tags": [
           "User"
@@ -1444,17 +1444,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/UserWithEmailDTO"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/UserWithEmailDTO"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/UserWithEmailDTO"
                 }
               }
             }
@@ -1811,6 +1811,110 @@
           }
         }
       }
+    },
+    "/api/User/resend-verify-email-link": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/User/verify-email": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/User/send-password-reset": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/User/reset-password": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2078,6 +2182,17 @@
         }
       },
       "ForgotPasswordRequest": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ForgotPasswordRequestDTO": {
         "required": [
           "email"
         ],
@@ -2428,6 +2543,25 @@
           }
         }
       },
+      "ResetPasswordRequestDTO": {
+        "required": [
+          "id",
+          "token",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
       "RoomDTO": {
         "required": [
           "id",
@@ -2638,7 +2772,6 @@
         "required": [
           "id",
           "userName",
-          "email",
           "decks"
         ],
         "type": "object",
@@ -2647,9 +2780,6 @@
             "type": "string"
           },
           "userName": {
-            "type": "string"
-          },
-          "email": {
             "type": "string"
           },
           "profile": {
@@ -2667,8 +2797,7 @@
       "UserReadMinimalDTO": {
         "required": [
           "id",
-          "userName",
-          "email"
+          "userName"
         ],
         "type": "object",
         "properties": {
@@ -2676,9 +2805,6 @@
             "type": "string"
           },
           "userName": {
-            "type": "string"
-          },
-          "email": {
             "type": "string"
           },
           "profile": {
@@ -2703,6 +2829,40 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "UserWithEmailDTO": {
+        "required": [
+          "email",
+          "emailConfirmed",
+          "id",
+          "userName",
+          "decks"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "emailConfirmed": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string",
+            "nullable": true
+          },
+          "decks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeckReadDTO"
+            }
           }
         }
       },

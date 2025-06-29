@@ -50,6 +50,7 @@ export function handleAxiosErrors<
   errors: Partial<ErrorsT> | undefined,
 ) {
 	if (isAxiosError(error)) {
+    console.log(error)
 		const status = error.response?.status;
 		if (
 			status &&

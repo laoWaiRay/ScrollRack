@@ -3,7 +3,7 @@
 import { api } from "@/generated/client";
 import { cookies } from "next/headers";
 
-export async function verifySession() {
+export async function getUserWithEmail() {
 	const aspNetCoreIdentityCookieName = ".AspNetCore.Identity.Application";
 	const cookieStore = await cookies();
 	const cookie = cookieStore.get(aspNetCoreIdentityCookieName);
@@ -13,7 +13,7 @@ export async function verifySession() {
 	}
 
 	try {
-		const user = await api.getApiUseridentity({
+		const user = await api.getApiUseremail({
 			headers: {
 				cookie: `${aspNetCoreIdentityCookieName}=${cookie.value}`,
 			},

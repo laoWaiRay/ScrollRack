@@ -102,7 +102,7 @@ export default function LoginPage() {
 				>
 					Forgot password?
 				</Link>
-				<ButtonPrimary type="submit" onClick={() => {}}>
+				<ButtonPrimary type="submit" onClick={() => {}} uppercase={false}>
 					Log in
 				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
@@ -110,7 +110,7 @@ export default function LoginPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={() => {}} style="google">
+				<ButtonPrimary onClick={() => {}} style="google" uppercase={false}>
 					<div className="flex items-center justify-center">
 						Sign in with Google <GoogleLogo className="ml-2" />
 					</div>

@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { verifySession } from "@/actions/verifySession";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useLogout } from "@/hooks/useLogout";

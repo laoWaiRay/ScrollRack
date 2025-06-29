@@ -62,8 +62,8 @@ export default function TextInput({
 
 	return (
 		<Field className="flex flex-col mb-2" disabled={isDisabled}>
-			<Label className="mb-2 text-fg">{label}</Label>
-			<div className="max-w-xs">{errorMessage}</div>
+			<Label className="mb-2 text-fg self-start">{label}</Label>
+			<div className="max-w-xs self-start">{errorMessage}</div>
 			<div className="relative">
 				<input
 					ref={inputRef}

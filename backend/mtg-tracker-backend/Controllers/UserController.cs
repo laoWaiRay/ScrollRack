@@ -7,6 +7,12 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Mtg_tracker.Models.Errors;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Mtg_tracker.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.Net.Mail;
 
 namespace Mtg_tracker.Controllers;
 
@@ -28,16 +34,17 @@ namespace Mtg_tracker.Controllers;
 */
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(MtgContext context, IMapper mapper) : ControllerBase
+public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailSender emailSender) : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly ITemplatedEmailSender _emailSender = emailSender;
 
-    // GET: api/User/identity
-    // Return the current user. Used for session verification.
+    // GET: api/User/email
+    // Return the current user with email
     [Authorize]
-    [HttpGet("identity")]
-    public async Task<ActionResult<UserReadDTO>> Identity()
+    [HttpGet("email")]
+    public async Task<ActionResult<UserWithEmailDTO>> GetUserWithEmail()
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -52,7 +59,7 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        return _mapper.Map<UserReadDTO>(user);
+        return _mapper.Map<UserWithEmailDTO>(user);
     }
 
     // // GET: api/User
@@ -277,6 +284,21 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
         await signInManager.SignOutAsync();
         await signInManager.SignInAsync(user, isPersistent: true);
 
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        EmailTemplateContext emailContext = new()
+        {
+            ToEmail = user.Email,
+            Type = EmailType.VerifyEmail,
+            Variables = new VerifyEmailRequestVariables()
+            {
+                Name = user.UserName,
+                UserId = user.Id,
+                Token = urlEncodedToken
+            }
+        };
+        await _emailSender.SendEmailAsync(emailContext);
+
         return _mapper.Map<UserReadDTO>(user);
     }
 
@@ -316,4 +338,159 @@ public class UserController(MtgContext context, IMapper mapper) : ControllerBase
 
         return _mapper.Map<UserReadDTO>(user);
     }
+
+    [HttpPost("resend-verify-email-link")]
+    [Authorize]
+    public async Task<IActionResult> ResendVerifyEmailLink(UserManager<ApplicationUser> userManager)
+    {
+        var userId = User.GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return BadRequest();
+        }
+
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        EmailTemplateContext emailContext = new()
+        {
+            ToEmail = user.Email ?? "",
+            Type = EmailType.VerifyEmail,
+            Variables = new VerifyEmailRequestVariables()
+            {
+                Name = user.UserName ?? "",
+                UserId = user.Id,
+                Token = urlEncodedToken
+            }
+
+        };
+        await _emailSender.SendEmailAsync(emailContext);
+
+        return Ok();
+    }
+
+    [HttpPost("verify-email")]
+    public async Task<IActionResult> VerifyEmail(UserManager<ApplicationUser> userManager,
+        [FromQuery] string id, [FromQuery] string token)
+    {
+        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(token))
+        {
+            return BadRequest("Missing user ID or token.");
+        }
+
+        var user = await userManager.FindByIdAsync(id);
+        if (user is null)
+        {
+            return NotFound("User not found");
+        }
+
+        try
+        {
+            var tokenBytes = WebEncoders.Base64UrlDecode(token);
+            var urlDecodedToken = Encoding.UTF8.GetString(tokenBytes);
+            var result = await userManager.ConfirmEmailAsync(user, urlDecodedToken);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok("Email verified");
+        }
+        catch (FormatException)
+        {
+            return BadRequest("Invalid token format");
+        }
+    }
+
+    [HttpPost("send-password-reset")]
+    public async Task<IActionResult> SendPasswordReset(UserManager<ApplicationUser> userManager, ForgotPasswordRequestDTO request)
+    {
+        try
+        {
+            var emailAddress = new MailAddress(request.Email);
+        }
+        catch
+        {
+            ErrorResponse[] errors = [
+                 new ErrorResponse {
+                    Code = "InvalidEmail",
+                    Description = "Invalid Email Format"
+                }
+             ];
+            return BadRequest(errors);
+        }
+
+        var normalizedEmail = userManager.NormalizeEmail(request.Email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
+
+        if (user is null || user.Email is null)
+        {
+            return Ok();
+        }
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+
+        EmailTemplateContext emailContext = new()
+        {
+
+            ToEmail = user.Email,
+            Type = EmailType.ForgotPassword,
+            Variables = new ForgotPasswordRequestVariables()
+            {
+                UserId = user.Id,
+                Token = urlEncodedToken
+            }
+        };
+        await _emailSender.SendEmailAsync(emailContext);
+
+        return Ok();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(UserManager<ApplicationUser> userManager, ResetPasswordRequestDTO request)
+    {
+        var id = request.Id;
+        var token = request.Token;
+        var newPassword = request.Password;
+
+        if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(token))
+        {
+            return BadRequest("Missing user ID or token.");
+        }
+
+        var user = await userManager.FindByIdAsync(id);
+        if (user is null)
+        {
+            return NotFound("User not found");
+        }
+
+        try
+        {
+            var tokenBytes = WebEncoders.Base64UrlDecode(token);
+            var urlDecodedToken = Encoding.UTF8.GetString(tokenBytes);
+            var result = await userManager.ResetPasswordAsync(user, urlDecodedToken, newPassword);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+
+            // TODO: Send an email confirmation that password was reset
+
+            return Ok("Password successfully reset");
+        }
+        catch (FormatException)
+        {
+            return BadRequest("Invalid token format");
+        }
+    }
+
 }
