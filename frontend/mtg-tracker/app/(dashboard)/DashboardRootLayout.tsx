@@ -220,7 +220,7 @@ export default function DashboardRootLayout({
 				</div>
 
 				{/* Hidden Drawer */}
-				<Drawer isDrawerOpen={isDrawerOpen}>
+				<Drawer isDrawerOpen={isDrawerOpen} maxWidth="none">
 					<h2 className="text-fg-dark mb-2 flex justify-center">MAIN MENU</h2>
 					<ul className="flex flex-col gap-2">
 						{renderMobileLinks(

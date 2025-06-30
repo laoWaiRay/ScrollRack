@@ -863,6 +863,13 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/api/User/google-callback",
+    alias: "getApiUsergoogleCallback",
+    requestFormat: "json",
+    response: z.void(),
+  },
+  {
+    method: "get",
     path: "/api/User/id/:id",
     alias: "getApiUseridId",
     requestFormat: "json",
@@ -962,6 +969,20 @@ const endpoints = makeApi([
         name: "body",
         type: "Body",
         schema: z.object({ email: z.string() }).passthrough(),
+      },
+    ],
+    response: z.void(),
+  },
+  {
+    method: "get",
+    path: "/api/User/signin-google",
+    alias: "getApiUsersigninGoogle",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "returnUrl",
+        type: "Query",
+        schema: z.string().optional().default(null),
       },
     ],
     response: z.void(),

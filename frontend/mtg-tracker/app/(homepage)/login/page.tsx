@@ -55,6 +55,10 @@ export default function LoginPage() {
 			);
 		}
 	}
+  
+  function handleGoogleRedirect() {
+    window.location.href = "https://localhost:7165/api/user/signin-google";
+  }
 
 	const invalidLoginMessages =
 		errors?.invalidUsernameOrPassword &&
@@ -110,7 +114,7 @@ export default function LoginPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={() => {}} style="google" uppercase={false}>
+				<ButtonPrimary onClick={handleGoogleRedirect} style="google" uppercase={false}>
 					<div className="flex items-center justify-center">
 						Sign in with Google <GoogleLogo className="ml-2" />
 					</div>

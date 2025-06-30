@@ -36,10 +36,10 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 								Commander Game Tracker
 							</h2>
 						</div>
-						<div className="mt-4 w-[30rem] xl:w-[40rem] aspect-[107/90] relative hidden lg:block">
+						<div className="mt-4 w-[30rem] xl:w-[36rem] aspect-[107/90] relative hidden lg:block">
 							<Image
 								src="/images/Hero.png"
-                sizes="(max-width: 768px) 0px, 40rem"
+                sizes="(max-width: 768px) 0px, 36rem"
 								alt="ScrollRack app dashboard view"
 								fill={true}
 								priority={true}

@@ -117,6 +117,7 @@ export default function LineChart({ buckets }: LineChartInterface) {
 			stroke: {
 				lineCap: "round",
 				curve: "smooth",
+        width: 4,
 			},
 			markers: {
 				size: 0,

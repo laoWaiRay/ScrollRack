@@ -14,10 +14,14 @@ CSS Reset, inspired by: https://www.joshwcomeau.com/css/custom-css-reset/
 		margin: 0;
 		overflow-wrap: anywhere;
 	}
-    
-    h1,h2,h3,h4,h5 {
-        user-select: none;
-    }
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5 {
+		user-select: none;
+	}
 
 	body {
 		line-height: calc(1em + 0.5rem);
@@ -90,9 +94,10 @@ body {
 }
 
 @media screen and (min-width: 1024px) {
-    html, body {
-        height: 100%;
-    }
+	html,
+	body {
+		height: 100%;
+	}
 }
 
 /* Dark mode variants */
@@ -191,8 +196,7 @@ Global CSS
 	scrollbar-color: var(--surface-300) var(--surface-600);
 }
 
-*:focus-visible
-{
+*:focus-visible {
 	@apply outline-0 ring-2 ring-surface-100;
 }
 
@@ -259,6 +263,16 @@ Tailwind Components
 		background-size: cover;
 		background-position: center center, 60% 50%;
 	}
+	.bg-gradient-lost-page {
+		background-image: linear-gradient(
+				to top left,
+				rgba(0, 0, 0, 0.9) 0%,
+				rgba(0, 0, 0, 0.9) 100%
+			),
+			url("/images/404-fblthp.jpg");
+		background-size: cover;
+		background-position: center center, 47% 50%;
+	}
 	.bg-primary-600.focus-outline[data-focus] {
 		@apply outline-0 !ring-1 !ring-primary-100;
 	}
@@ -270,10 +284,10 @@ Tailwind Components
 	.dashboard-main-content-layout {
 		@apply flex flex-col gap-2 w-full items-center my-2;
 	}
-    
-    .bg-card-surface {
-        @apply bg-surface-500/20
-    }
+
+	.bg-card-surface {
+		@apply bg-surface-500/20;
+	}
 }
 
 /*--------------------------------------------------------------------------------------

@@ -29,6 +29,14 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 builder.Services.AddAuthorization();
+builder.Services.AddAuthentication()
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    });
+
+
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<MtgContext>();
 
@@ -49,11 +57,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddSignalR();
 
 // Cookies
-// builder.Services.ConfigureApplicationCookie(options =>
-// {
-//     options.Cookie.SameSite = SameSiteMode.Lax;
-//     options.Cookie.HttpOnly = true;
-// });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // options.Cookie.SameSite = SameSiteMode.None;
+    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 var app = builder.Build();
 

@@ -7,12 +7,13 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Mtg_tracker.Models.Errors;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Mtg_tracker.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using System.Security.Claims;
 
 namespace Mtg_tracker.Controllers;
 
@@ -536,4 +537,78 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
     }
 
+    [HttpGet("signin-google")]
+    public IActionResult SignInWithGoogle([FromQuery] string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action("GoogleCallback", "User", new { returnUrl });
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet("google-callback")]
+    public async Task<IActionResult> GoogleCallback(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
+    {
+        var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
+        if (externalLoginInfo == null)
+        {
+            return BadRequest("External login information not found.");
+        }
+
+        // Try to sign in with external login
+        var result = await signInManager.ExternalLoginSignInAsync(
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderKey,
+            isPersistent: true,
+            bypassTwoFactor: true);
+
+        if (result.Succeeded)
+        {
+            return Redirect("https://localhost:3000"); // your frontend home page
+        }
+
+        // Create a new user if one doesn't exist
+        var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
+        var name = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
+
+        if (email == null)
+        {
+            return BadRequest("Google login must return an email address.");
+        }
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+            };
+
+            user.StatSnapshot = new StatSnapshot()
+            {
+                UserId = user.Id,
+            };
+
+            var createResult = await userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest(createResult.Errors);
+            }
+
+            await _context.SaveChangesAsync(); // Save the new StatSnapshot
+        }
+
+        var addLoginResult = await userManager.AddLoginAsync(user, externalLoginInfo);
+        if (!addLoginResult.Succeeded)
+        {
+            return BadRequest(addLoginResult.Errors);
+        }
+
+        await signInManager.SignInAsync(user, isPersistent: true);
+
+        return Redirect("https://localhost:3000"); // or a custom success page
+    }
 }
