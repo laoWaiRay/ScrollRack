@@ -83,7 +83,7 @@ export function GameLogCard({
 	}
 
 	return (
-		<div className="flex flex-col bg-card-surface rounded-lg p-4 lg:p-8">
+		<div className="flex flex-col bg-card-surface rounded-lg p-4">
 			{size === "lg" && (
 				<Dialog
 					title={`Deleting Game`}

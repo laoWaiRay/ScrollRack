@@ -18,9 +18,9 @@ export default function ListBox({
 	list,
 	selected,
 	setSelected,
-  transparent
+  transparent = false
 }: ListBoxInterface) {
-  const styles = transparent ? "bg-black/40 border border-white/10" : "bg-surface-500";
+  const styles = transparent ? "bg-black/40 border border-white/10" : "bg-surface-600 border border-surface-500";
 
 	return (
 		<Listbox value={selected} onChange={setSelected}>
@@ -34,13 +34,13 @@ export default function ListBox({
 			</div>
 			<ListboxOptions
 				anchor="bottom"
-				className={`w-(--button-width) flex flex-col gap-1 rounded-lg border border-white/5 ${styles} ${transparent && "!bg-black/95"} [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full z-60`}
+				className={`w-(--button-width) flex flex-col rounded-lg border border-white/5 ${styles} ${transparent && "!bg-black/95"} [--anchor-gap:--spacing(1)] empty:invisible transition duration-100 ease-in data-leave:data-closed:opacity-0 !max-h-[min(30vh,24rem)] absolute top-full z-60`}
 			>
 				{list.map((item) => (
 					<ListboxOption
 						key={item}
 						value={item}
-						className="group w-full bg-white/[2%] px-4 py-2 rounded-md text-fg-light focus-outline flex gap-2 items-center select-none data-focus:bg-white/20"
+						className="group w-full bg-surface-600 px-4 py-2 border-b border-surface-500 focus-outline flex gap-2 items-center select-none data-focus:bg-white/5"
 					>
 						{item}
 					</ListboxOption>

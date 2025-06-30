@@ -28,7 +28,7 @@ export default function Footer() {
 				</p>
 				<p>
 					<a
-						href="https://buymeacoffee.com/laowairay"
+						href="https://buymeacoffee.com/raymondly9r"
 						className="flex mr-[6px] link text-fg items-center"
 					>
 						Buy me a coffee

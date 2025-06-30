@@ -272,7 +272,7 @@ Tailwind Components
 	}
     
     .bg-card-surface {
-        @apply bg-surface-500/30
+        @apply bg-surface-500/20
     }
 }
 

@@ -1,7 +1,13 @@
 "use client";
 import { FormEvent, useState } from "react";
 import ButtonPrimary from "@/components/ButtonPrimary";
-import { DeckReadDTO, GameParticipationReadDTO, GameParticipationWriteDTO, GameWriteDTO, UserReadDTO } from "@/types/client";
+import {
+	DeckReadDTO,
+	GameParticipationReadDTO,
+	GameParticipationWriteDTO,
+	GameWriteDTO,
+	UserReadDTO,
+} from "@/types/client";
 import UserCard from "@/components/UserCard";
 import { useAuth } from "@/hooks/useAuth";
 import ButtonIcon from "@/components/ButtonIcon";
@@ -39,7 +45,7 @@ export default function Import({}: ImportInterface) {
 	const [isFetching, setIsFetching] = useState(false);
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const { gameParticipations, dispatch: dispatchGameParticipation } =
-		useGameParticipation()
+		useGameParticipation();
 
 	// Have to do this because by default the user loaded through useAuth hook does not include
 	// deck data.
@@ -70,11 +76,11 @@ export default function Import({}: ImportInterface) {
 		setWinner(null);
 		setPlayers(players.filter((p) => p.id !== playerId));
 	}
-  
-  function handleSetWinner(e: React.MouseEvent, player: UserReadDTO) {
-    e.stopPropagation();
-    setWinner(player);
-  }
+
+	function handleSetWinner(e: React.MouseEvent, player: UserReadDTO) {
+		e.stopPropagation();
+		setWinner(player);
+	}
 
 	async function handleSaveGame() {
 		if (!user) {
@@ -100,7 +106,7 @@ export default function Import({}: ImportInterface) {
 				createdAt: new Date().toISOString(),
 				createdByUserId: user.id,
 				winnerId: winner.id,
-        imported: true,
+				imported: true,
 			};
 
 			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
@@ -139,9 +145,9 @@ export default function Import({}: ImportInterface) {
 				const gpReadDTO = await api.postApiGameParticipation(
 					gameParticipationWriteDTO,
 					{
-            queries: {
-              imported: true,
-            },
+						queries: {
+							imported: true,
+						},
 						withCredentials: true,
 					}
 				);
@@ -190,18 +196,28 @@ export default function Import({}: ImportInterface) {
 			<DashboardMain>
 				<section className="dashboard-main-content-layout gap-4 !max-w-lg">
 					<h2 className="text-lg mt-2">Importing Games</h2>
-					<p className="px-4 -mb-4">
-						Imported games will not count towards record statistics
-						(Fastest/Slowest Wins and Longest Win/Loss Streaks). This feature is
-						mainly for adding games that were not originally tracked using{" "}
-						<span className="font-semibold">ScrollRack</span>.
-					</p>
+					<section className="mx-6 flex flex-col gap-2">
+						<p>
+							You can import games that were not originally tracked using
+							ScrollRack to add those games to your match history.
+						</p>
+						<p>
+							{" "}
+							Imported games will not count towards certain record statistics
+							(e.g. fastest/slowest wins and longest win/loss streaks).
+						</p>
+					</section>
 					<div className="flex flex-col w-full gap-3 mt-6">
 						<div className="flex flex-col justify-between px-2 gap-4">
 							{/* Player List */}
 							<div className="flex flex-col self-start px-6 w-full">
 								<h3 className="uppercase self-start mb-2">Players</h3>
-								<div className="flex flex-col gap-2">
+								<div className="flex flex-col gap-2 w-full">
+									{players.length === 0 && (
+										<div className="w-full flex center my-4 justify-center">
+											No players
+										</div>
+									)}
 									{players.length > 0 &&
 										players.map((player) => (
 											<div
@@ -210,7 +226,10 @@ export default function Import({}: ImportInterface) {
 												} flex justify-between items-center w-full rounded-lg relative overflow-hidden bg-white/5`}
 												key={player.id}
 											>
-												<div className="w-full" onClick={(e) => handleSetWinner(e, player)}>
+												<div
+													className="w-full"
+													onClick={(e) => handleSetWinner(e, player)}
+												>
 													<UserCard
 														user={player}
 														useDeckSelector={true}

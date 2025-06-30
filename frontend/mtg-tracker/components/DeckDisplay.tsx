@@ -465,7 +465,7 @@ export default function DeckDisplay({
 				</section>
 			</Drawer>
 
-			<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
+			<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl z-10`}>
 				<div className="flex flex-col w-full gap-4">
 					<section className="w-full flex flex-col gap-4">
 						<FilterSortBar

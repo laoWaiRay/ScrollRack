@@ -35,7 +35,7 @@ const buttonStyles: { [style: string]: ButtonStyle } = {
 		hover:
 			"data-hover:text-white",
 		active: "",
-		textColor: "text-fg-light",
+		textColor: "text-fg",
 	},
 	danger: {
 		color: "bg-transparent",

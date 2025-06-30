@@ -136,7 +136,7 @@ export default function AddFriends({}: AddFriendsInterface) {
 						type="submit"
 						onClick={() => {}}
 						style="transparent"
-						uppercase={true}
+						uppercase={false}
 					>
 						Add
 						<div className="size-[1.8em]">
@@ -182,12 +182,13 @@ export default function AddFriends({}: AddFriendsInterface) {
 					<ButtonPrimary
 						onClick={handleToggleVideoContainer}
 						style="transparent"
+            uppercase={false}
 					>
 						{isScanning ? (
-							"STOP"
+							"Stop"
 						) : (
-							<div className="text-white flex justify-center items-center gap-2">
-								<span className="">SCAN</span>
+							<div className="flex justify-center items-center gap-2">
+								<span className="">Scan</span>
 								<div className="size-[1em]">
 									<QrCodeScan />
 								</div>

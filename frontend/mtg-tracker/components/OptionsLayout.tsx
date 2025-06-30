@@ -23,9 +23,9 @@ export default function OptionsLayout({ children, title }: OptionsLayoutInterfac
 		<DashboardLayout>
 			<DashboardHeader title={title} user={user} />
 			{/* Back Button */}
-			<div className="w-fit self-start flex sticky top-24 left-0 pt-4 lg:top-0 ml-10 max-w-sm z-50">
+			<div className="w-full self-center flex sticky top-24 left-0 pt-4 lg:top-0 ml-16 max-w-sm z-50">
 				<Button
-					className="w-16 h-16 bg-surface-400 rounded-full p-3"
+					className="w-16 h-16 bg-surface-500 rounded-full p-3 hover:cursor-pointer z-50"
 					onClick={() => router.back()}
 				>
 					<ArrowLeft className="text-fg-light -translate-x-0.5" />

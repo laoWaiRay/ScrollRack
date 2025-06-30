@@ -165,7 +165,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 					</ButtonPrimary>
 				</section>
 			</form>
-			<section className="w-full flex justify-center mt-32 border-t border-surface-500 pt-4">
+			<section className="w-full flex justify-center mt-16 border-t border-surface-500 pt-4">
 				<div className="self-center">
 					<ButtonPrimary
 						style="danger"

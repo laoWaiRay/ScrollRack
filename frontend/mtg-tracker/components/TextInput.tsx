@@ -67,7 +67,7 @@ export default function TextInput({
 			<div className="relative">
 				<input
 					ref={inputRef}
-					className={`w-full bg-surface-500 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline ${type === "password" && "pr-11"} ${
+					className={`w-full border border-surface-400 px-4 py-2 rounded-md text-fg-light mb-1.5 focus-outline ${type === "password" && "pr-11"} ${
 						isDisabled && "opacity-50"
 					}`}
 					name={name}

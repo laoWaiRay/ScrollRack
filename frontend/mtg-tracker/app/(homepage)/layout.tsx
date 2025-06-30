@@ -28,12 +28,12 @@ export default function HomepageLayout({ children }: LoginLayoutProps) {
 									title="Scroll with quill writing"
 									className="w-[1em] h-[1em] shrink-0"
 								/>
-								<h2 className="font-dancing-script select-none leading-[1em]">
+								<h2 className="font-dancing-script select-none leading-[1.25em]">
 									ScrollRack
 								</h2>
 							</div>
 							<h2 className="font-dancing-script text-[1.6rem] lg:text-xl text-fg select-none">
-								the Commander game tracker
+								Commander Game Tracker
 							</h2>
 						</div>
 						<div className="mt-4 w-[30rem] xl:w-[40rem] aspect-[107/90] relative hidden lg:block">

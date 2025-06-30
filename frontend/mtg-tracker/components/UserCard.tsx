@@ -94,7 +94,7 @@ export default function UserCard({
 			/>
 			<div className="absolute inset-0 bg-black/50 z-0" />
 
-			<div className={`flex gap-2 items-center z-10 bg-black/40 py-2 px-4 rounded-lg ${styles}`}>
+			<div className={`flex gap-2 items-center z-10 py-2 px-4 rounded-lg ${styles}`}>
 				<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 					<Image
 						className="h-full w-full object-cover"
@@ -117,7 +117,7 @@ export default function UserCard({
 			)}
 
 			{useCommanderDisplay && (
-				<div className={`z-10 self-start ${textColor} bg-black/50 py-2 px-4 rounded-lg`}>{userDeck?.commander}</div>
+				<div className={`z-10 self-start ${textColor} bg-black/50 py-2 px-4 rounded-lg w-full`}>{userDeck?.commander}</div>
 			)}
 		</div>
 	);

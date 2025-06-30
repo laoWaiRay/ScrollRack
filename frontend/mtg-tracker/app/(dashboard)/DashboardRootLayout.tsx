@@ -10,10 +10,7 @@ import DoorEnter from "@/public/icons/door-enter.svg";
 import DoorOpen from "@/public/icons/door-open.svg";
 import User from "@/public/icons/user.svg";
 import UsersMultiple from "@/public/icons/users-multiple.svg";
-import UserRemove from "@/public/icons/user-remove.svg";
 import Settings from "@/public/icons/settings.svg";
-import Search from "@/public/icons/search.svg";
-import Filter from "@/public/icons/filter.svg";
 import UserAdd from "@/public/icons/user-add.svg";
 import Bell from "@/public/icons/bell.svg";
 import SidebarLink from "@/components/SidebarLink";
@@ -98,7 +95,7 @@ export default function DashboardRootLayout({
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (
-			<li key={data.name}>
+			<li key={data.name} className="z-10">
 				<Tooltip
 					text={data.name}
 					placement="right"
@@ -154,7 +151,7 @@ export default function DashboardRootLayout({
 				{/* Desktop Sidebar */}
 				<nav
 					aria-labelledby="Sidebar navigation"
-					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500 z-10`}
+					className={`${styles.gridA} hidden lg:flex flex-col items-stretch lg:mx-2 lg:sticky lg:h-screen lg:top-0 bg-surface-500`}
 				>
 					<header className="font-dancing-script text-white text-xl flex items-center justify-center xl:justify-start select-none my-4 mx-5">
 						<div
@@ -247,7 +244,7 @@ export default function DashboardRootLayout({
 				</Drawer>
 
 				{/* Main Content */}
-				<main className={`${styles.gridB} bg-surface-600 z-0`}>{children}</main>
+				<main className={`${styles.gridB} bg-surface-600`}>{children}</main>
 			</div>
 			<Footer />
 		</div>
