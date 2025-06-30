@@ -72,6 +72,7 @@ public class DeckStatsService(IMapper mapper)
         );
     }
 
+    // Deck game participations should be sorted by Newest First
     public DeckReadDTO ComputeDeckStats(List<GameParticipation> deckGameParticipations, Deck deck)
     {
         List<FilteredDeckStats> filteredDeckStats = [];
@@ -94,7 +95,11 @@ public class DeckStatsService(IMapper mapper)
 
             double par = ComputePar(filteredGameParticipations);
 
-            var latestWin = filteredGameParticipations.Where(gp => gp.Won && !gp.Game.Imported).FirstOrDefault()?.CreatedAt;
+            var latestWin = filteredGameParticipations
+                .Where(gp => gp.Won && !gp.Game.Imported)
+                .FirstOrDefault()?.CreatedAt;
+
+            var lastPlayed = filteredGameParticipations.FirstOrDefault()?.CreatedAt;
 
             DeckStats deckStats = new()
             {
@@ -108,6 +113,7 @@ public class DeckStatsService(IMapper mapper)
                 FastestWinInSeconds = fastestWinInSeconds,
                 SlowestWinInSeconds = slowestWinInSeconds,
                 Par = par,
+                LastPlayed = lastPlayed,
             };
             FilteredDeckStats filteredStats = new()
             {

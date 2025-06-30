@@ -2109,6 +2109,11 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "lastPlayed": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },

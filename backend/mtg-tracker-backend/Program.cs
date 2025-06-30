@@ -7,13 +7,6 @@ using Mtg_tracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var MailjetEmail = builder.Configuration["MailjetEmail"];
-var MailjetApiKey = builder.Configuration["MailjetApiKey"];
-var MailjetSecretKey = builder.Configuration["MailjetSecretKey"];
-
-Console.WriteLine("@@@@@@@@@@@@@@@@@");
-Console.WriteLine($"Email: {MailjetEmail}, ApiKey: {MailjetApiKey}, Secret: {MailjetSecretKey}");
-
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();

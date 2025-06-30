@@ -29,7 +29,8 @@ interface DeckDisplayInterface {
 }
 
 interface SortValues {
-	recency: "newest" | "oldest" | null;
+	dateCreated: "newest" | "oldest" | null;
+  recentlyPlayed: "most" | "least" | null;
 	numGames: "most" | "least" | null;
 	winRate: "highest" | "lowest" | null;
 	recentWins: "most recent" | "least recent" | null;
@@ -51,14 +52,15 @@ export default function DeckDisplay({
   console.log(JSON.stringify(decks[0] ?? {}, undefined, 3))
 
 	const initialSortValues: SortValues = {
-		recency: "newest",
+		dateCreated: "newest",
+    recentlyPlayed: null,
 		numGames: null,
 		winRate: null,
 		recentWins: null,
 	};
 
 	const [sortValues, setSortValues] = useState(initialSortValues);
-	const { recency, numGames, winRate, recentWins } = sortValues;
+	const { dateCreated, recentlyPlayed, numGames, winRate, recentWins } = sortValues;
 
 	type ValueOf<T> = T[keyof T];
 	function updateValues(
@@ -88,13 +90,30 @@ export default function DeckDisplay({
 			switches: [
 				{
 					name: "Newest First",
-					enabled: recency === "newest",
-					setEnabled: () => updateValues("recency", "newest", false),
+					enabled: dateCreated === "newest",
+					setEnabled: () => updateValues("dateCreated", "newest", false),
 				},
 				{
 					name: "Oldest First",
-					enabled: recency === "oldest",
-					setEnabled: () => updateValues("recency", "oldest", false),
+					enabled: dateCreated === "oldest",
+					setEnabled: () => updateValues("dateCreated", "oldest", false),
+				},
+			],
+		},
+		{
+			heading: "RECENTLY PLAYED",
+			switches: [
+				{
+					name: "Most Recent First",
+					enabled: recentlyPlayed === "most",
+					setEnabled: () => {
+						updateValues("recentlyPlayed", "most");
+					},
+				},
+				{
+					name: "Least Recent First",
+					enabled: recentlyPlayed === "least",
+					setEnabled: () => updateValues("recentlyPlayed", "least"),
 				},
 			],
 		},
@@ -146,6 +165,30 @@ export default function DeckDisplay({
 			],
 		},
 	];
+  
+  const sortRecentlyPlayed = (a: DeckReadDTO, b: DeckReadDTO) => {
+		const aStats = deckToDeckStats(a);
+		const bStats = deckToDeckStats(b);
+		if (!aStats || !bStats) {
+			return 0;
+		}
+    
+    if (aStats.lastPlayed == null && bStats.lastPlayed == null) {
+      return 0;
+    }
+    
+    const aTime = aStats.lastPlayed ? new Date(aStats.lastPlayed).getTime() : -Infinity;
+    const bTime = bStats.lastPlayed ? new Date(bStats.lastPlayed).getTime() : -Infinity;
+
+		switch (recentlyPlayed) {
+			case "most":
+        return bTime - aTime;
+			case "least":
+				return aTime - bTime;
+			default:
+				return 0;
+		}
+	};
 
 	const sortNumGames = (a: DeckReadDTO, b: DeckReadDTO) => {
 		const aStats = deckToDeckStats(a);
@@ -185,7 +228,7 @@ export default function DeckDisplay({
 	};
 
 	const sortDateCreated = (a: DeckReadDTO, b: DeckReadDTO) => {
-		switch (recency) {
+		switch (dateCreated) {
 			case "newest":
 				return (
 					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -266,6 +309,7 @@ export default function DeckDisplay({
 		// Sort after applying fuzzy search filter
 		searchResults.sort(
 			(a, b) =>
+        sortRecentlyPlayed(a, b) ||
 				sortNumGames(a, b) ||
 				sortWinRate(a, b) ||
 				sortRecentWins(a, b) ||
@@ -305,6 +349,7 @@ export default function DeckDisplay({
 			// Apply sorting here for non-filtered decks
 			timeFilteredDecks.sort(
 				(a, b) =>
+          sortRecentlyPlayed(a, b) ||
 					sortNumGames(a, b) ||
 					sortWinRate(a, b) ||
 					sortRecentWins(a, b) ||

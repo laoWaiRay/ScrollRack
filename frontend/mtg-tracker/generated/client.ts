@@ -25,6 +25,7 @@ type DeckStats = {
   fastestWinInSeconds?: (number | null) | undefined;
   slowestWinInSeconds?: (number | null) | undefined;
   par?: (number | null) | undefined;
+  lastPlayed?: (string | null) | undefined;
 };
 type DeckReadDTO2 = {
   id: number;
@@ -189,6 +190,7 @@ const DeckStats: z.ZodType<DeckStats> = z
     fastestWinInSeconds: z.number().int().nullish(),
     slowestWinInSeconds: z.number().int().nullish(),
     par: z.number().nullish(),
+    lastPlayed: z.string().datetime({ offset: true }).nullish(),
   })
   .passthrough();
 const FilteredDeckStats: z.ZodType<FilteredDeckStats> = z

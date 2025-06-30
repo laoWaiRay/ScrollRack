@@ -33,6 +33,7 @@ export default function DeckCard({
 		slowestWinInSeconds,
 		isCurrentWinStreak,
 		currentStreak,
+    lastPlayed,
 	} = deckStats;
 
 	const deckCardStats: DeckCardStat[] = [
@@ -69,10 +70,6 @@ export default function DeckCard({
 			data: longestLossStreak ? longestLossStreak.toString() : "-",
 		},
 		{
-			title: "Last Win",
-			data: latestWin ? dayjs(latestWin).format("YYYY-MM-DD") : "-",
-		},
-		{
 			title: "Fastest Win",
 			data: fastestWinInSeconds ? formatTime(fastestWinInSeconds, "hms") : "-",
 		},
@@ -81,9 +78,17 @@ export default function DeckCard({
 			data: slowestWinInSeconds ? formatTime(slowestWinInSeconds, "hms") : "-",
 		},
 		{
-			title: "Created",
-			data: dayjs(deck.createdAt).format("YYYY-MM-DD"),
+			title: "Last Win",
+			data: latestWin ? dayjs(latestWin).format("YYYY-MM-DD") : "-",
 		},
+		{
+			title: "Last Played",
+			data: lastPlayed ? dayjs(lastPlayed).format("YYYY-MM-DD") : "-",
+		},
+		// {
+		// 	title: "Created",
+		// 	data: dayjs(deck.createdAt).format("YYYY-MM-DD"),
+		// },
 	];
 
 	let streakStyle = "";

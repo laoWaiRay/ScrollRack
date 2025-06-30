@@ -12,6 +12,7 @@ public class DeckStats
     public int? FastestWinInSeconds { get; set; }
     public int? SlowestWinInSeconds { get; set; }
     public double? Par { get; set; }
+    public DateTime? LastPlayed { get; set; }
 }
 
 public class FilteredDeckStats
