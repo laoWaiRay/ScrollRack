@@ -215,6 +215,28 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         {
             return BadRequest(passwordChangeResult.Errors);
         }
+        else
+        {
+            // Send an email confirmation that password was reset
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+                var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+
+                EmailTemplateContext emailContext = new()
+                {
+
+                    ToEmail = user.Email,
+                    Type = EmailType.ResetPasswordConfirmation,
+                    Variables = new ResetPasswordConfirmationVariables()
+                    {
+                        UserId = user.Id,
+                        Name = user.UserName ?? "",
+                    }
+                };
+                await _emailSender.SendEmailAsync(emailContext);
+            }
+        }
 
         return NoContent();
     }
@@ -454,7 +476,8 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(UserManager<ApplicationUser> userManager, ResetPasswordRequestDTO request)
+    public async Task<IActionResult> ResetPassword(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signinManager, ResetPasswordRequestDTO request)
     {
         var id = request.Id;
         var token = request.Token;
@@ -482,8 +505,28 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
                 return BadRequest(result.Errors);
             }
 
+            // Invalidate all sessions for user
+            await userManager.UpdateSecurityStampAsync(user);
 
-            // TODO: Send an email confirmation that password was reset
+            // Send an email confirmation that password was reset
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+                var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+
+                EmailTemplateContext emailContext = new()
+                {
+
+                    ToEmail = user.Email,
+                    Type = EmailType.ResetPasswordConfirmation,
+                    Variables = new ResetPasswordConfirmationVariables()
+                    {
+                        UserId = user.Id,
+                        Name = user.UserName ?? "",
+                    }
+                };
+                await _emailSender.SendEmailAsync(emailContext);
+            }
 
             return Ok("Password successfully reset");
         }

@@ -3,7 +3,8 @@ namespace Mtg_tracker.Services;
 public enum EmailType
 {
     VerifyEmail,
-    ForgotPassword
+    ForgotPassword,
+    ResetPasswordConfirmation,
 };
 
 public class EmailTemplateContext

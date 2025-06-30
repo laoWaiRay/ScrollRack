@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Mtg_tracker.Services;
 
-// https://scrollrack.win/reset-password?id={{var:UserId}}&token={{var:Token}}
 public class VerifyEmailRequestVariables
 {
     public required string Name { get; set; }
@@ -17,6 +16,12 @@ public class ForgotPasswordRequestVariables
 {
     public required string UserId { get; set; }
     public required string Token { get; set; }
+}
+
+public class ResetPasswordConfirmationVariables
+{
+    public required string UserId { get; set; }
+    public required string Name { get; set; }
 }
 
 public class EmailSender(
@@ -36,20 +41,13 @@ public class EmailSender(
             throw new Exception("Missing Mailjet Data");
         }
 
-        switch (context.Type)
+        try
         {
-            case EmailType.VerifyEmail:
-                {
-                    await Execute(Options.MailjetEmail, Options.MailjetApiKey, Options.MailjetSecretKey, context);
-                    break;
-                }
-            case EmailType.ForgotPassword:
-                {
-                    await Execute(Options.MailjetEmail, Options.MailjetApiKey, Options.MailjetSecretKey, context);
-                    break;
-                }
-            default:
-                throw new Exception("Not a valid Email Type");
+            await Execute(Options.MailjetEmail, Options.MailjetApiKey, Options.MailjetSecretKey, context);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
         }
     }
 
@@ -70,6 +68,11 @@ public class EmailSender(
                     request = ForgotPasswordRequest(fromEmail, context);
                     break;
                 }
+            case EmailType.ResetPasswordConfirmation:
+                {
+                    request = ResetPasswordConfirmation(fromEmail, context);
+                    break;
+                }
             default:
                 throw new Exception("Not a valid Email Type");
         }
@@ -77,7 +80,7 @@ public class EmailSender(
         if (request is null)
         {
             Console.WriteLine("No request");
-            return;    
+            return;
         }
 
         var response = await client.PostAsync(request);
@@ -146,6 +149,34 @@ public class EmailSender(
                 {"Variables", new JObject {
                     {"userId", vars.UserId},
                     {"token", vars.Token},
+                }}
+            }
+        });
+
+        return request;
+    }
+
+    private static MailjetRequest ResetPasswordConfirmation(string fromEmail, EmailTemplateContext context)
+    {
+        var vars = (context.Variables as ResetPasswordConfirmationVariables)
+            ?? throw new ArgumentNullException("Variables must be of type ResetPasswordConfirmationVariables.");
+
+        var request = new MailjetRequest { Resource = SendV31.Resource }
+        .Property(Send.Messages, new JArray {
+            new JObject {
+                {"From", new JObject {
+                    {"Email", fromEmail},
+                }},
+                {"To", new JArray {
+                    new JObject {
+                        {"Email", context.ToEmail},
+                    }
+                }},
+                {"TemplateID", 7114426},
+                {"TemplateLanguage", true},
+                {"Variables", new JObject {
+                    {"userId", vars.UserId},
+                    {"name", vars.Name},
                 }}
             }
         });

@@ -10,6 +10,7 @@ import {
 	MenuButton,
 	MenuItems,
 	MenuItem,
+	Button,
 } from "@headlessui/react";
 import ButtonIcon from "./ButtonIcon";
 import Image from "next/image";
@@ -20,6 +21,7 @@ import { UserReadDTO } from "@/types/client";
 import FriendRequestCard from "./FriendRequestCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 import { useRouter } from "next/navigation";
+import { api } from "@/generated/client";
 
 interface DashboardLayoutInterface {
 	children: ReactNode;
@@ -65,6 +67,15 @@ export function DashboardHeader({
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 	const { friendRequests } = useFriendRequest();
 	const router = useRouter();
+
+	async function handleLogout() {
+		try {
+      await api.postApiUserlogout({}, { withCredentials: true });
+      router.push("login");
+		} catch (error) {
+      console.log(error);
+    }
+	}
 
 	return (
 		<div className="border-b border-surface-500 w-full pb-4 lg:pb-2.5 mb-2 lg:mb-4">
@@ -120,9 +131,7 @@ export function DashboardHeader({
 					{/* User Profile Card  */}
 
 					<Menu>
-						<MenuButton
-							className="flex items-center justify-center gap-3 py-2 pl-3 pr-4 ml-1 rounded data-hover:cursor-pointer data-hover:bg-white/5"
-						>
+						<MenuButton className="flex items-center justify-center gap-3 py-2 pl-3 pr-4 ml-1 rounded data-hover:cursor-pointer data-hover:bg-white/5">
 							<div className="w-[2em] h-[2em] rounded-full overflow-hidden">
 								<Image
 									className="h-full w-full object-cover"
@@ -145,7 +154,7 @@ export function DashboardHeader({
 									className="px-2.5 py-2 select-none data-focus:bg-white/5 border-b border-surface-500/50"
 									onClick={() => {}}
 								>
-									<span>Log Out</span>
+									<Button onClick={handleLogout}>Log Out</Button>
 								</div>
 							</MenuItem>
 						</MenuItems>

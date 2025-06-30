@@ -4,11 +4,23 @@ import ButtonPrimary from "@/components/ButtonPrimary";
 import OptionsLayout from "@/components/OptionsLayout";
 import Switch from "@/components/Switch";
 import ButtonLink from "@/components/ButtonLink";
+import { api } from "@/generated/client";
+import { useRouter } from "next/navigation";
 
 interface SettingsInterface {}
 
 export default function Settings({}: SettingsInterface) {
 	const [enabled, setEnabled] = useState(false);
+	const router = useRouter();
+
+	async function handleLogout() {
+		try {
+			await api.postApiUserlogout({}, { withCredentials: true });
+			router.push("login");
+		} catch (error) {
+			console.log(error);
+		}
+	}
 
 	return (
 		<OptionsLayout title={"Settings"}>
@@ -34,7 +46,11 @@ export default function Settings({}: SettingsInterface) {
 				</div>
 
 				<div className="aspect-3/2 self-end">
-					<ButtonPrimary onClick={() => {}} style="secondary" uppercase={false}>
+					<ButtonPrimary
+						onClick={handleLogout}
+						style="secondary"
+						uppercase={false}
+					>
 						Log Out
 					</ButtonPrimary>
 				</div>

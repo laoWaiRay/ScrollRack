@@ -183,7 +183,7 @@ export default function Account({
 						/>
 					</div>
 					{emailConfirmed && (
-						<Tooltip text="Email Confirmed!" styles="!bg-success !text-white">
+						<Tooltip text="Email Verified!" styles="!bg-success !text-white">
 							<div className="size-[2em] text-success absolute right-0 bottom-0 -mr-2 -mb-2">
 								<CheckCircle />
 							</div>
