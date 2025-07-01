@@ -4,13 +4,47 @@ using Mtg_tracker.MappingProfiles;
 using Microsoft.AspNetCore.Identity;
 using Mtg_tracker.Hubs;
 using Mtg_tracker.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
+Console.WriteLine("JWT Secret: " + builder.Configuration["Jwt:Secret"]);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+// Add Swagger with JWT configuration
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mtg Tracker Api", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token."
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
+
 builder.Services.AddDbContext<MtgContext>(options =>
     options
         .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -22,6 +56,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 builder.Services.AddScoped<DeckStatsService>();
 builder.Services.AddTransient<ITemplatedEmailSender, EmailSender>();
 builder.Services.Configure<EmailSenderOptions>(builder.Configuration);
+builder.Services.AddSingleton<TokenProviderService>();
 
 // Identity Services (authentication/authorization)
 builder.Services.Configure<IdentityOptions>(options =>
@@ -29,7 +64,21 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(jwtOptions =>
+    {
+        jwtOptions.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ClockSkew = TimeSpan.Zero,
+        };
+    })
     .AddGoogle(googleOptions =>
     {
         googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
@@ -72,11 +121,8 @@ app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Only for development (inspecting tutorial on fetch api) - production frontend will be Next.js
@@ -86,8 +132,20 @@ app.UseStaticFiles();
 // Only for development purposes - production should simply not expose http endpoints
 app.UseHttpsRedirection();
 
-app.MapIdentityApi<ApplicationUser>();
+// app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
 app.MapHub<RoomHub>("/hub");
+
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode == 401)
+    {
+        Console.WriteLine("401 Unauthorized!");
+        var authHeader = context.Request.Headers["Authorization"].ToString();
+        Console.WriteLine("Authorization Header: " + authHeader);
+    }
+});
 
 app.Run();

@@ -71,3 +71,8 @@ public class ResetPasswordRequestDTO
     public required string Token { get; set; }
     public required string Password { get; set; }
 }
+
+public class LoginResponseDTO
+{
+    public required string Token { get; set; }
+}

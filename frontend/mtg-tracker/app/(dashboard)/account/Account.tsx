@@ -133,6 +133,9 @@ export default function Account({
 			await api.putApiUserId(userWriteDTO, {
 				params: { id: user.id },
 				withCredentials: true,
+        // headers: {
+        //   Authorization: `Bearer ${token}`
+        // }
 			});
 
 			const userReadDTO: UserReadDTO = {

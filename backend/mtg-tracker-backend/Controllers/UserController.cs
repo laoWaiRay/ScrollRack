@@ -336,10 +336,11 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         return BadRequest();
     }
 
+    // Returns a JWT that can be used to authenticate the user
     [HttpPost("login")]
-    public async Task<ActionResult<UserReadDTO>> Login(SignInManager<ApplicationUser> signInManager, UserLoginDTO loginDTO)
+    public async Task<ActionResult<LoginResponseDTO>> Login(TokenProviderService tokenProvider, UserManager<ApplicationUser> userManager, UserLoginDTO loginDTO)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
+        var user = await userManager.FindByEmailAsync(loginDTO.Email);
         List<ErrorResponse> errors = [
             new ErrorResponse
             {
@@ -353,13 +354,15 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             return Unauthorized(errors);
         }
 
-        var result = await signInManager.PasswordSignInAsync(user.UserName, loginDTO.Password, true, false);
-        if (!result.Succeeded)
+        var loginResult = await userManager.CheckPasswordAsync(user, loginDTO.Password);
+
+        if (!loginResult)
         {
             return Unauthorized(errors);
         }
 
-        return _mapper.Map<UserReadDTO>(user);
+        var token = tokenProvider.Create(user);
+        return Ok(new LoginResponseDTO { Token = token });
     }
 
     [HttpPost("resend-verify-email-link")]
