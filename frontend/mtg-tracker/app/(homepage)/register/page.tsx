@@ -104,6 +104,10 @@ export default function RegisterPage() {
 			toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
 		},
 	];
+  
+  function handleGoogleRedirect() {
+    window.location.href = "https://localhost:7165/api/user/signin-google";
+  }
 
 	return (
 		<div className={`${styles.gridB} z-20`}>
@@ -126,7 +130,7 @@ export default function RegisterPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={() => {}} style="google" disabled={isFetching} uppercase={false}>
+				<ButtonPrimary onClick={handleGoogleRedirect} style="google" disabled={isFetching} uppercase={false}>
 					<div className="flex items-center justify-center">
 						Sign up with Google <GoogleLogo className="ml-2" />
 					</div>
