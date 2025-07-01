@@ -45,24 +45,9 @@ export default function Lobby({
 }: LobbyInterface) {
 	const [selected, setSelected] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
-	const { rooms, dispatch } = useRoom();
+	const { dispatch } = useRoom();
 	const { toast } = useToast();
   
-  function sortRoomPlayers(roomDTO: RoomDTO) {
-    if (!user || !roomDTO.players) {
-      return;
-    }
-
-    roomDTO.players.sort((a, b) => {
-      if (a.id === user.id) {
-        return -1;
-      } else if (b.id === user.id) {
-        return 1;
-      } else {
-        return a.userName.localeCompare(b.userName);
-      }
-    })
-  }
 
 	async function handleAddPlayer(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();

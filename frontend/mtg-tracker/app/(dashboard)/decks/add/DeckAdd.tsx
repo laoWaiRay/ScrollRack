@@ -7,15 +7,15 @@ import TextInput from "@/components/TextInput";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useDeck } from "@/hooks/useDeck";
 import useToast from "@/hooks/useToast";
-import { DeckReadDTO, DeckWriteDTO } from "@/types/client";
+import { DeckWriteDTO } from "@/types/client";
 import { Field, Label } from "@headlessui/react";
 import { isAxiosError } from "axios";
 import {
 	Dispatch,
 	FormEvent,
 	SetStateAction,
+	useCallback,
 	useEffect,
 	useRef,
 	useState,
@@ -26,9 +26,7 @@ interface ScryfallCardData {
 	name: string;
 }
 
-interface DeckAddInterface {}
-
-export default function DeckAdd({}: DeckAddInterface) {
+export default function DeckAdd() {
 	const { user } = useAuth();
 	const [cards, setCards] = useState<ScryfallCardData[]>([]);
 	const [selectedCard, setSelectedCard] = useState<ScryfallCardData | null>(
@@ -47,14 +45,14 @@ export default function DeckAdd({}: DeckAddInterface) {
 		setSelectedCard(cards.find((c) => c.name === value) ?? null);
 	};
 
-	async function callScryfall() {
+	const callScryfall = useCallback(async () => {
 		// Insert artificial delay between API calls to respect rate limits requested by Scryfall:
 		// https://scryfall.com/docs/api
 		if (delayRef.current) {
 			return;
 		}
 		delayRef.current = true;
-		await new Promise((resolve, reject) => setTimeout(resolve, 250));
+		await new Promise((resolve) => setTimeout(resolve, 250));
 		delayRef.current = false;
 
 		const cardName = query.replaceAll(/[^a-zA-Z0-9,-\s]/g, "");
@@ -94,7 +92,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 		} catch (error) {
 			console.log(`Fetch Error: ${error}`);
 		}
-	}
+	}, [query]);
 
 	async function handleAddDeck(e: FormEvent<HTMLElement>) {
 		e.preventDefault();
@@ -149,7 +147,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 		}, 300);
 
 		return () => clearTimeout(handle);
-	}, [query]);
+	}, [query, callScryfall]);
 
 	return (
 		<OptionsLayout title="Add Decks">
@@ -193,7 +191,7 @@ export default function DeckAdd({}: DeckAddInterface) {
 						style="primary"
 						onClick={() => {}}
 						disabled={!selected}
-            uppercase={false}
+						uppercase={false}
 					>
 						Save Deck
 					</ButtonPrimary>

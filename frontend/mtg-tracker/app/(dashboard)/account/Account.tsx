@@ -17,7 +17,7 @@ import { renderErrors } from "@/helpers/renderErrors";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Image from "next/image";
 import { api } from "@/generated/client";
-import { UserReadDTO, UserWithEmailDTO, UserWriteDTO } from "@/types/client";
+import { UserReadDTO, UserWriteDTO } from "@/types/client";
 import { useRouter } from "next/navigation";
 import { handleAxiosErrors } from "@/helpers/validationHelpers";
 import { ActionType } from "@/context/AuthContext";

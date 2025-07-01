@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import styles from "./Hamburger.module.css";
 
 interface HamburgerInterface {

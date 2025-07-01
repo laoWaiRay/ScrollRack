@@ -1,7 +1,7 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
-import { UserFriendAddDTO, UserReadDTO } from "@/types/client";
-import { FormEvent, useEffect, useState } from "react";
+import { UserFriendAddDTO } from "@/types/client";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import TextInput from "@/components/TextInput";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import OptionsLayout from "@/components/OptionsLayout";
@@ -18,30 +18,10 @@ import { useFriend } from "@/hooks/useFriend";
 import { ActionType } from "@/context/FriendContext";
 import UserAdd from "@/public/icons/user-add.svg";
 
-interface AddFriendsInterface {}
-
-interface Person {
-	id: string;
-	userName: string;
-}
-
-const people: Person[] = [
-	{ id: "1", userName: "Durward Reynolds" },
-	{ id: "2", userName: "Kenton Towne" },
-	{ id: "3", userName: "Therese Wunsch" },
-	{ id: "4", userName: "Benedict Kessler" },
-	{ id: "5", userName: "Katelyn Rohan" },
-	{ id: "6", userName: "Durward Reynolds" },
-	{ id: "7", userName: "Kenton Towne" },
-	{ id: "8", userName: "Therese Wunsch" },
-	{ id: "9", userName: "Benedict Kessler" },
-	{ id: "10", userName: "Katelyn Rohan" },
-];
-
-export default function AddFriends({}: AddFriendsInterface) {
+export default function AddFriends() {
 	const { user } = useAuth();
 	const { toast } = useToast();
-	const { friends, dispatch } = useFriend();
+	const { dispatch } = useFriend();
 
 	const [friendUserName, setFriendUserName] = useState("");
 	const [isQrExpanded, setIsQrExpanded] = useState(false);
@@ -109,11 +89,41 @@ export default function AddFriends({}: AddFriendsInterface) {
 		if (!isVideoContainerHidden) {
 			ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
 		}
-	}, [isScanning, videoReady]);
+	}, [isScanning, videoReady, isVideoContainerHidden, ref]);
+
+	const tryAddAndUpdateFriends = useCallback(async () => {
+		const updateFriendsList = async () => {
+			setResult("");
+			try {
+				const updatedFriends = (await getFriends()) ?? [];
+				dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
+			} catch (error) {
+				console.log(error);
+			}
+		};
+
+		if (result) {
+			const userFriendAddDTO: UserFriendAddDTO = {
+				id: result,
+				requiresPermission: false,
+			};
+
+			try {
+				await api.postApiFriend(userFriendAddDTO, { withCredentials: true });
+				updateFriendsList();
+				toast("Successfully Added", "success");
+			} catch (error) {
+				if (isAxiosError(error) && error.response?.status == CONFLICT) {
+					toast("Already Friends", "warn");
+				}
+				toast("Error Adding Friend", "warn");
+			}
+		}
+	}, [result, dispatch, toast]);
 
 	useEffect(() => {
 		tryAddAndUpdateFriends();
-	}, [result]);
+	}, [result, tryAddAndUpdateFriends]);
 
 	return (
 		<OptionsLayout title="Add Friends">
@@ -182,7 +192,7 @@ export default function AddFriends({}: AddFriendsInterface) {
 					<ButtonPrimary
 						onClick={handleToggleVideoContainer}
 						style="transparent"
-            uppercase={false}
+						uppercase={false}
 					>
 						{isScanning ? (
 							"Stop"
@@ -199,34 +209,4 @@ export default function AddFriends({}: AddFriendsInterface) {
 			</div>
 		</OptionsLayout>
 	);
-
-	async function tryAddAndUpdateFriends() {
-		const updateFriendsList = async () => {
-			setResult("");
-			try {
-				const updatedFriends = (await getFriends()) ?? [];
-				dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
-			} catch (error) {
-				console.log(error);
-			}
-		};
-
-		if (result) {
-			const userFriendAddDTO: UserFriendAddDTO = {
-				id: result,
-				requiresPermission: false,
-			};
-
-			try {
-				await api.postApiFriend(userFriendAddDTO, { withCredentials: true });
-				updateFriendsList();
-				toast("Successfully Added", "success");
-			} catch (error) {
-				if (isAxiosError(error) && error.response?.status == CONFLICT) {
-					toast("Already Friends", "warn");
-				}
-				toast("Error Adding Friend", "warn");
-			}
-		}
-	}
 }

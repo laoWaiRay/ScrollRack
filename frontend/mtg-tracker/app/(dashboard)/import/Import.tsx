@@ -28,9 +28,7 @@ import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 
-interface ImportInterface {}
-
-export default function Import({}: ImportInterface) {
+export default function Import() {
 	const { toast } = useToast();
 	const { user } = useAuth();
 	const { decks } = useDeck();

@@ -31,7 +31,9 @@ export default async function layout({
 				id="root"
 				className={`${commissioner.className} ${dancingScript.variable} bg-surface-600 text-fg min-h-dvh`}
 			>
-        <RootLayout children={children} user={user} />
+        <RootLayout user={user}>
+          { children }
+        </RootLayout>
 			</body>
 		</html>
 	);

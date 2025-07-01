@@ -167,7 +167,7 @@ export default function InGameScreen({
 		return () => {
 			clearInterval(handle);
 		};
-	}, []);
+	}, [startTime]);
 
 	return (
 		<div className="w-full max-w-lg flex flex-col">

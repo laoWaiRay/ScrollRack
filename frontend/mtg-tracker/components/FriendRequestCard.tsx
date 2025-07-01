@@ -26,6 +26,7 @@ export default function FriendRequestCard({
       mutate();
 			toast(`Added ${user.userName} to Friends`, "success");
 		} catch (error) {
+      console.log(error);
 			toast("Error accepting friend request", "error");
 		}
 	}

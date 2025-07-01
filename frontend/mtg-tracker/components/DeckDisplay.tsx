@@ -3,7 +3,7 @@
 import { DeckReadDTO } from "@/types/client";
 import Drawer from "./Drawer";
 import ButtonIcon from "@/components/ButtonIcon";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import {
@@ -30,7 +30,7 @@ interface DeckDisplayInterface {
 
 interface SortValues {
 	dateCreated: "newest" | "oldest" | null;
-  recentlyPlayed: "most" | "least" | null;
+	recentlyPlayed: "most" | "least" | null;
 	numGames: "most" | "least" | null;
 	winRate: "highest" | "lowest" | null;
 	recentWins: "most recent" | "least recent" | null;
@@ -48,19 +48,18 @@ export default function DeckDisplay({
 	const [endDate, setEndDate] = useState<PickerValue>(dayjs());
 	const [showAllDecks, setShowAllDecks] = useState(true);
 	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
-  
-  console.log(JSON.stringify(decks[0] ?? {}, undefined, 3))
 
 	const initialSortValues: SortValues = {
 		dateCreated: "newest",
-    recentlyPlayed: null,
+		recentlyPlayed: null,
 		numGames: null,
 		winRate: null,
 		recentWins: null,
 	};
 
 	const [sortValues, setSortValues] = useState(initialSortValues);
-	const { dateCreated, recentlyPlayed, numGames, winRate, recentWins } = sortValues;
+	const { dateCreated, recentlyPlayed, numGames, winRate, recentWins } =
+		sortValues;
 
 	type ValueOf<T> = T[keyof T];
 	function updateValues(
@@ -77,12 +76,15 @@ export default function DeckDisplay({
 
 	const podSize = labelToPodSize[podSizeLabel];
 
-	function deckToDeckStats(deck: DeckReadDTO) {
-		return (
-			deck.statistics?.find((s) => s.podSize === podSize)?.stats ??
-			defaultDeckStats
-		);
-	}
+	const deckToDeckStats = useCallback(
+		(deck: DeckReadDTO) => {
+			return (
+				deck.statistics?.find((s) => s.podSize === podSize)?.stats ??
+				defaultDeckStats
+			);
+		},
+		[podSize]
+	);
 
 	const sortFormData = [
 		{
@@ -165,132 +167,169 @@ export default function DeckDisplay({
 			],
 		},
 	];
-  
-  const sortRecentlyPlayed = (a: DeckReadDTO, b: DeckReadDTO) => {
-		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(b);
-		if (!aStats || !bStats) {
-			return 0;
-		}
-    
-    if (aStats.lastPlayed == null && bStats.lastPlayed == null) {
-      return 0;
-    }
-    
-    const aTime = aStats.lastPlayed ? new Date(aStats.lastPlayed).getTime() : -Infinity;
-    const bTime = bStats.lastPlayed ? new Date(bStats.lastPlayed).getTime() : -Infinity;
 
-		switch (recentlyPlayed) {
-			case "most":
-        return bTime - aTime;
-			case "least":
-				return aTime - bTime;
-			default:
+	const sortRecentlyPlayed = useCallback(
+		(a: DeckReadDTO, b: DeckReadDTO) => {
+      if (!recentlyPlayed) {
+        return 0;
+      }
+			const aStats = deckToDeckStats(a);
+			const bStats = deckToDeckStats(b);
+			if (!aStats || !bStats) {
 				return 0;
-		}
-	};
+			}
 
-	const sortNumGames = (a: DeckReadDTO, b: DeckReadDTO) => {
-		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(b);
-		if (!aStats || !bStats) {
-			return 0;
-		}
-
-		switch (numGames) {
-			case "most":
-				return bStats.numGames - aStats.numGames;
-			case "least":
-				return aStats.numGames - bStats.numGames;
-			default:
+			if (aStats.lastPlayed == null && bStats.lastPlayed == null) {
 				return 0;
-		}
-	};
+			}
 
-	const sortWinRate = (a: DeckReadDTO, b: DeckReadDTO) => {
-		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(b);
-		if (!aStats || !bStats || aStats.numGames <= 0 || bStats.numGames <= 0) {
-			return 0;
-		}
-    
-    const aWinRate = aStats.numWins / aStats.numGames;
-    const bWinRate = bStats.numWins / bStats.numGames;
+			const aTime = aStats.lastPlayed
+				? new Date(aStats.lastPlayed).getTime()
+				: -Infinity;
+			const bTime = bStats.lastPlayed
+				? new Date(bStats.lastPlayed).getTime()
+				: -Infinity;
 
-		switch (winRate) {
-			case "highest":
-				return bWinRate - aWinRate;
-			case "lowest":
-				return aWinRate - bWinRate;
-			default:
-				return 0;
-		}
-	};
-
-	const sortDateCreated = (a: DeckReadDTO, b: DeckReadDTO) => {
-		switch (dateCreated) {
-			case "newest":
-				return (
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-				);
-			case "oldest":
-				return (
-					new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-				);
-			default:
-				return 0;
-		}
-	};
-
-	const sortRecentWins = (a: DeckReadDTO, b: DeckReadDTO) => {
-		const aStats = deckToDeckStats(a);
-		const bStats = deckToDeckStats(b);
-		if (!aStats || !bStats) {
-			return 0;
-		}
-
-		switch (recentWins) {
-			case "most recent":
-				if (aStats.latestWin == null && bStats.latestWin == null) {
+			switch (recentlyPlayed) {
+				case "most":
+					return bTime - aTime;
+				case "least":
+					return aTime - bTime;
+				default:
 					return 0;
-				} else if (aStats.latestWin == null) {
-					return 1;
-				} else if (bStats.latestWin == null) {
-					return -1;
-				} else {
-					return (
-						new Date(bStats.latestWin).getTime() -
-						new Date(aStats.latestWin).getTime()
-					);
-				}
-			case "least recent":
-				if (aStats.latestWin == null && bStats.latestWin == null) {
-					return 0;
-				} else if (aStats.latestWin == null) {
-					return -1;
-				} else if (bStats.latestWin == null) {
-					return 1;
-				} else {
-					return (
-						new Date(aStats.latestWin).getTime() -
-						new Date(bStats.latestWin).getTime()
-					);
-				}
-			default:
-				return 0;
-		}
-	};
+			}
+		},
+		[deckToDeckStats, recentlyPlayed]
+	);
 
-	const filterDeckByDateRange = (toFilter: DeckReadDTO[]) => {
-		if (!showAllDecks && startDate && endDate) {
-			return toFilter.filter(
-				(d) =>
-					d.createdAt >= startDate.startOf("day").toISOString() &&
-					d.createdAt <= endDate.endOf("day").toISOString()
-			);
-		}
-		return toFilter;
-	};
+	const sortNumGames = useCallback(
+		(a: DeckReadDTO, b: DeckReadDTO) => {
+      if (!numGames) {
+        return 0;
+      }
+			const aStats = deckToDeckStats(a);
+			const bStats = deckToDeckStats(b);
+			if (!aStats || !bStats) {
+				return 0;
+			}
+
+			switch (numGames) {
+				case "most":
+					return bStats.numGames - aStats.numGames;
+				case "least":
+					return aStats.numGames - bStats.numGames;
+				default:
+					return 0;
+			}
+		},
+		[numGames, deckToDeckStats]
+	);
+
+	const sortWinRate = useCallback(
+		(a: DeckReadDTO, b: DeckReadDTO) => {
+      if (!winRate) {
+        return 0;
+      }
+			const aStats = deckToDeckStats(a);
+			const bStats = deckToDeckStats(b);
+			if (!aStats || !bStats) {
+				return 0;
+			}
+			if (aStats.numGames <= 0 && bStats.numGames <= 0) return 0;
+			if (aStats.numGames <= 0) return 1;
+			if (bStats.numGames <= 0) return -1;
+
+			const aWinRate = aStats.numWins / aStats.numGames;
+			const bWinRate = bStats.numWins / bStats.numGames;
+
+			switch (winRate) {
+				case "highest":
+					return bWinRate - aWinRate;
+				case "lowest":
+					return aWinRate - bWinRate;
+				default:
+					return 0;
+			}
+		},
+		[deckToDeckStats, winRate]
+	);
+
+	const sortDateCreated = useCallback(
+		(a: DeckReadDTO, b: DeckReadDTO) => {
+			switch (dateCreated) {
+				case "newest":
+					return (
+						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+					);
+				case "oldest":
+					return (
+						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+					);
+				default:
+					return 0;
+			}
+		},
+		[dateCreated]
+	);
+
+	const sortRecentWins = useCallback(
+		(a: DeckReadDTO, b: DeckReadDTO) => {
+      if (!recentWins) {
+        return 0;
+      }
+			const aStats = deckToDeckStats(a);
+			const bStats = deckToDeckStats(b);
+			if (!aStats || !bStats) {
+				return 0;
+			}
+
+			switch (recentWins) {
+				case "most recent":
+					if (aStats.latestWin == null && bStats.latestWin == null) {
+						return 0;
+					} else if (aStats.latestWin == null) {
+						return 1;
+					} else if (bStats.latestWin == null) {
+						return -1;
+					} else {
+						return (
+							new Date(bStats.latestWin).getTime() -
+							new Date(aStats.latestWin).getTime()
+						);
+					}
+				case "least recent":
+					if (aStats.latestWin == null && bStats.latestWin == null) {
+						return 0;
+					} else if (aStats.latestWin == null) {
+						return -1;
+					} else if (bStats.latestWin == null) {
+						return 1;
+					} else {
+						return (
+							new Date(aStats.latestWin).getTime() -
+							new Date(bStats.latestWin).getTime()
+						);
+					}
+				default:
+					return 0;
+			}
+		},
+		[recentWins, deckToDeckStats]
+	);
+
+	const filterDeckByDateRange = useCallback(
+		(toFilter: DeckReadDTO[]) => {
+			if (!showAllDecks && startDate && endDate) {
+				return toFilter.filter(
+					(d) =>
+						d.createdAt >= startDate.startOf("day").toISOString() &&
+						d.createdAt <= endDate.endOf("day").toISOString()
+				);
+			}
+			return toFilter;
+		},
+		[showAllDecks, startDate, endDate]
+	);
 
 	useEffect(() => {
 		if (filter === "" || isFilterDrawerOpen) {
@@ -302,6 +341,7 @@ export default function DeckDisplay({
 
 		const fuse = new Fuse(timeFilteredDecks, {
 			keys: ["commander"],
+			threshold: 0.3,
 		});
 
 		const searchResults = fuse.search(filter).map((result) => result.item);
@@ -309,7 +349,7 @@ export default function DeckDisplay({
 		// Sort after applying fuzzy search filter
 		searchResults.sort(
 			(a, b) =>
-        sortRecentlyPlayed(a, b) ||
+				sortRecentlyPlayed(a, b) ||
 				sortNumGames(a, b) ||
 				sortWinRate(a, b) ||
 				sortRecentWins(a, b) ||
@@ -324,6 +364,13 @@ export default function DeckDisplay({
 		startDate,
 		endDate,
 		isFilterDrawerOpen,
+		decks,
+		filterDeckByDateRange,
+		sortDateCreated,
+		sortNumGames,
+		sortRecentWins,
+		sortRecentlyPlayed,
+		sortWinRate,
 	]);
 
 	function renderDeckCards() {
@@ -349,7 +396,7 @@ export default function DeckDisplay({
 			// Apply sorting here for non-filtered decks
 			timeFilteredDecks.sort(
 				(a, b) =>
-          sortRecentlyPlayed(a, b) ||
+					sortRecentlyPlayed(a, b) ||
 					sortNumGames(a, b) ||
 					sortWinRate(a, b) ||
 					sortRecentWins(a, b) ||
@@ -510,7 +557,7 @@ export default function DeckDisplay({
 				</section>
 			</Drawer>
 
-			<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl z-10`}>
+			<div className={`dashboard-main-content-layout max-w-lg lg:max-w-3xl`}>
 				<div className="flex flex-col w-full gap-4">
 					<section className="w-full flex flex-col gap-4">
 						<FilterSortBar
@@ -520,7 +567,7 @@ export default function DeckDisplay({
 							useSortButton={false}
 						/>
 						<div className="w-full flex justify-between lg:justify-start lg:gap-4 pl-4 pr-2">
-							<div className="flex gap-2 items-center">
+							<div className="flex gap-2 items-center z-10 relative">
 								<span className="text-sm">Pod Size</span>
 								<DropdownMenu
 									options={podSizeLabels}

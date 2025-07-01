@@ -10,13 +10,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
 import { tryGetLocalStoragePlayerData } from "@/hooks/useLocalStorage";
 import useToast from "@/hooks/useToast";
-import { DeckWriteDTO } from "@/types/client";
+import { DeckReadDTO, DeckWriteDTO } from "@/types/client";
 import { Field, Label } from "@headlessui/react";
 import { FormEvent, useEffect, useState } from "react";
 
-interface DeckEditInterface {}
-
-export default function DeckEdit({}: DeckEditInterface) {
+export default function DeckEdit() {
 	const { user } = useAuth();
 	const { toast } = useToast();
 	const { decks, mutate } = useDeck();
@@ -80,8 +78,8 @@ export default function DeckEdit({}: DeckEditInterface) {
 
 			if (user) {
 				const localStorageData = tryGetLocalStoragePlayerData(user.id ?? "");
-				let playerId = null;
-				let playerDeckData = null;
+				let playerId: string | null = null;
+				let playerDeckData: DeckReadDTO | null = null;
 				if (localStorageData != null) {
 					({ playerId, playerDeckData } = localStorageData);
 				}
@@ -105,7 +103,7 @@ export default function DeckEdit({}: DeckEditInterface) {
 		if (selected) {
 			setMoxfield(selectedDeck?.moxfield ?? "");
 		}
-	}, [selected]);
+	}, [selected, selectedDeck?.moxfield]);
 
 	return (
 		<OptionsLayout title="Edit Decks">

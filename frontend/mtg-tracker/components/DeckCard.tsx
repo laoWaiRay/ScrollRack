@@ -138,7 +138,7 @@ export default function DeckCard({
 				{deck.moxfield && (
 					<a
 						href={deck.moxfield}
-						className="-mr-1 border rounded-lg border-surface-500 p-1"
+						className="-mr-1 border rounded-lg border-surface-500 p-1 ml-2"
 					>
 						<div className="size-[2em] flex items-center justify-center">
 							<Moxfield />

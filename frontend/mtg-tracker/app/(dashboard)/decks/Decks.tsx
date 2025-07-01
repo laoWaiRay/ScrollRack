@@ -11,9 +11,7 @@ import Edit from "@/public/icons/edit.svg";
 import { useDeck } from "@/hooks/useDeck";
 import DeckDisplay from "@/components/DeckDisplay";
 
-interface DecksInterface {}
-
-export default function Decks({}: DecksInterface) {
+export default function Decks() {
 	const { user } = useAuth();
 	const { decks, isLoading } = useDeck();
 

@@ -43,7 +43,6 @@ interface DashboardHeaderInterface {
 
 export function DashboardLayout({
 	children,
-	styles,
 }: DashboardLayoutInterface) {
 	return (
 		<div

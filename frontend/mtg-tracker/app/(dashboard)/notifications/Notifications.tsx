@@ -1,13 +1,9 @@
 "use client";
-import { useState } from "react";
 import OptionsLayout from "@/components/OptionsLayout";
 import FriendRequestCard from "@/components/FriendRequestCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 
-interface NotificationsInterface {}
-
-export default function Notifications({}: NotificationsInterface) {
-	const [enabled, setEnabled] = useState(false);
+export default function Notifications() {
 	const { friendRequests } = useFriendRequest();
 
 	return (

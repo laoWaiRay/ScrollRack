@@ -64,7 +64,6 @@ export function Form({ fields, handleChange }: FormInterface) {
 					/>
 				);
 			default:
-				const _exhaustiveCheck: never = f;
 				throw new Error(`Unhandled field type: ${JSON.stringify(f)}`);
 		}
 	});

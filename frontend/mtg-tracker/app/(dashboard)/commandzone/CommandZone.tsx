@@ -1,6 +1,5 @@
 "use client";
 import styles from "./styles.module.css";
-import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import StatCard from "@/components/StatCard";
 import { GameLogCard } from "@/components/GameLogCard";
@@ -21,8 +20,6 @@ import DropdownMenu from "@/components/DropdownMenu";
 import DeckCard from "@/components/DeckCard";
 import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
 import LoadingSpinner from "@/components/LoadingSpinner";
-
-interface CommandZoneInterface {}
 
 interface StatCardData {
 	title: string;
@@ -58,7 +55,7 @@ export const labelToPodSize: Record<string, number> = {
 	"5+": 5,
 };
 
-export default function CommandZone({}: CommandZoneInterface) {
+export default function CommandZone() {
 	const { user } = useAuth();
 	const { gameState } = useGame();
 	const { snapshots, isLoading } = useStatSnapshot();
@@ -77,7 +74,8 @@ export default function CommandZone({}: CommandZoneInterface) {
 					s.playerCount == podSize
 			)?.snapshot ?? defaultStatSnapshot
 		);
-	}, [timePeriodLabel, podSizeLabel, snapshots]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [timePeriodLabel, podSizeLabel, snapshots, podSize, timePeriod]);
 
 	const mostRecentDeck = snapshot.mostRecentPlayedDeck;
   const mostRecentDeckStats = mostRecentDeck?.statistics?.find(s => s.podSize == podSize)?.stats;

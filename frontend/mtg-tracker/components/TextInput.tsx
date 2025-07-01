@@ -1,4 +1,4 @@
-import { Input, Field, Label, Button } from "@headlessui/react";
+import { Field, Label } from "@headlessui/react";
 import { ChangeEvent, MouseEvent, useEffect, useRef } from "react";
 import Eye from "@/public/icons/eye.svg";
 import EyeSlash from "@/public/icons/eye-slash.svg";
@@ -58,6 +58,7 @@ export default function TextInput({
 		}, 100);
     
     return () => clearTimeout(handle);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

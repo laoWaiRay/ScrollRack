@@ -60,7 +60,7 @@ export default function RoomCodeInput({ roomCode, setRoomCode, onSubmit }: RoomC
     }
     
     if (/^[a-zA-Z0-9]$/.test(e.key)) {
-      let index = inputRefs.current.indexOf(e.target as HTMLInputElement);
+      const index = inputRefs.current.indexOf(e.target as HTMLInputElement);
       if (index >= 0 && index < roomCode.length) {
         setRoomCode((prev) => {
           const newRoomCode = [...prev];

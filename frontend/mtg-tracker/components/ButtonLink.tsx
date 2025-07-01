@@ -27,7 +27,7 @@ export default function ButtonLink({
 		buttonStyle = "bg-transparent text-fg hover:text-white";
 	}
 
-	let caseStyle = uppercase ? "text-sm uppercase" : "text-base"
+	const caseStyle = uppercase ? "text-sm uppercase" : "text-base"
 
 		return (
 			<Link

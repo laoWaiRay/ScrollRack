@@ -18,10 +18,8 @@ import Switch from "@/components/Switch";
 import Drawer from "@/components/Drawer";
 import dayjs from "dayjs";
 import Fuse from "fuse.js";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import East from "@/public/icons/east.svg";
-
-interface LogInterface {}
 
 interface DateFilters {
   showAllDates: boolean;
@@ -35,7 +33,7 @@ const initialDateFilters: DateFilters = {
 	endDate: dayjs(),
 };
 
-export default function Log({}: LogInterface) {
+export default function Log() {
 	const { user } = useAuth();
 	const { gameState, dispatch: dispatchGameState } = useGame();
 	const [filter, setFilter] = useState("");
@@ -76,6 +74,7 @@ export default function Log({}: LogInterface) {
       
       setIsFetching(false);
 		} catch (error) {
+      console.log(error);
 			toast("Something went wrong fetching more games", "warn");
       setIsFetching(false);
 		}
@@ -91,7 +90,7 @@ export default function Log({}: LogInterface) {
     updateGames(draftDateFilters);
 	}
 
-	async function updateGames({ showAllDates, startDate, endDate }: DateFilters) {
+	const updateGames = useCallback(async ({ showAllDates, startDate, endDate }: DateFilters) => {
 		let updatedGames: GameState | null = null;
 
 		if (showAllDates) {
@@ -116,7 +115,7 @@ export default function Log({}: LogInterface) {
 			type: ActionType.SET_HAS_MORE,
 			payload: updatedGames.hasMore,
 		});
-	}
+	}, [dispatchGameState]);
 
 	useEffect(() => {
 		if (filter === "") {
@@ -132,16 +131,17 @@ export default function Log({}: LogInterface) {
 							.commander ?? "",
 				},
 			],
+      threshold: 0.3,
 		});
 
 		setFiltered(fuse.search(filter).map((result) => result.item));
-	}, [filter, gameState]);
+	}, [filter, gameState, user?.id]);
 
 	useEffect(() => {
 		if (isFilterDrawerOpen) {
 			setDraftDateFilters(dateFilters);
 		}
-	}, [isFilterDrawerOpen]);
+	}, [isFilterDrawerOpen, dateFilters]);
 
 	function renderLogs() {
 		if (gameState.games.length === 0) {
@@ -166,7 +166,7 @@ export default function Log({}: LogInterface) {
         await updateGames(initialDateFilters);
       })()
     }
-  }, [])
+  }, [updateGames])
 
 	return (
 		<DashboardLayout>

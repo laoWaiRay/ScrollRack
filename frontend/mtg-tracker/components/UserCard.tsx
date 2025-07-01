@@ -77,6 +77,7 @@ export default function UserCard({
 				}));
 			}
 		}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

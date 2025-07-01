@@ -54,7 +54,7 @@ export default function Dialog({
         }
       }
 		}
-	}, [isDialogOpen]);
+	}, [isDialogOpen, useCountdown]);
 
 	return (
 		<HeadlessUiDialog

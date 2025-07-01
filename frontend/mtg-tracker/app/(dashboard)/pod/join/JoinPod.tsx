@@ -21,9 +21,7 @@ import Dialog from "@/components/Dialog";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
 import { getRooms } from "@/actions/rooms";
 
-interface JoinPodInterface {}
-
-export default function JoinPod({}: JoinPodInterface) {
+export default function JoinPod() {
 	const { toast } = useToast();
 	const { user } = useAuth();
 	const { rooms, dispatch } = useRoom();
@@ -102,6 +100,7 @@ export default function JoinPod({}: JoinPodInterface) {
 			await api.deleteApiRoom(undefined, { withCredentials: true });
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
+      console.log(error);
 			toast("Error leaving pod", "warn");
 		}
 	}

@@ -7,9 +7,7 @@ import ButtonLink from "@/components/ButtonLink";
 import { api } from "@/generated/client";
 import { useRouter } from "next/navigation";
 
-interface SettingsInterface {}
-
-export default function Settings({}: SettingsInterface) {
+export default function Settings() {
 	const [enabled, setEnabled] = useState(false);
 	const router = useRouter();
 

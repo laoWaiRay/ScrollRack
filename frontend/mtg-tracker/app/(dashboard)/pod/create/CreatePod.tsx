@@ -37,9 +37,7 @@ export interface UserDeckData {
 	deckData: DeckReadDTO;
 }
 
-interface CreatePodInterface {}
-
-export default function CreatePod({}: CreatePodInterface) {
+export default function CreatePod() {
 	const { toast } = useToast();
 	const { user } = useAuth();
 	const { friends } = useFriend();
@@ -125,6 +123,7 @@ export default function CreatePod({}: CreatePodInterface) {
 			}
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
+      console.log(error);
 			toast("Error closing pod", "warn");
 		}
 	}
@@ -134,8 +133,8 @@ export default function CreatePod({}: CreatePodInterface) {
 		if (hostedRoom && hostedRoom.players) {
 			for (const player of hostedRoom.players) {
 				const localStorageData = tryGetLocalStoragePlayerData(player.id);
-				let playerId = null;
-				let playerDeckData = null;
+				let playerId: string | null = null;
+				let playerDeckData: DeckReadDTO | null = null;
 				if (localStorageData != null) {
 					({ playerId, playerDeckData } = localStorageData);
 				}
@@ -156,6 +155,7 @@ export default function CreatePod({}: CreatePodInterface) {
 				setCurrentGameData(localStorageGameData);
 			}
 		}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

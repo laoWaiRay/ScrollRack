@@ -37,7 +37,7 @@ export default function RegisterPage() {
 	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
 	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
-  const { user, dispatch } = useAuth();
+  const { dispatch } = useAuth();
 
 	const { email, username, password, confirmPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);

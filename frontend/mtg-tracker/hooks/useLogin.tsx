@@ -4,15 +4,16 @@ import { useCallback } from "react";
 import z from "zod";
 import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
+import { UserReadDTO } from "@/types/client";
 
 type LoginRequest = z.infer<typeof schemas.LoginRequest>;
 
 export function useLogin() {
 	const router = useRouter();
-  const { user, dispatch } = useAuth();
+  const { dispatch } = useAuth();
  
   async function _loginAsync(email: string, password: string) {
-    let user = null;
+    let user: UserReadDTO | null = null;
 
     try {
       // On successful login, a session cookie is stored automatically on client

@@ -120,7 +120,7 @@ export default function LoginPage() {
 					</div>
 				</ButtonPrimary>
 				<div className="flex justify-center items-center">
-					Don't have an account?{" "}
+					{"Don't have an account? "}
 					<Link href="/register" className="link px-1">
 						Sign up
 					</Link>
