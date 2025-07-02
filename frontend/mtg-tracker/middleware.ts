@@ -6,7 +6,7 @@ const publicRoutes = ["/login", "/register", "/verify-email", "/reset-password",
 export function middleware(req: NextRequest) {
   const path =  req.nextUrl.pathname;
   const isProtectedRoute = !publicRoutes.includes(path);
-  const cookie = req.cookies.get(".AspNetCore.Identity.Application");
+  const cookie = req.cookies.get("access_token");
   
   if (isProtectedRoute && cookie === undefined) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));

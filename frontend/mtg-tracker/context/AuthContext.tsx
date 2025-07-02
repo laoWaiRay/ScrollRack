@@ -39,7 +39,7 @@ export function AuthProvider({ children, initialUser }: { children: ReactNode, i
   );
 }
 
-const authReducer: Reducer<UserReadDTO | null, Action> = (state, action) => {
+const authReducer: Reducer<UserReadDTO | null, Action> = (_, action) => {
 	switch (action.type) {
 		case ActionType.LOGIN: {
 			return action.payload;

@@ -336,7 +336,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         return BadRequest();
     }
 
-    // Returns a JWT that can be used to authenticate the user
+    // Returns an access token that can be used to authenticate the user
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponseDTO>> Login(TokenProviderService tokenProvider, UserManager<ApplicationUser> userManager, UserLoginDTO loginDTO)
     {
@@ -361,9 +361,37 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             return Unauthorized(errors);
         }
 
-        var token = tokenProvider.Create(user);
-        return Ok(new LoginResponseDTO { Token = token });
+        var accessToken = tokenProvider.CreateAccessToken(user);
+        var refreshToken = await tokenProvider.CreateRefreshToken(user);
+        return Ok(new LoginResponseDTO
+        {
+            UserData = _mapper.Map<UserWithEmailDTO>(user),
+            AccessToken = accessToken,
+            RefreshToken = refreshToken.Token
+        });
     }
+
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<RefreshResponseDTO>> Refresh(TokenProviderService tokenProvider, RefreshRequestDTO request)
+    {
+        var refreshToken = request.RefreshToken;
+        var user = await tokenProvider.ValidateRefreshToken(refreshToken);
+        if (user == null) return Unauthorized();
+
+        // Invalidate old refresh token
+        await tokenProvider.InvalidateRefreshToken(refreshToken);
+
+        var newAccessToken = tokenProvider.CreateAccessToken(user);
+        var newRefreshToken = await tokenProvider.CreateRefreshToken(user);
+
+        return Ok(new RefreshResponseDTO()
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken.Token
+        });
+    }
+
 
     [HttpPost("resend-verify-email-link")]
     [Authorize]

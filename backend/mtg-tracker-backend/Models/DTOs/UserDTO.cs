@@ -28,7 +28,7 @@ public class UserReadMinimalDTO
 public class UserWriteDTO
 {
     public required string Id { get; set; }
-    public required string  UserName { get; set; }
+    public required string UserName { get; set; }
     public string? CurrentPassword { get; set; }
     public string? NewPassword { get; set; }
     public string? Profile { get; set; }
@@ -52,7 +52,7 @@ public class UserLoginDTO
 public class UserFriendAddDTO
 {
     public required string Id { get; set; }
-    public required bool RequiresPermission { get; set; } 
+    public required bool RequiresPermission { get; set; }
 }
 
 public class UserMultipleDTO
@@ -74,5 +74,18 @@ public class ResetPasswordRequestDTO
 
 public class LoginResponseDTO
 {
-    public required string Token { get; set; }
+    public required UserWithEmailDTO UserData { get; set; }
+    public required string AccessToken { get; set; }
+    public required string RefreshToken { get; set; }
+}
+
+public class RefreshRequestDTO
+{
+    public required string RefreshToken { get; set; }
+}
+
+public class RefreshResponseDTO
+{
+    public required string AccessToken { get; set; }
+    public required string RefreshToken { get; set; }
 }

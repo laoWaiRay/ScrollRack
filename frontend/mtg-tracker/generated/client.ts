@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
@@ -95,6 +94,19 @@ type GameReadDTO = {
   winnerId?: (string | null) | undefined;
   gameParticipations?: Array<GameParticipationReadDTO> | undefined;
 };
+type LoginResponseDTO = {
+  userData: UserWithEmailDTO;
+  accessToken: string;
+  refreshToken: string;
+};
+type UserWithEmailDTO = {
+  email: string;
+  emailConfirmed: boolean;
+  id: string;
+  userName: string;
+  profile?: (string | null) | undefined;
+  decks: Array<DeckReadDTO>;
+};
 type PagedResultOfGameReadDTO = Partial<{
   items: Array<GameReadDTO>;
   page: number;
@@ -113,72 +125,7 @@ type UserReadDTO = {
   profile?: (string | null) | undefined;
   decks: Array<DeckReadDTO>;
 };
-type UserWithEmailDTO = {
-  email: string;
-  emailConfirmed: boolean;
-  id: string;
-  userName: string;
-  profile?: (string | null) | undefined;
-  decks: Array<DeckReadDTO>;
-};
 
-const RegisterRequest = z
-  .object({ email: z.string(), password: z.string() })
-  .passthrough();
-const LoginRequest = z
-  .object({
-    email: z.string(),
-    password: z.string(),
-    twoFactorCode: z.string().nullish(),
-    twoFactorRecoveryCode: z.string().nullish(),
-  })
-  .passthrough();
-const AccessTokenResponse = z
-  .object({
-    tokenType: z.string().nullish(),
-    accessToken: z.string(),
-    expiresIn: z.number().int(),
-    refreshToken: z.string(),
-  })
-  .passthrough();
-const RefreshRequest = z.object({ refreshToken: z.string() }).passthrough();
-const ResendConfirmationEmailRequest = z
-  .object({ email: z.string() })
-  .passthrough();
-const ForgotPasswordRequest = z.object({ email: z.string() }).passthrough();
-const ResetPasswordRequest = z
-  .object({ email: z.string(), resetCode: z.string(), newPassword: z.string() })
-  .passthrough();
-const TwoFactorRequest = z
-  .object({
-    enable: z.boolean().nullable(),
-    twoFactorCode: z.string().nullable(),
-    resetSharedKey: z.boolean(),
-    resetRecoveryCodes: z.boolean(),
-    forgetMachine: z.boolean(),
-  })
-  .partial()
-  .passthrough();
-const TwoFactorResponse = z
-  .object({
-    sharedKey: z.string(),
-    recoveryCodesLeft: z.number().int(),
-    recoveryCodes: z.array(z.string()).nullish(),
-    isTwoFactorEnabled: z.boolean(),
-    isMachineRemembered: z.boolean(),
-  })
-  .passthrough();
-const InfoResponse = z
-  .object({ email: z.string(), isEmailConfirmed: z.boolean() })
-  .passthrough();
-const InfoRequest = z
-  .object({
-    newEmail: z.string().nullable(),
-    newPassword: z.string().nullable(),
-    oldPassword: z.string().nullable(),
-  })
-  .partial()
-  .passthrough();
 const DeckStats: z.ZodType<DeckStats> = z
   .object({
     numGames: z.number().int(),
@@ -383,34 +330,23 @@ const UserRegisterDTO = z
 const UserLoginDTO = z
   .object({ email: z.string(), password: z.string() })
   .passthrough();
+const LoginResponseDTO: z.ZodType<LoginResponseDTO> = z
+  .object({
+    userData: UserWithEmailDTO,
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  })
+  .passthrough();
+const RefreshRequestDTO = z.object({ refreshToken: z.string() }).passthrough();
+const RefreshResponseDTO = z
+  .object({ accessToken: z.string(), refreshToken: z.string() })
+  .passthrough();
 const ForgotPasswordRequestDTO = z.object({ email: z.string() }).passthrough();
 const ResetPasswordRequestDTO = z
   .object({ id: z.string(), token: z.string(), password: z.string() })
   .passthrough();
-const HttpValidationProblemDetails = z
-  .object({
-    type: z.string().nullable(),
-    title: z.string().nullable(),
-    status: z.number().int().nullable(),
-    detail: z.string().nullable(),
-    instance: z.string().nullable(),
-    errors: z.record(z.array(z.string())),
-  })
-  .partial()
-  .passthrough();
 
 export const schemas = {
-  RegisterRequest,
-  LoginRequest,
-  AccessTokenResponse,
-  RefreshRequest,
-  ResendConfirmationEmailRequest,
-  ForgotPasswordRequest,
-  ResetPasswordRequest,
-  TwoFactorRequest,
-  TwoFactorResponse,
-  InfoResponse,
-  InfoRequest,
   DeckStats,
   FilteredDeckStats,
   DeckReadDTO,
@@ -436,9 +372,11 @@ export const schemas = {
   UserWriteDTO,
   UserRegisterDTO,
   UserLoginDTO,
+  LoginResponseDTO,
+  RefreshRequestDTO,
+  RefreshResponseDTO,
   ForgotPasswordRequestDTO,
   ResetPasswordRequestDTO,
-  HttpValidationProblemDetails,
 };
 
 const endpoints = makeApi([
@@ -895,7 +833,7 @@ const endpoints = makeApi([
         schema: UserLoginDTO,
       },
     ],
-    response: UserReadDTO,
+    response: LoginResponseDTO,
   },
   {
     method: "post",
@@ -924,6 +862,20 @@ const endpoints = makeApi([
       },
     ],
     response: UserReadDTO,
+  },
+  {
+    method: "post",
+    path: "/api/User/refresh",
+    alias: "postApiUserrefresh",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ refreshToken: z.string() }).passthrough(),
+      },
+    ],
+    response: RefreshResponseDTO,
   },
   {
     method: "post",
@@ -1006,216 +958,6 @@ const endpoints = makeApi([
       },
     ],
     response: z.void(),
-  },
-  {
-    method: "get",
-    path: "/confirmEmail",
-    alias: "MapIdentityApi-/confirmEmail",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "userId",
-        type: "Query",
-        schema: z.string(),
-      },
-      {
-        name: "code",
-        type: "Query",
-        schema: z.string(),
-      },
-      {
-        name: "changedEmail",
-        type: "Query",
-        schema: z.string().optional(),
-      },
-    ],
-    response: z.void(),
-  },
-  {
-    method: "post",
-    path: "/forgotPassword",
-    alias: "postForgotPassword",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: z.object({ email: z.string() }).passthrough(),
-      },
-    ],
-    response: z.void(),
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/login",
-    alias: "postLogin",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: LoginRequest,
-      },
-      {
-        name: "useCookies",
-        type: "Query",
-        schema: z.boolean().optional(),
-      },
-      {
-        name: "useSessionCookies",
-        type: "Query",
-        schema: z.boolean().optional(),
-      },
-    ],
-    response: AccessTokenResponse,
-  },
-  {
-    method: "post",
-    path: "/manage/2fa",
-    alias: "postManage2fa",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: TwoFactorRequest,
-      },
-    ],
-    response: TwoFactorResponse,
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-      {
-        status: 404,
-        description: `Not Found`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "get",
-    path: "/manage/info",
-    alias: "getManageinfo",
-    requestFormat: "json",
-    response: InfoResponse,
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-      {
-        status: 404,
-        description: `Not Found`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/manage/info",
-    alias: "postManageinfo",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: InfoRequest,
-      },
-    ],
-    response: InfoResponse,
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-      {
-        status: 404,
-        description: `Not Found`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/refresh",
-    alias: "postRefresh",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: z.object({ refreshToken: z.string() }).passthrough(),
-      },
-    ],
-    response: AccessTokenResponse,
-  },
-  {
-    method: "post",
-    path: "/register",
-    alias: "postRegister",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: RegisterRequest,
-      },
-    ],
-    response: z.void(),
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-    ],
-  },
-  {
-    method: "post",
-    path: "/resendConfirmationEmail",
-    alias: "postResendConfirmationEmail",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: z.object({ email: z.string() }).passthrough(),
-      },
-    ],
-    response: z.void(),
-  },
-  {
-    method: "post",
-    path: "/resetPassword",
-    alias: "postResetPassword",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "body",
-        type: "Body",
-        schema: ResetPasswordRequest,
-      },
-    ],
-    response: z.void(),
-    errors: [
-      {
-        status: 400,
-        description: `Bad Request`,
-        schema: z.void(),
-      },
-    ],
   },
 ]);
 

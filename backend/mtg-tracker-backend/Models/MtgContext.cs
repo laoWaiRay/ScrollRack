@@ -13,6 +13,7 @@ public class MtgContext(DbContextOptions<MtgContext> options)
     public DbSet<GameParticipation> GameParticipations { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<StatSnapshot> StatSnapshots { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -151,6 +152,13 @@ public class MtgContext(DbContextOptions<MtgContext> options)
                 nestedBuilder
                     .HasIndex(b => new { b.Code })
                     .IsUnique();
+            }
+        );
+
+        modelBuilder.Entity<RefreshToken>(
+            nestedBuilder =>
+            {
+                nestedBuilder.HasKey(e => e.Token);
             }
         );
     }

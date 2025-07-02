@@ -3,6 +3,8 @@ import { Commissioner, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import RootLayout from "./RootLayout";
+import { setAuthCookies } from "@/actions/auth";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",

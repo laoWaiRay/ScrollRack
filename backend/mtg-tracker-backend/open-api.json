@@ -1468,6 +1468,55 @@
         }
       }
     },
+    "/api/User/refresh": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDTO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDTO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/User/resend-verify-email-link": {
       "post": {
         "tags": [
@@ -2041,11 +2090,19 @@
       },
       "LoginResponseDTO": {
         "required": [
-          "token"
+          "userData",
+          "accessToken",
+          "refreshToken"
         ],
         "type": "object",
         "properties": {
-          "token": {
+          "userData": {
+            "$ref": "#/components/schemas/UserWithEmailDTO"
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
             "type": "string"
           }
         }
@@ -2065,6 +2122,32 @@
           },
           "hasMore": {
             "type": "boolean"
+          }
+        }
+      },
+      "RefreshRequestDTO": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "RefreshResponseDTO": {
+        "required": [
+          "accessToken",
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
           }
         }
       },

@@ -1,12 +1,9 @@
 import { useRouter } from "next/navigation";
-import { api, schemas } from "@/generated/client";
 import { useCallback } from "react";
-import z from "zod";
 import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
-import { UserReadDTO } from "@/types/client";
-
-type LoginRequest = z.infer<typeof schemas.LoginRequest>;
+import { UserLoginDTO, UserReadDTO } from "@/types/client";
+import { login } from "@/actions/user";
 
 export function useLogin() {
 	const router = useRouter();
@@ -16,15 +13,16 @@ export function useLogin() {
     let user: UserReadDTO | null = null;
 
     try {
-      // On successful login, a session cookie is stored automatically on client
-      const loginData: LoginRequest = { email, password };
-      user = await api.postApiUserlogin(loginData, {
-        withCredentials: true
-      });
+      const loginDTO: UserLoginDTO = {
+        email,
+        password,
+      };
+      user = await login(loginDTO);
       
       dispatch({ type: ActionType.LOGIN, payload: user });
       router.push("/commandzone");
     } catch (error) {
+      console.error(error);
       throw error;
     }
   }
