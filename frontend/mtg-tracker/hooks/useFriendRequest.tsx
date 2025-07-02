@@ -1,10 +1,10 @@
-import { getReceivedFriendRequests } from "@/actions/friendRequests";
+import { getReceivedFriendRequestUsers } from "@/actions/friendRequests";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import useSWR from "swr";
 
 export function useFriendRequest() {
   const fetcher = async () => {
-    const authResult = await getReceivedFriendRequests();
+    const authResult = await getReceivedFriendRequestUsers();
     const data = extractAuthResult(authResult);
     return data;
   };

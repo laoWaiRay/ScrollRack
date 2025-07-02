@@ -22,11 +22,13 @@ import {
 } from "@/components/Dashboard";
 import useToast from "@/hooks/useToast";
 import { useDeck } from "@/hooks/useDeck";
-import { api } from "@/generated/client";
 import { useGame } from "@/hooks/useGame";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
+import { deleteGame, postGame } from "@/actions/games";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { postGameParticipation } from "@/actions/gameParticipations";
 
 export default function Import() {
 	const { toast } = useToast();
@@ -107,9 +109,12 @@ export default function Import() {
 				imported: true,
 			};
 
-			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
-				withCredentials: true,
-			});
+      const authResult = await postGame(gameWriteDTO);
+      const gameReadDTO = extractAuthResult(authResult);
+      
+      if (gameReadDTO == null) {
+        throw Error("No Game Data");
+      }
 
 			gameSaved = true;
 			gameSavedId = gameReadDTO.id;
@@ -140,15 +145,13 @@ export default function Import() {
 
 			let hostGpReadDTO: GameParticipationReadDTO | null = null;
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
-				const gpReadDTO = await api.postApiGameParticipation(
-					gameParticipationWriteDTO,
-					{
-						queries: {
-							imported: true,
-						},
-						withCredentials: true,
-					}
-				);
+        const authResult = await postGameParticipation(gameParticipationWriteDTO);
+        const gpReadDTO = extractAuthResult(authResult);
+        
+        if (gpReadDTO == null) {
+          throw Error("No Game Participation info");
+        }
+
 				if (gpReadDTO.userId === user.id) {
 					hostGpReadDTO = gpReadDTO;
 				}
@@ -169,10 +172,7 @@ export default function Import() {
 		} catch (error) {
 			if (gameSaved) {
 				// Revert, delete game data
-				await api.deleteApiGameId(undefined, {
-					params: { id: gameSavedId },
-					withCredentials: true,
-				});
+        await deleteGame(gameSavedId);
 			}
 			console.log(error);
 			toast("Error saving game", "warn");

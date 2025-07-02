@@ -6,6 +6,7 @@ import {
 } from "@microsoft/signalr";
 import { RoomDTO } from "@/types/client";
 import { useEffect, useRef } from "react";
+import { getAccessToken } from "@/actions/getAccessToken";
 
 export interface RoomConnectionHandlers {
 	handleReceiveUpdateRoom?: (players: RoomDTO) => void;
@@ -28,7 +29,7 @@ export function useRoomConnection(
 		const conn = new HubConnectionBuilder()
 			.withUrl("https://localhost:7165/hub", {
 				logger: LogLevel.Information,
-				withCredentials: true,
+        accessTokenFactory: getAccessToken
 			})
 			.withAutomaticReconnect()
 			.build();

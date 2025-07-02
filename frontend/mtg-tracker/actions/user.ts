@@ -3,13 +3,14 @@
 import { api } from "@/generated/client";
 import {
   ForgotPasswordRequestDTO,
+	LogoutRequestDTO,
 	ResetPasswordRequestDTO,
 	UserLoginDTO,
 	UserRegisterDTO,
 	UserWithEmailDTO,
 	UserWriteDTO,
 } from "@/types/client";
-import { setAuthCookies } from "./auth";
+import { clearAuthCookies, getRefreshToken, setAuthCookies } from "./auth";
 import { callWithAuth } from "./helpers/callWithAuth";
 import { isAxiosError } from "axios";
 import { AuthResult } from "@/types/server";
@@ -18,9 +19,6 @@ export async function login(loginDTO: UserLoginDTO) {
 	try {
 		const data = await api.postApiUserlogin(loginDTO);
 		const { userData, accessToken, refreshToken } = data;
-		console.log(
-			`User Is Authenticated: refresh: ${refreshToken}, access: ${accessToken}`
-		);
 		await setAuthCookies(accessToken, refreshToken);
 
 		const result: AuthResult<UserWithEmailDTO> = {
@@ -43,6 +41,17 @@ export async function login(loginDTO: UserLoginDTO) {
 			throw error;
 		}
 	}
+}
+
+export async function logout() {
+  const refreshToken = await getRefreshToken();
+  if (refreshToken) {
+    const logoutRequestDTO: LogoutRequestDTO = {
+      refreshToken: refreshToken
+    };
+    await callWithAuth(api.postApiUserlogout, logoutRequestDTO);
+  }
+  await clearAuthCookies();
 }
 
 export async function updateUser(userWriteDTO: UserWriteDTO, id: string) {

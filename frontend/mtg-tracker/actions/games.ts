@@ -4,6 +4,7 @@ import { api } from "@/generated/client";
 import { callWithAuth } from "./helpers/callWithAuth";
 import { GameState } from "@/context/GameContext";
 import { AuthResult } from "@/types/server";
+import { GameWriteDTO } from "@/types/client";
 
 // startDate and endDate should be ISO date strings
 export async function getGames(
@@ -28,8 +29,16 @@ export async function getGames(
 		};
 	}
 
-  return {
-    success: false,
-    error: authResult.error
-  }
+	return {
+		success: false,
+		error: authResult.error,
+	};
+}
+
+export async function postGame(requestDTO: GameWriteDTO) {
+	return await callWithAuth(api.postApiGame, requestDTO);
+}
+
+export async function deleteGame(id: number) {
+	return await callWithAuth(api.deleteApiGameId, undefined, { params: { id } });
 }

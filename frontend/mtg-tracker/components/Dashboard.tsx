@@ -22,6 +22,7 @@ import FriendRequestCard from "./FriendRequestCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 import { useRouter } from "next/navigation";
 import { api } from "@/generated/client";
+import { useLogout } from "@/hooks/useLogout";
 
 interface DashboardLayoutInterface {
 	children: ReactNode;
@@ -41,9 +42,7 @@ interface DashboardHeaderInterface {
 	childrenStyles?: string;
 }
 
-export function DashboardLayout({
-	children,
-}: DashboardLayoutInterface) {
+export function DashboardLayout({ children }: DashboardLayoutInterface) {
 	return (
 		<div
 			className={`${_styles.gridB} flex flex-col items-center lg:m-4 min-h-dvh lg:mt-4 mx-3`}
@@ -66,14 +65,10 @@ export function DashboardHeader({
 	const buttonIconStyle = "p-1 mx-1 hover:text-fg-light";
 	const { friendRequests } = useFriendRequest();
 	const router = useRouter();
+	const { logoutAsync } = useLogout();
 
 	async function handleLogout() {
-		try {
-      await api.postApiUserlogout({}, { withCredentials: true });
-      router.push("login");
-		} catch (error) {
-      console.log(error);
-    }
+		await logoutAsync();
 	}
 
 	return (
@@ -149,12 +144,12 @@ export function DashboardHeader({
 							className="bg-surface-600 border border-surface-500 rounded mt-2 min-w-(--button-width)"
 						>
 							<MenuItem>
-								<div
-									className="px-2.5 py-2 select-none data-focus:bg-white/5 border-b border-surface-500/50"
-									onClick={() => {}}
+								<Button
+									className="w-full px-2.5 py-2 data-focus:bg-white/5 border-b border-surface-500/50"
+									onClick={handleLogout}
 								>
-									<Button onClick={handleLogout}>Log Out</Button>
-								</div>
+									Log Out
+								</Button>
 							</MenuItem>
 						</MenuItems>
 					</Menu>

@@ -30,4 +30,4 @@ export type ResetPasswordRequestDTO = z.infer<typeof schemas.ResetPasswordReques
 export type LoginResponseDTO = z.infer<typeof schemas.LoginResponseDTO>;
 export type RefreshRequestDTO = z.infer<typeof schemas.RefreshRequestDTO>;
 export type RefreshResponseDTO = z.infer<typeof schemas.RefreshResponseDTO>;
-export type RefreshToken = z.infer<typeof schemas.RefreshToken>;
+export type LogoutRequestDTO = z.infer<typeof schemas.LogoutRequestDTO>;

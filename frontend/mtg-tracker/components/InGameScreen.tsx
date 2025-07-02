@@ -20,6 +20,9 @@ import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { formatTime } from "@/helpers/time";
 import Checkbox from "@mui/material/Checkbox";
+import { deleteGame, postGame } from "@/actions/games";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { postGameParticipation } from "@/actions/gameParticipations";
 
 interface InGameScreenInterface {
 	startTime: number;
@@ -85,9 +88,12 @@ export default function InGameScreen({
 				winnerId: winner.id,
 			};
 
-			const gameReadDTO = await api.postApiGame(gameWriteDTO, {
-				withCredentials: true,
-			});
+      const authResult = await postGame(gameWriteDTO);
+      const gameReadDTO = extractAuthResult(authResult);
+      
+      if (!gameReadDTO) {
+        throw Error("No game data returned from server");
+      }
 
 			gameSaved = true;
 			gameSavedId = gameReadDTO.id;
@@ -118,13 +124,9 @@ export default function InGameScreen({
 
 			let hostGpReadDTO: GameParticipationReadDTO | null = null;
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
-				const gpReadDTO = await api.postApiGameParticipation(
-					gameParticipationWriteDTO,
-					{
-						withCredentials: true,
-					}
-				);
-				if (gpReadDTO.userId === user.id) {
+        const authResult = await postGameParticipation(gameParticipationWriteDTO);
+        const gpReadDTO = extractAuthResult(authResult);
+				if (gpReadDTO?.userId === user.id) {
 					hostGpReadDTO = gpReadDTO;
 				}
 			}
@@ -145,11 +147,7 @@ export default function InGameScreen({
 			setIsFetching(false);
 		} catch (error) {
 			if (gameSaved) {
-				// Revert, delete game data
-				await api.deleteApiGameId(undefined, {
-					params: { id: gameSavedId },
-					withCredentials: true,
-				});
+        await deleteGame(gameSavedId);
 			}
 			console.log(error);
 			toast("Error saving game", "warn");

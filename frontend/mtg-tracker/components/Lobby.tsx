@@ -19,6 +19,9 @@ import { ActionType } from "@/context/RoomContext";
 import { CurrentGameData } from "@/app/(dashboard)/pod/create/CreatePod";
 import { isAxiosError } from "axios";
 import { CONFLICT } from "@/constants/httpStatus";
+import { addPlayerToRoom, removePlayerFromRoom } from "@/actions/rooms";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { ServerApiError } from "@/types/server";
 
 interface LobbyInterface {
 	hostedRoom: RoomDTO;
@@ -65,10 +68,12 @@ export default function Lobby({
 
 		try {
 			const addPlayerDTO: AddPlayerDTO = { id: friend.id };
-			const updatedRoom = await api.postApiRoomRoomCodeplayers(addPlayerDTO, {
-				params: { roomCode: hostedRoom.code },
-				withCredentials: true,
-			});
+      const authResult = await addPlayerToRoom(addPlayerDTO, hostedRoom.code);
+      const updatedRoom = extractAuthResult(authResult);
+      
+      if (!updatedRoom) {
+        throw Error("No room data");
+      }
 
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
 			setSelected(null);
@@ -84,7 +89,7 @@ export default function Lobby({
 				console.log("ERROR: NO CONNECTION REF");
 			}
 		} catch (error) {
-			if (isAxiosError(error) && error.response?.status === CONFLICT) {
+			if (error instanceof ServerApiError && error.status === CONFLICT) {
 				toast("User is already in a pod", "warn");
 			} else {
 				toast("Error adding friend", "warn");
@@ -99,10 +104,12 @@ export default function Lobby({
 		}
 
 		try {
-			const updatedRoom = await api.deleteApiRoomRoomCodeplayersId(undefined, {
-				params: { id, roomCode: hostedRoom.code },
-				withCredentials: true,
-			});
+      const authResult = await removePlayerFromRoom(id, hostedRoom.code);
+      const updatedRoom = extractAuthResult(authResult);
+      
+      if (!updatedRoom) {
+        throw Error("No room data");
+      }
 
 			dispatch({ type: ActionType.UPDATE, payload: [updatedRoom] });
 

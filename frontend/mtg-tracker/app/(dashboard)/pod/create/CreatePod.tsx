@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import Dialog from "@/components/Dialog";
 import { useRouter } from "next/navigation";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
-import { getRooms } from "@/actions/rooms";
+import { deleteRoom, getRooms, postRoom } from "@/actions/rooms";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import {
 	tryGetLocalStoragePlayerData,
@@ -26,6 +26,7 @@ import {
 } from "@/hooks/useLocalStorage";
 import Lobby from "@/components/Lobby";
 import InGameScreen from "@/components/InGameScreen";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export interface CurrentGameData {
 	startTime: number;
@@ -66,8 +67,10 @@ export default function CreatePod() {
 	};
 
 	const handleReceivePlayerJoin = async (conn: HubConnection | null) => {
-		console.log("received player join");
-		const updatedRoom = (await getRooms()).find(
+    const authResult = await getRooms();
+    const rooms = extractAuthResult(authResult) ?? [];
+
+		const updatedRoom = rooms.find(
 			(r) => r.code === hostedRoom?.code
 		);
 		if (updatedRoom && conn?.state === HubConnectionState.Connected) {
@@ -76,7 +79,10 @@ export default function CreatePod() {
 	};
 
 	const handleReceivePlayerLeave = async (conn: HubConnection | null) => {
-		const updatedRoom = (await getRooms()).find(
+    const authResult = await getRooms();
+    const rooms = extractAuthResult(authResult) ?? [];
+
+		const updatedRoom = rooms.find(
 			(r) => r.code === hostedRoom?.code
 		);
 		if (updatedRoom && conn?.state === HubConnectionState.Connected) {
@@ -92,8 +98,11 @@ export default function CreatePod() {
 
 	async function handleCreateRoom() {
 		try {
-			await api.postApiRoom(undefined, { withCredentials: true });
-			const rooms = await api.getApiRoom({ withCredentials: true });
+      const authResult = await postRoom();
+      extractAuthResult(authResult);
+
+      const getAuthResult = await getRooms();
+      const rooms = extractAuthResult(getAuthResult) ?? [];
 			const room = rooms.find((r) => r.roomOwnerId === user?.id);
 			if (!room) {
 				toast("Error creating pod", "warn");
@@ -113,7 +122,8 @@ export default function CreatePod() {
 		}
 
 		try {
-			await api.deleteApiRoom(undefined, { withCredentials: true });
+      const authResult = await deleteRoom();
+      extractAuthResult(authResult);
 			setLocalStorageGameData(null);
 			setCurrentGameData(null);
 			if (connectionRef.current) {

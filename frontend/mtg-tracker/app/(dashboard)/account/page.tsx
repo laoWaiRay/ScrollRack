@@ -2,9 +2,11 @@
 
 import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import Account from "./Account";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export default async function page() {
-	const userWithEmail = await getUserWithEmail();
+  const authResult = await getUserWithEmail();
+	const userWithEmail = extractAuthResult(authResult);
 
 	return (
 		<Account

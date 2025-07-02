@@ -2,7 +2,7 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
-import { UserLoginDTO, UserReadDTO } from "@/types/client";
+import { UserLoginDTO } from "@/types/client";
 import { login } from "@/actions/user";
 import { ServerApiError } from "@/types/server";
 

@@ -12,8 +12,8 @@ import { AuthResult } from "@/types/server";
 
 interface ConfigOptions {
 	headers?: Record<string, string>;
-	params?: Record<string, string | number | undefined>;
-	queries?: Record<string, string | number | undefined>;
+	params?: Record<string, string | number | boolean | undefined>;
+	queries?: Record<string, string | number | boolean | undefined>;
 	[key: string]: any;
 }
 

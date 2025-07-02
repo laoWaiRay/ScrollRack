@@ -19,7 +19,9 @@ import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { ActionType } from "@/context/RoomContext";
 import Dialog from "@/components/Dialog";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
-import { getRooms } from "@/actions/rooms";
+import { deleteRoom, getRooms, joinRoom } from "@/actions/rooms";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { ServerApiError } from "@/types/server";
 
 export default function JoinPod() {
 	const { toast } = useToast();
@@ -38,18 +40,33 @@ export default function JoinPod() {
 	);
 
 	const handleReceivePlayerAdd = async () => {
-		const updatedRooms = await getRooms();
-		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    try {
+      const authResult = await getRooms();
+      const updatedRooms = extractAuthResult(authResult) ?? [];
+      dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    } catch (error) {
+      console.log(error);
+    }
 	};
 
 	const handleReceivePlayerRemove = async () => {
-		const updatedRooms = await getRooms();
-		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    try {
+      const authResult = await getRooms();
+      const updatedRooms = extractAuthResult(authResult) ?? [];
+      dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    } catch (error) {
+      console.log(error);
+    }
 	};
 
 	const handleReceiveCloseRoom = async () => {
-		const updatedRooms = await getRooms();
-		dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    try {
+      const authResult = await getRooms();
+      const updatedRooms = extractAuthResult(authResult) ?? [];
+      dispatch({ type: ActionType.UPDATE, payload: updatedRooms });
+    } catch (error) {
+      console.log(error);
+    }
 	};
 
 	const { connectionRef } = useRoomConnection(joinedRoom?.code ?? null, {
@@ -65,18 +82,21 @@ export default function JoinPod() {
 		}
 
 		try {
-			const room = await api.postApiRoomRoomCode(undefined, {
-				params: { roomCode: roomCode.join("") },
-				withCredentials: true,
-			});
-			dispatch({ type: ActionType.UPDATE, payload: [room] });
-			toast("Joined pod", "success");
+      const authResult = await joinRoom(roomCode.join(""));
+      const room = extractAuthResult(authResult);
+      
+      if (room) {
+        dispatch({ type: ActionType.UPDATE, payload: [room] });
+        toast("Joined pod", "success");
+      } else {
+        throw Error("No room")
+      }
 		} catch (error) {
-			if (isAxiosError(error)) {
-				if (error.response?.status === NOT_FOUND) {
+			if (error instanceof ServerApiError) {
+				if (error.status === NOT_FOUND) {
 					toast("Pod not found", "warn");
 					return;
-				} else if (error.response?.status === CONFLICT) {
+				} else if (error.status === CONFLICT) {
 					toast("Already joined pod", "warn");
 					return;
 				}
@@ -97,7 +117,8 @@ export default function JoinPod() {
 			} else {
 				console.log("ERROR: NO CONNECTION REF");
 			}
-			await api.deleteApiRoom(undefined, { withCredentials: true });
+      const authResult = await deleteRoom();
+      extractAuthResult(authResult);
 			dispatch({ type: ActionType.UPDATE, payload: [] });
 		} catch (error) {
       console.log(error);

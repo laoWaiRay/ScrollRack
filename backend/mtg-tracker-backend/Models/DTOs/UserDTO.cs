@@ -79,6 +79,11 @@ public class LoginResponseDTO
     public required string RefreshToken { get; set; }
 }
 
+public class LogoutRequestDTO
+{
+    public required string RefreshToken { get; set; }
+}
+
 public class RefreshRequestDTO
 {
     public required string RefreshToken { get; set; }

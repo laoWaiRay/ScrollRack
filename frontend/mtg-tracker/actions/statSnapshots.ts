@@ -5,5 +5,5 @@ import { callWithAuth } from "./helpers/callWithAuth";
 
 // Get stat snapshots for current user
 export async function getStatSnapshots() {
-  return await callWithAuth(api.getApiStatSnapshot) ?? [];
+	return await callWithAuth(api.getApiStatSnapshot);
 }

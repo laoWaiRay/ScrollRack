@@ -11,6 +11,8 @@ import useToast from "@/hooks/useToast";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { GameParticipationReadDTO, GameReadDTO } from "@/types/client";
+import { deleteGame } from "@/actions/games";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 interface GameLogCellInterface {
 	header: string;
@@ -58,10 +60,8 @@ export function GameLogCard({
 		}
 
 		try {
-			await api.deleteApiGameId(undefined, {
-				params: { id: game.id },
-				withCredentials: true,
-			});
+      const authResult = await deleteGame(game.id);
+      extractAuthResult(authResult);
 			dispatchGame({
 				type: GameActionType.UPDATE,
 				payload: [...gameState.games.filter((g) => g.id !== game.id)],

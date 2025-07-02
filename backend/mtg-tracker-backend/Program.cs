@@ -86,6 +86,24 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
             ClockSkew = TimeSpan.Zero,
         };
+
+        jwtOptions.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                // Only allow tokens for SignalR endpoints
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hub"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     })
     .AddGoogle(googleOptions =>
     {
@@ -151,7 +169,7 @@ app.Use(async (context, next) =>
     if (context.Response.StatusCode == 401)
     {
         Console.WriteLine("401 Unauthorized!");
-        var authHeader = context.Request.Headers["Authorization"].ToString();
+        var authHeader = context.Request.Headers.Authorization.ToString();
         Console.WriteLine("Authorization Header: " + authHeader);
     }
 });

@@ -4,20 +4,14 @@ import ButtonPrimary from "@/components/ButtonPrimary";
 import OptionsLayout from "@/components/OptionsLayout";
 import Switch from "@/components/Switch";
 import ButtonLink from "@/components/ButtonLink";
-import { api } from "@/generated/client";
-import { useRouter } from "next/navigation";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function Settings() {
 	const [enabled, setEnabled] = useState(false);
-	const router = useRouter();
+  const { logoutAsync } = useLogout();
 
 	async function handleLogout() {
-		try {
-			await api.postApiUserlogout({}, { withCredentials: true });
-			router.push("login");
-		} catch (error) {
-			console.log(error);
-		}
+    await logoutAsync();
 	}
 
 	return (

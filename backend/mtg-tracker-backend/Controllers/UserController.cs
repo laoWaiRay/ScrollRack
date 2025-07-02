@@ -327,14 +327,10 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout(SignInManager<ApplicationUser> signInManager, [FromBody] object empty)
+    public async Task<IActionResult> Logout(TokenProviderService tokenProvider, LogoutRequestDTO requestDTO)
     {
-        if (empty != null)
-        {
-            await signInManager.SignOutAsync();
-            return Ok();
-        }
-        return BadRequest();
+        await tokenProvider.InvalidateRefreshToken(requestDTO.RefreshToken);
+        return Ok();
     }
 
     // Returns an access token that can be used to authenticate the user

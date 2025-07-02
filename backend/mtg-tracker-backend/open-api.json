@@ -1401,13 +1401,19 @@
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": { }
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequestDTO"
+              }
             },
             "text/json": {
-              "schema": { }
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequestDTO"
+              }
             },
             "application/*+json": {
-              "schema": { }
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequestDTO"
+              }
             }
           },
           "required": true
@@ -2102,6 +2108,17 @@
           "accessToken": {
             "type": "string"
           },
+          "refreshToken": {
+            "type": "string"
+          }
+        }
+      },
+      "LogoutRequestDTO": {
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object",
+        "properties": {
           "refreshToken": {
             "type": "string"
           }

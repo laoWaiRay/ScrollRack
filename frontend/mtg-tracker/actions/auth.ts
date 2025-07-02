@@ -23,8 +23,15 @@ export async function setAuthCookies(
 		path: "/",
 		maxAge: 60 * 60 * 24 * 30, // 30 days
 	});
-  
-  console.log(`Successfully Set Cookies`);
-  console.log(`Access: ${accessToken}`);
-  console.log(`Refresh: ${refreshToken}`);
+}
+
+export async function clearAuthCookies() {
+  const cookieStore = await cookies();
+  cookieStore.delete("access_token");
+  cookieStore.delete("refresh_token");
+}
+
+export async function getRefreshToken() {
+  const cookieStore = await cookies();
+  return cookieStore.get("refresh_token")?.value;
 }

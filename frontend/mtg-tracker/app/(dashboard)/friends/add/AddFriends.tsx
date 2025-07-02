@@ -8,10 +8,8 @@ import OptionsLayout from "@/components/OptionsLayout";
 import { QRCodeSVG } from "qrcode.react";
 import { useZxing } from "react-zxing";
 import QrCodeScan from "@/public/icons/qrcode-scan.svg";
-import { api } from "@/generated/client";
-import { getFriends, sendFriendRequest } from "@/actions/friends";
+import { addFriend, getFriends } from "@/actions/friends";
 import useToast from "@/hooks/useToast";
-import { isAxiosError } from "axios";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { isValidationErrorArray } from "@/helpers/validationHelpers";
 import { useFriend } from "@/hooks/useFriend";
@@ -19,6 +17,7 @@ import { ActionType } from "@/context/FriendContext";
 import UserAdd from "@/public/icons/user-add.svg";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { ServerApiError } from "@/types/server";
+import { sendFriendRequest } from "@/actions/friendRequests";
 
 export default function AddFriends() {
 	const { user } = useAuth();
@@ -110,11 +109,12 @@ export default function AddFriends() {
 			};
 
 			try {
-				await api.postApiFriend(userFriendAddDTO, { withCredentials: true });
+        const authResult = await addFriend(userFriendAddDTO);
+        extractAuthResult(authResult);
 				updateFriendsList();
 				toast("Successfully Added", "success");
 			} catch (error) {
-				if (isAxiosError(error) && error.response?.status == CONFLICT) {
+				if (error instanceof ServerApiError && error.status === CONFLICT) {
 					toast("Already Friends", "warn");
 				}
 				toast("Error Adding Friend", "warn");

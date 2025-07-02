@@ -4,6 +4,7 @@ import "./globals.css";
 import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import RootLayout from "./RootLayout";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { UserWithEmailDTO } from "@/types/client";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",
@@ -25,7 +26,11 @@ export default async function layout({
 	children: React.ReactNode;
 }>) {
 	const authResult = await getUserWithEmail();
-  let user = extractAuthResult(authResult);
+  let user: UserWithEmailDTO | null = null;
+  try {
+    user = extractAuthResult(authResult);
+  } catch (error) {
+  }
 
 	return (
 		<html lang="en">

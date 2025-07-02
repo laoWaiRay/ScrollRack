@@ -107,9 +107,9 @@ public class EmailSender(
         var request = new MailjetRequest { Resource = SendV31.Resource }
         .Property(Send.Messages, new JArray {
             new JObject {
-                {"From", new JObject {
-                    {"Email", fromEmail},
-                }},
+                // {"From", new JObject {
+                //     {"Email", fromEmail},
+                // }},
                 {"To", new JArray {
                     new JObject {
                         {"Email", context.ToEmail},
@@ -136,9 +136,9 @@ public class EmailSender(
         var request = new MailjetRequest { Resource = SendV31.Resource }
         .Property(Send.Messages, new JArray {
             new JObject {
-                {"From", new JObject {
-                    {"Email", fromEmail},
-                }},
+                // {"From", new JObject {
+                //     {"Email", fromEmail},
+                // }},
                 {"To", new JArray {
                     new JObject {
                         {"Email", context.ToEmail},
@@ -164,9 +164,9 @@ public class EmailSender(
         var request = new MailjetRequest { Resource = SendV31.Resource }
         .Property(Send.Messages, new JArray {
             new JObject {
-                {"From", new JObject {
-                    {"Email", fromEmail},
-                }},
+                // {"From", new JObject {
+                //     {"Email", fromEmail},
+                // }},
                 {"To", new JArray {
                     new JObject {
                         {"Email", context.ToEmail},

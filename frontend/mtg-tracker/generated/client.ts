@@ -334,6 +334,7 @@ const LoginResponseDTO: z.ZodType<LoginResponseDTO> = z
     refreshToken: z.string(),
   })
   .passthrough();
+const LogoutRequestDTO = z.object({ refreshToken: z.string() }).passthrough();
 const UserLoginDTO = z
   .object({ email: z.string(), password: z.string() })
   .passthrough();
@@ -372,6 +373,7 @@ export const schemas = {
   UserWriteDTO,
   UserRegisterDTO,
   LoginResponseDTO,
+  LogoutRequestDTO,
   UserLoginDTO,
   RefreshRequestDTO,
   RefreshResponseDTO,
@@ -844,7 +846,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: z.unknown(),
+        schema: z.object({ refreshToken: z.string() }).passthrough(),
       },
     ],
     response: z.void(),
