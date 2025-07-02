@@ -8,7 +8,7 @@ import { UserWithEmailDTO } from "@/types/client";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",
-	description: "The Commander game tracker",
+	description: "A Commander stat tracker for Magic: The Gathering®",
 };
 
 const commissioner = Commissioner({
