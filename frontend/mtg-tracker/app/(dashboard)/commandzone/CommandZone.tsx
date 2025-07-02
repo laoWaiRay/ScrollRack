@@ -60,7 +60,7 @@ export default function CommandZone() {
 	const { gameState } = useGame();
 	const { snapshots, isLoading } = useStatSnapshot();
 	const router = useRouter();
-	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[0]);
+	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[2]);
 	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
 
   const podSize = labelToPodSize[podSizeLabel];

@@ -20,6 +20,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
     // GET: api/room
     // Returns all rooms for current user
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
     {
@@ -46,6 +47,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
 
     // GET: api/room/{roomCode}
     // Returns details for a specific room
+    [Authorize]
     [HttpGet("{roomCode}")]
     public async Task<ActionResult<RoomDTO>> GetRoom(string roomCode)
     {   var rooms = await _context.Rooms

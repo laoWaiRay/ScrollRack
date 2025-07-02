@@ -20,11 +20,12 @@ import dayjs from "dayjs";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useState } from "react";
 import East from "@/public/icons/east.svg";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 interface DateFilters {
-  showAllDates: boolean;
-  startDate: dayjs.Dayjs;
-  endDate: dayjs.Dayjs;
+	showAllDates: boolean;
+	startDate: dayjs.Dayjs;
+	endDate: dayjs.Dayjs;
 }
 
 const initialDateFilters: DateFilters = {
@@ -42,7 +43,7 @@ export default function Log() {
 	const [filtered, setFiltered] = useState(gameState.games);
 	const { toast } = useToast();
 	const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
+	const [isFetching, setIsFetching] = useState(false);
 
 	async function handleLoadMore() {
 		if (!gameState.hasMore) {
@@ -53,16 +54,22 @@ export default function Log() {
 		try {
 			let nextGames: GameState | null = null;
 			const { showAllDates, startDate, endDate } = dateFilters;
-      setIsFetching(true);
+			setIsFetching(true);
 
 			if (showAllDates) {
-				nextGames = await getGames(gameState.page + 1);
+				const authResult = await getGames(gameState.page + 1);
+				nextGames = extractAuthResult(authResult);
 			} else {
-				nextGames = await getGames(
+				const authResult = await getGames(
 					gameState.page + 1,
 					startDate.startOf("day").toISOString(),
 					endDate.endOf("day").toISOString()
 				);
+				nextGames = extractAuthResult(authResult);
+			}
+
+			if (!nextGames) {
+				throw Error("No game log data");
 			}
 
 			dispatchGameState({ type: ActionType.APPEND, payload: nextGames.games });
@@ -71,51 +78,60 @@ export default function Log() {
 				type: ActionType.SET_HAS_MORE,
 				payload: nextGames.hasMore,
 			});
-      
-      setIsFetching(false);
+
+			setIsFetching(false);
 		} catch (error) {
-      console.log(error);
+			console.log(error);
 			toast("Something went wrong fetching more games", "warn");
-      setIsFetching(false);
+			setIsFetching(false);
 		}
 	}
 
 	function resetDateFilters() {
 		setDateFilters(initialDateFilters);
-    updateGames(initialDateFilters);
+		updateGames(initialDateFilters);
 	}
 
 	async function handleSaveTimeFilter() {
 		setDateFilters(draftDateFilters);
-    updateGames(draftDateFilters);
+		updateGames(draftDateFilters);
 	}
 
-	const updateGames = useCallback(async ({ showAllDates, startDate, endDate }: DateFilters) => {
-		let updatedGames: GameState | null = null;
+	const updateGames = useCallback(
+		async ({ showAllDates, startDate, endDate }: DateFilters) => {
+			let updatedGames: GameState | null = null;
 
-		if (showAllDates) {
-			updatedGames = await getGames(0);
-		} else {
-			updatedGames = await getGames(
-				0,
-				startDate.startOf("day").toISOString(),
-				endDate.endOf("day").toISOString()
-			);
-		}
+			if (showAllDates) {
+				const authResult = await getGames(0);
+				updatedGames = extractAuthResult(authResult);
+			} else {
+				const authResult = await getGames(
+					0,
+					startDate.startOf("day").toISOString(),
+					endDate.endOf("day").toISOString()
+				);
+				updatedGames = extractAuthResult(authResult);
+			}
 
-		dispatchGameState({
-			type: ActionType.UPDATE,
-			payload: updatedGames.games,
-		});
-		dispatchGameState({
-			type: ActionType.SET_PAGE,
-			payload: updatedGames.page,
-		});
-		dispatchGameState({
-			type: ActionType.SET_HAS_MORE,
-			payload: updatedGames.hasMore,
-		});
-	}, [dispatchGameState]);
+			if (!updatedGames) {
+				throw Error("No game log data");
+			}
+
+			dispatchGameState({
+				type: ActionType.UPDATE,
+				payload: updatedGames.games,
+			});
+			dispatchGameState({
+				type: ActionType.SET_PAGE,
+				payload: updatedGames.page,
+			});
+			dispatchGameState({
+				type: ActionType.SET_HAS_MORE,
+				payload: updatedGames.hasMore,
+			});
+		},
+		[dispatchGameState]
+	);
 
 	useEffect(() => {
 		if (filter === "") {
@@ -131,7 +147,7 @@ export default function Log() {
 							.commander ?? "",
 				},
 			],
-      threshold: 0.3,
+			threshold: 0.3,
 		});
 
 		setFiltered(fuse.search(filter).map((result) => result.item));
@@ -158,15 +174,15 @@ export default function Log() {
 			<GameLogCard key={data.id} game={data} size="lg" />
 		));
 	}
-  
-  // Set client state back to default on dismount
-  useEffect(() => {
-    return () => {
-      (async function () {
-        await updateGames(initialDateFilters);
-      })()
-    }
-  }, [updateGames])
+
+	// Set client state back to default on dismount
+	useEffect(() => {
+		return () => {
+			(async function () {
+				await updateGames(initialDateFilters);
+			})();
+		};
+	}, [updateGames]);
 
 	return (
 		<DashboardLayout>
@@ -301,7 +317,7 @@ export default function Log() {
 									onClick={handleLoadMore}
 									style="transparent"
 									uppercase={false}
-                  disabled={isFetching}
+									disabled={isFetching}
 								>
 									Load More
 								</ButtonPrimary>

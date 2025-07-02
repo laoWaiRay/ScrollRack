@@ -89,6 +89,7 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
         var user = await _context.Users
             .Include(u => u.Friends)
             .Include(u => u.ReceivedFriendRequests)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         var friendUser = await _context.Users

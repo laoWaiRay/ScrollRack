@@ -7,7 +7,7 @@ export function useFriendDeck(friendId: string) {
 
   const fetcher = async () => {
     const authResult = await getFriendDecks(friendId);
-    const data = extractAuthResult(authResult);
+    const data = extractAuthResult(authResult) ?? [];
     return data;
   };
 

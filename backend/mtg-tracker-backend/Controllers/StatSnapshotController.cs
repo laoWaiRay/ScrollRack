@@ -64,8 +64,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
         DateTime now = DateTime.Now;
         DateTime[] periodStartTimes = [
             new DateTime(2000, 1, 1),
-            new DateTime(now.Year, 1, 1),
-            new DateTime(now.Year, now.Month, 1),
+            DateTime.Now.AddYears(-1),
+            DateTime.Now.AddDays(-30),
         ];
 
         string[] periodLabels = [

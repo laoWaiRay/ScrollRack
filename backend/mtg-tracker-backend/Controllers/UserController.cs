@@ -63,17 +63,9 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         return _mapper.Map<UserWithEmailDTO>(user);
     }
 
-    // // GET: api/User
-    // // Get a list of all users
-    // [HttpGet]
-    // public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers()
-    // {
-    //     var users = await _context.Users.ToListAsync();
-    //     return _mapper.Map<List<UserReadDTO>>(users);
-    // }
-
     // POST: api/User
     // Get a list of all users corresponding to the given ids
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers(UserMultipleDTO userMultipleDTO)
     {
@@ -91,6 +83,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
     // GET: api/User/id/{id}
     // Get a specific user by id
+    [Authorize]
     [HttpGet("id/{id}")]
     public async Task<ActionResult<UserReadDTO>> GetUserById(string id)
     {
@@ -106,6 +99,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
     // GET: api/User/name/{username}
     // Get a specific user by username
+    [Authorize]
     [HttpGet("name/{username}")]
     public async Task<ActionResult<UserReadDTO>> GetUserByName(string username)
     {
@@ -121,6 +115,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
     // GET: api/User/{id}/decks
     // Get all decks for a specific user
+    [Authorize]
     [HttpGet("{id}/decks")]
     public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetUserDecks(string id)
     {
@@ -326,6 +321,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         });
     }
 
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(TokenProviderService tokenProvider, LogoutRequestDTO requestDTO)
     {
@@ -506,7 +502,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signinManager, ResetPasswordRequestDTO request)
+        ResetPasswordRequestDTO request)
     {
         var id = request.Id;
         var token = request.Token;

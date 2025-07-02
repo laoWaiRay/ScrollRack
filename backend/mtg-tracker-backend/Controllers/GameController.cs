@@ -66,6 +66,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
 
     // GET: api/game/{id}
     // Returns details for a specific game
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<GameReadDTO>> GetGame(int id)
     {

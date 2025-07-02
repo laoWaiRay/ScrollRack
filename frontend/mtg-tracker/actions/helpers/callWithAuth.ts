@@ -6,7 +6,7 @@ import { isAccessTokenExpired } from "@/helpers/auth";
 import { RefreshRequestDTO } from "@/types/client";
 import { isAxiosError } from "axios";
 import { cookies } from "next/headers";
-import { setAuthCookies } from "../auth";
+import { setAuthCookies } from "./auth";
 import { AuthResult } from "@/types/server";
 
 

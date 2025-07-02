@@ -2,7 +2,7 @@
 
 import { api } from "@/generated/client";
 import {
-  ForgotPasswordRequestDTO,
+	ForgotPasswordRequestDTO,
 	LogoutRequestDTO,
 	ResetPasswordRequestDTO,
 	UserLoginDTO,
@@ -10,7 +10,11 @@ import {
 	UserWithEmailDTO,
 	UserWriteDTO,
 } from "@/types/client";
-import { clearAuthCookies, getRefreshToken, setAuthCookies } from "./auth";
+import {
+	clearAuthCookies,
+	getRefreshToken,
+	setAuthCookies,
+} from "./helpers/auth";
 import { callWithAuth } from "./helpers/callWithAuth";
 import { isAxiosError } from "axios";
 import { AuthResult } from "@/types/server";
@@ -44,14 +48,14 @@ export async function login(loginDTO: UserLoginDTO) {
 }
 
 export async function logout() {
-  const refreshToken = await getRefreshToken();
-  if (refreshToken) {
-    const logoutRequestDTO: LogoutRequestDTO = {
-      refreshToken: refreshToken
-    };
-    await callWithAuth(api.postApiUserlogout, logoutRequestDTO);
-  }
-  await clearAuthCookies();
+	const refreshToken = await getRefreshToken();
+	if (refreshToken) {
+		const logoutRequestDTO: LogoutRequestDTO = {
+			refreshToken: refreshToken,
+		};
+		await callWithAuth(api.postApiUserlogout, logoutRequestDTO);
+	}
+	await clearAuthCookies();
 }
 
 export async function updateUser(userWriteDTO: UserWriteDTO, id: string) {
@@ -62,28 +66,91 @@ export async function sendVerifyEmailLink() {
 	return await callWithAuth(api.postApiUserresendVerifyEmailLink);
 }
 
-export async function sendPasswordResetLink(requestDTO: ForgotPasswordRequestDTO) {
-  return await callWithAuth(api.postApiUsersendPasswordReset, requestDTO);
+export async function sendPasswordResetLink(
+	requestDTO: ForgotPasswordRequestDTO
+) {
+	try {
+		await api.postApiUsersendPasswordReset(requestDTO);
+		const result: AuthResult<never> = {
+			success: true,
+		};
+		return result;
+	} catch (error) {
+		if (isAxiosError(error)) {
+			const result: AuthResult<never> = {
+				success: false,
+				error: {
+					data: error.response?.data,
+					status: error.response?.status ?? 500,
+				},
+			};
+			return result;
+		}
+		return {
+			success: false,
+			error: {
+				status: 500,
+				data: "Server Error",
+			},
+		};
+	}
 }
 
 export async function resetPassword(requestDTO: ResetPasswordRequestDTO) {
-  return await callWithAuth(api.postApiUserresetPassword, requestDTO);
+	try {
+		await api.postApiUserresetPassword(requestDTO);
+		const result: AuthResult<never> = {
+			success: true,
+		};
+		return result;
+	} catch (error) {
+		if (isAxiosError(error)) {
+			const result: AuthResult<never> = {
+				success: false,
+				error: {
+					status: error.response?.status ?? 500,
+					data: error.response?.data,
+				},
+			};
+			return result;
+		}
+		return {
+			success: false,
+			error: {
+				status: 500,
+				data: "Server Error",
+			},
+		};
+	}
 }
 
 export async function registerUser(userRegisterDTO: UserRegisterDTO) {
-	const authResult = await callWithAuth(
-		api.postApiUserregister,
-		userRegisterDTO
-	);
-	if (authResult.success && authResult.data) {
-    const { accessToken, refreshToken } = authResult.data
-    await setAuthCookies(accessToken, refreshToken);
+	try {
+		const authResult = await api.postApiUserregister(userRegisterDTO);
+		const { accessToken, refreshToken } = authResult;
+		await setAuthCookies(accessToken, refreshToken);
+		const result: AuthResult<UserWithEmailDTO> = {
+			success: true,
+			data: authResult.userData,
+		};
+		return result;
+	} catch (error) {
+		if (isAxiosError(error)) {
+			const result: AuthResult<UserWithEmailDTO> = {
+				success: false,
+				error: {
+					status: error.response?.status ?? 500,
+					data: error.response?.data,
+				},
+			};
+			return result;
+		}
+		return {
+			success: false,
+			error: {
+				status: 500,
+				data: "Server Error",
+			},
+		};
 	}
-
-  const result: AuthResult<UserWithEmailDTO> = {
-    success: true,
-    data: authResult.data?.userData
-  }
-
-  return result;
 }

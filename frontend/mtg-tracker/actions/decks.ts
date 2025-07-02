@@ -47,7 +47,7 @@ export async function deleteDeck(deckId: number) {
 }
 
 export async function getFriendDecks(friendId: string) {
-	return await callWithAuth(api.getApiDeckfriendId, {
+	return await callWithAuth(api.getApiDeckfriendId, undefined, {
 		params: { id: friendId },
 	});
 }

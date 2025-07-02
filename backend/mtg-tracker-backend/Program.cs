@@ -132,11 +132,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddSignalR();
 
 // Cookies
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // options.Cookie.SameSite = SameSiteMode.None;
-    // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-});
+// builder.Services.ConfigureApplicationCookie(options =>
+// {
+//     // options.Cookie.SameSite = SameSiteMode.None;
+//     // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+// });
 
 var app = builder.Build();
 

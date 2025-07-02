@@ -6,7 +6,7 @@ import {
 } from "@microsoft/signalr";
 import { RoomDTO } from "@/types/client";
 import { useEffect, useRef } from "react";
-import { getAccessToken } from "@/actions/getAccessToken";
+import { getAccessToken } from "@/actions/helpers/auth";
 
 export interface RoomConnectionHandlers {
 	handleReceiveUpdateRoom?: (players: RoomDTO) => void;

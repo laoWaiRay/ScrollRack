@@ -4,7 +4,6 @@ import { Dispatch, SetStateAction, useState } from "react";
 import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
-import { api } from "@/generated/client";
 import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
 import useForm from "@/hooks/useForm";
 import {
@@ -19,11 +18,11 @@ import {
 import { renderErrors } from "@/helpers/renderErrors";
 import { Form, FormField } from "@/components/Form";
 import { handleServerApiError } from "@/helpers/validationHelpers";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { ActionType } from "@/context/AuthContext";
 import { UserRegisterDTO } from "@/types/client";
 import { registerUser } from "@/actions/user";
+import { ActionType } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { ServerApiError } from "@/types/server";
 
 const initialValues: FormData = {
@@ -41,10 +40,10 @@ export default function RegisterPage() {
 	const [isPwHidden, setIsPwHidden] = useState(true);
 	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
 	const { dispatch } = useAuth();
+  const router = useRouter();
 
 	const { email, username, password, confirmPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
-	const router = useRouter();
 	const [isFetching, setIsFetching] = useState(false);
 
 	async function onSubmit(
@@ -60,16 +59,15 @@ export default function RegisterPage() {
 				email,
 				password,
 			};
-			const authResult = await registerUser(userRegisterDTO);
-			if (authResult.success && authResult.data) {
-				const userDTO = authResult.data;
-				dispatch({ type: ActionType.LOGIN, payload: userDTO });
-				router.push("/commandzone");
-				setIsFetching(false);
-			} else {
-				const { status = 500, data = "Error" } = authResult.error ?? {};
-				throw new ServerApiError(status, data);
-			}
+      const authResult = await registerUser(userRegisterDTO);
+
+      if (authResult.success && authResult.data) {
+        dispatch({ type: ActionType.LOGIN, payload: authResult.data })
+        router.push("/commandzone");
+      } else {
+        const { status = 500, data = "Error" } = authResult.error ?? {};
+        throw new ServerApiError(status, data);
+      }
 		} catch (error) {
 			handleServerApiError<Errors>(
 				[UNAUTHORIZED, BAD_REQUEST],
