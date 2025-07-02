@@ -1375,17 +1375,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/LoginResponseDTO"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/LoginResponseDTO"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadDTO"
+                  "$ref": "#/components/schemas/LoginResponseDTO"
                 }
               }
             }

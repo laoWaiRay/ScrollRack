@@ -3,8 +3,7 @@ import { Commissioner, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import RootLayout from "./RootLayout";
-import { setAuthCookies } from "@/actions/auth";
-import { redirect } from "next/navigation";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",
@@ -25,7 +24,8 @@ export default async function layout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const user = await getUserWithEmail();
+	const authResult = await getUserWithEmail();
+  let user = extractAuthResult(authResult);
 
 	return (
 		<html lang="en">

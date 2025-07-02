@@ -221,9 +221,6 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             // Send an email confirmation that password was reset
             if (!string.IsNullOrEmpty(user.Email))
             {
-                var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
-                var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
-
                 EmailTemplateContext emailContext = new()
                 {
 
@@ -246,9 +243,9 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     // Custom registration endpoint to be used instead of the default endpoint
     // created by Identity minimal API endpoints
     [HttpPost("register")]
-    public async Task<ActionResult<UserReadDTO>> Register(
+    public async Task<ActionResult<LoginResponseDTO>> Register(
+        TokenProviderService tokenProvider,
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
         UserRegisterDTO userRegisterDTO)
     {
         var user = new ApplicationUser
@@ -304,9 +301,6 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             return BadRequest();
         }
 
-        await signInManager.SignOutAsync();
-        await signInManager.SignInAsync(user, isPersistent: true);
-
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         EmailTemplateContext emailContext = new()
@@ -322,7 +316,14 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         };
         await _emailSender.SendEmailAsync(emailContext);
 
-        return _mapper.Map<UserReadDTO>(user);
+        var accessToken = tokenProvider.CreateAccessToken(user);
+        var refreshToken = await tokenProvider.CreateRefreshToken(user);
+        return Ok(new LoginResponseDTO
+        {
+            UserData = _mapper.Map<UserWithEmailDTO>(user),
+            AccessToken = accessToken,
+            RefreshToken = refreshToken.Token
+        });
     }
 
     [HttpPost("logout")]

@@ -1,11 +1,12 @@
 "use client";
+import { deleteDeck, editDeck } from "@/actions/decks";
 import ButtonLink from "@/components/ButtonLink";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Dialog from "@/components/Dialog";
 import ListBox from "@/components/ListBox";
 import OptionsLayout from "@/components/OptionsLayout";
 import TextInput from "@/components/TextInput";
-import { api } from "@/generated/client";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { useAuth } from "@/hooks/useAuth";
 import { useDeck } from "@/hooks/useDeck";
 import { tryGetLocalStoragePlayerData } from "@/hooks/useLocalStorage";
@@ -49,10 +50,8 @@ export default function DeckEdit() {
 				moxfield: moxfield,
 			};
 
-			await api.putApiDeckId(deckWriteDTO, {
-				params: { id: selectedDeck.id },
-				withCredentials: true,
-			});
+      const authResult = await editDeck(deckWriteDTO, selectedDeck.id);
+      extractAuthResult(authResult);
 			mutate();
 
 			setSelected(null);
@@ -70,10 +69,8 @@ export default function DeckEdit() {
 		}
 
 		try {
-			await api.deleteApiDeckId(undefined, {
-				params: { id: selectedDeck.id },
-				withCredentials: true,
-			});
+      const authResult = await deleteDeck(selectedDeck.id);
+      extractAuthResult(authResult);
 			mutate();
 
 			if (user) {

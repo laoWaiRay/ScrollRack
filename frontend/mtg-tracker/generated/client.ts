@@ -327,15 +327,15 @@ const UserWriteDTO = z
 const UserRegisterDTO = z
   .object({ userName: z.string(), email: z.string(), password: z.string() })
   .passthrough();
-const UserLoginDTO = z
-  .object({ email: z.string(), password: z.string() })
-  .passthrough();
 const LoginResponseDTO: z.ZodType<LoginResponseDTO> = z
   .object({
     userData: UserWithEmailDTO,
     accessToken: z.string(),
     refreshToken: z.string(),
   })
+  .passthrough();
+const UserLoginDTO = z
+  .object({ email: z.string(), password: z.string() })
   .passthrough();
 const RefreshRequestDTO = z.object({ refreshToken: z.string() }).passthrough();
 const RefreshResponseDTO = z
@@ -371,8 +371,8 @@ export const schemas = {
   UserMultipleDTO,
   UserWriteDTO,
   UserRegisterDTO,
-  UserLoginDTO,
   LoginResponseDTO,
+  UserLoginDTO,
   RefreshRequestDTO,
   RefreshResponseDTO,
   ForgotPasswordRequestDTO,
@@ -889,7 +889,7 @@ const endpoints = makeApi([
         schema: UserRegisterDTO,
       },
     ],
-    response: UserReadDTO,
+    response: LoginResponseDTO,
   },
   {
     method: "post",

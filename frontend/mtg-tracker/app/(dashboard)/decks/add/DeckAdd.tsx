@@ -1,11 +1,12 @@
 "use client";
+import { createDeck } from "@/actions/decks";
 import ButtonLink from "@/components/ButtonLink";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import ComboBox from "@/components/ComboBox";
 import OptionsLayout from "@/components/OptionsLayout";
 import TextInput from "@/components/TextInput";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
-import { api } from "@/generated/client";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { useAuth } from "@/hooks/useAuth";
 import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
@@ -123,11 +124,12 @@ export default function DeckAdd() {
 		};
 
 		try {
-			await api.postApiDeck(deckWriteDTO, { withCredentials: true });
-			setSelected(null);
-			setQuery("");
-			setMoxfield("");
-			toast(`Saved deck: ${selected}`, "success");
+			const authResult = await createDeck(deckWriteDTO);
+      extractAuthResult(authResult);
+      setSelected(null);
+      setQuery("");
+      setMoxfield("");
+      toast(`Saved deck: ${selected}`, "success");
 		} catch (error) {
 			if (isAxiosError(error) && error.response?.status === CONFLICT) {
 				toast(`Deck with commander ${selected} already exists`, "warn");

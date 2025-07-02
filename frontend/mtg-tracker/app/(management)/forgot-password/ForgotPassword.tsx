@@ -14,9 +14,11 @@ import {
 	requiredEmail,
 } from "@/types/formValidation";
 import useForm from "@/hooks/useForm";
-import { handleAxiosErrors } from "@/helpers/validationHelpers";
+import { handleServerApiError } from "@/helpers/validationHelpers";
 import { BAD_REQUEST } from "@/constants/httpStatus";
 import { renderErrors } from "@/helpers/renderErrors";
+import { sendPasswordResetLink } from "@/actions/user";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 const initialValues: FormData = {
 	email: "",
@@ -37,16 +39,14 @@ export default function ForgotPassword() {
 		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
 	) {
 		try {
-			const request: ForgotPasswordRequestDTO = {
-				email,
-			};
-			await api.postApiUsersendPasswordReset(request);
+      const authResult = await sendPasswordResetLink({ email });
+      extractAuthResult(authResult);
 			toast(`Sent password reset link to ${email}`, "success");
 			if (_setErrors) {
 				_setErrors({});
 			}
 		} catch (error) {
-			handleAxiosErrors<Errors>(
+			handleServerApiError<Errors>(
 				[BAD_REQUEST],
 				error,
 				errorFieldMap,

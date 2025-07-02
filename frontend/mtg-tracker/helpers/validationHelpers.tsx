@@ -1,4 +1,5 @@
 import { ErrorFieldMap, ValidationError } from "@/types/formValidation";
+import { ServerApiError } from "@/types/server";
 import { isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 
@@ -39,7 +40,7 @@ export function validationErrorArrayToErrors<
 	return errors;
 }
 
-export function handleAxiosErrors<
+export function handleServerApiError<
 	ErrorsT extends Record<string, ValidationError[]>
 >(
   expectedResponseStatuses: number[],
@@ -49,16 +50,16 @@ export function handleAxiosErrors<
   setErrors: Dispatch<SetStateAction<Partial<ErrorsT>>> | undefined,
   errors: Partial<ErrorsT> | undefined,
 ) {
-	if (isAxiosError(error)) {
+	if (error instanceof ServerApiError) {
     console.log(error)
-		const status = error.response?.status;
+		const status = error.status;
 		if (
 			status &&
 			expectedResponseStatuses.includes(status) &&
-			isValidationErrorArray(error.response?.data)
+			isValidationErrorArray(error.data)
 		) {
 			const responseErrors = validationErrorArrayToErrors<ErrorsT>(
-				error.response.data,
+				error.data,
 				errorFieldMap,
 				ErrorsCtor
 			);

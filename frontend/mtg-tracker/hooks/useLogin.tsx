@@ -4,30 +4,29 @@ import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
 import { UserLoginDTO, UserReadDTO } from "@/types/client";
 import { login } from "@/actions/user";
+import { ServerApiError } from "@/types/server";
 
 export function useLogin() {
 	const router = useRouter();
-  const { dispatch } = useAuth();
- 
-  async function _loginAsync(email: string, password: string) {
-    let user: UserReadDTO | null = null;
+	const { dispatch } = useAuth();
 
-    try {
-      const loginDTO: UserLoginDTO = {
-        email,
-        password,
-      };
-      user = await login(loginDTO);
-      
-      dispatch({ type: ActionType.LOGIN, payload: user });
-      router.push("/commandzone");
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  }
+	async function _loginAsync(email: string, password: string) {
+		const loginDTO: UserLoginDTO = {
+			email,
+			password,
+		};
+		const authResult = await login(loginDTO);
 
-  const loginAsync = useCallback(_loginAsync, []);
-  
-  return { loginAsync };
+		if (authResult.success && authResult.data) {
+			dispatch({ type: ActionType.LOGIN, payload: authResult.data });
+			router.push("/commandzone");
+		} else {
+			const { status = 500, data = "Error" } = authResult.error ?? {};
+			throw new ServerApiError(status, data);
+		}
+	}
+
+	const loginAsync = useCallback(_loginAsync, []);
+
+	return { loginAsync };
 }

@@ -17,7 +17,7 @@ import useForm from "@/hooks/useForm";
 import { renderErrors } from "@/helpers/renderErrors";
 import { UNAUTHORIZED } from "@/constants/httpStatus";
 import {
-	handleAxiosErrors,
+	handleServerApiError,
 } from "@/helpers/validationHelpers";
 
 const initialValues: FormData = {
@@ -45,7 +45,7 @@ export default function LoginPage() {
 				_setErrors({});
 			}
 		} catch (error) {
-			handleAxiosErrors<Errors>(
+			handleServerApiError<Errors>(
         [UNAUTHORIZED],
 				error,
 				errorFieldMap,

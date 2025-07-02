@@ -16,15 +16,16 @@ import {
 import { renderErrors } from "@/helpers/renderErrors";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Image from "next/image";
-import { api } from "@/generated/client";
 import { UserReadDTO, UserWriteDTO } from "@/types/client";
 import { useRouter } from "next/navigation";
-import { handleAxiosErrors } from "@/helpers/validationHelpers";
+import { handleServerApiError } from "@/helpers/validationHelpers";
 import { ActionType } from "@/context/AuthContext";
 import useToast from "@/hooks/useToast";
 import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
 import CheckCircle from "@/public/icons/check_circle.svg";
 import Tooltip from "@/components/Tooltip";
+import { sendVerifyEmailLink, updateUser } from "@/actions/user";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 interface AccountInterface {
 	userEmail: string;
@@ -130,13 +131,8 @@ export default function Account({
 		};
 
 		try {
-			await api.putApiUserId(userWriteDTO, {
-				params: { id: user.id },
-				withCredentials: true,
-        // headers: {
-        //   Authorization: `Bearer ${token}`
-        // }
-			});
+      const authResult = await updateUser(userWriteDTO, user.id);
+      extractAuthResult(authResult);
 
 			const userReadDTO: UserReadDTO = {
 				id: user.id,
@@ -149,7 +145,7 @@ export default function Account({
 			toast("Updated Profile", "success");
 			router.push("/commandzone");
 		} catch (error) {
-			handleAxiosErrors<Errors>(
+			handleServerApiError<Errors>(
 				[UNAUTHORIZED, BAD_REQUEST],
 				error,
 				errorFieldMap,
@@ -162,7 +158,8 @@ export default function Account({
   
   async function handleSendConfirmEmail() {
     try {
-      await api.postApiUserresendVerifyEmailLink(undefined, { withCredentials: true }) ;
+      const authResult = await sendVerifyEmailLink();
+      extractAuthResult(authResult);
       toast(`Sent verification email to ${userEmail}`, "success");
     } catch (error) {
       console.log(error);

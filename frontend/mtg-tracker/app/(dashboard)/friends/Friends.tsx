@@ -13,9 +13,10 @@ import { useState } from "react";
 import UserRemove from "@/public/icons/user-remove.svg";
 import { useFriendDeck } from "@/hooks/useFriendDeck";
 import Dialog from "@/components/Dialog";
-import { api } from "@/generated/client";
 import useToast from "@/hooks/useToast";
 import { ActionType } from "@/context/FriendContext";
+import { deleteFriend } from "@/actions/friends";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export default function Friends() {
 	const { user } = useAuth();
@@ -34,7 +35,8 @@ export default function Friends() {
     const friendName = selected;
 
     try {
-      await api.deleteApiFriendId(undefined, { params: { id: friendId }, withCredentials: true });
+      const authResult = await deleteFriend(friendId);
+      extractAuthResult(authResult);
       dispatch({ type: ActionType.UPDATE, payload: friends.filter(f => f.id !== friendId) });
       setSelected(null);
       setQuery("");

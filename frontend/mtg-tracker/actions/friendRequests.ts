@@ -2,27 +2,31 @@
 
 import { api } from "@/generated/client";
 import { callWithAuth } from "./helpers/callWithAuth";
-import {
-	FriendRequestDTO,
-	UserMultipleDTO,
-} from "@/types/client";
+import { FriendRequestDTO, UserMultipleDTO } from "@/types/client";
 
 export async function getReceivedFriendRequests() {
-	try {
-		const receivedFriendRequests: FriendRequestDTO[] | null =
-			await callWithAuth(api.getApiFriendRequestreceived);
+	const authResult = await callWithAuth(api.getApiFriendRequestreceived);
+
+	if (authResult.success && authResult.data) {
+		const receivedFriendRequests: FriendRequestDTO[] | null = authResult.data;
+
 		if (receivedFriendRequests != null) {
 			const userMultipleDTO: UserMultipleDTO = { ids: [] };
+
 			receivedFriendRequests.forEach((request) => {
 				userMultipleDTO.ids.push(request.senderId);
 			});
-			const userData = await callWithAuth(api.postApiUser, userMultipleDTO);
-			return userData ?? [];
-		}
 
-		return [];
-	} catch (error) {
-		console.log(error);
-		throw error;
+			const userDataAuthResult = await callWithAuth(
+				api.postApiUser,
+				userMultipleDTO
+			);
+
+			return userDataAuthResult;
+		}
+    
+    return { success: false };
+	} else {
+    return { success: false };
 	}
 }

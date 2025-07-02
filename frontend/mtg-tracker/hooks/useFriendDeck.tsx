@@ -1,11 +1,14 @@
-import { api } from "@/generated/client";
+import { getFriendDecks } from "@/actions/decks";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 import useSWR from "swr";
 
 export function useFriendDeck(friendId: string) {
   const shouldFetch = friendId !== "";
 
-  const fetcher = () => {
-    return api.getApiDeckfriendId({ params: { id: friendId }, withCredentials: true });
+  const fetcher = async () => {
+    const authResult = await getFriendDecks(friendId);
+    const data = extractAuthResult(authResult);
+    return data;
   };
 
   const { data, error, isLoading, mutate } = useSWR(

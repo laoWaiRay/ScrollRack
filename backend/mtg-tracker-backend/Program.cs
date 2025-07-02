@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine("JWT Secret: " + builder.Configuration["Jwt:Secret"]);
@@ -51,6 +52,7 @@ builder.Services.AddDbContext<MtgContext>(options =>
     options
         .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
         .UseSnakeCaseNamingConvention()
+        .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
 );
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 

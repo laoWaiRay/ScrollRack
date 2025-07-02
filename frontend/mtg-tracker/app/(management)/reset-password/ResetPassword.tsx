@@ -4,7 +4,6 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import TextInput from "@/components/TextInput";
-import { api } from "@/generated/client";
 import { ResetPasswordRequestDTO } from "@/types/client";
 import useToast from "@/hooks/useToast";
 import {
@@ -15,10 +14,11 @@ import {
 	passwordMismatch,
 } from "@/types/formValidation";
 import useForm from "@/hooks/useForm";
-import { handleAxiosErrors } from "@/helpers/validationHelpers";
+import { handleServerApiError } from "@/helpers/validationHelpers";
 import { BAD_REQUEST, NOT_FOUND } from "@/constants/httpStatus";
 import { renderErrors } from "@/helpers/renderErrors";
-import { isAxiosError } from "axios";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { resetPassword } from "@/actions/user";
 
 const initialValues: FormData = {
 	password: "",
@@ -57,18 +57,15 @@ export default function ResetPassword() {
 				password,
 				token,
 			};
-			await api.postApiUserresetPassword(request);
-      router.push("/login");
+			const authResult = await resetPassword(request);
+      extractAuthResult(authResult);
+			router.push("/login");
 			toast(`Successfully reset password`, "success");
 			if (_setErrors) {
 				_setErrors({});
 			}
 		} catch (error) {
-			if (isAxiosError(error) && typeof error.response?.data === "string") {
-				setTokenError("Invalid or expired reset token");
-			}
-
-			handleAxiosErrors<Errors>(
+			handleServerApiError<Errors>(
 				[BAD_REQUEST, NOT_FOUND],
 				error,
 				errorFieldMap,
@@ -88,7 +85,7 @@ export default function ResetPassword() {
 	return (
 		<div className="p-6 bg-gradient-hero w-full flex flex-col justify-center items-center min-h-screen">
 			<div className="flex flex-col gap-4 max-w-md text-fg-light p-12 rounded-lg">
-				{tokenError || unknownErrorMessage ? (
+				{tokenError || unknownErrorMessage && unknownErrorMessage?.length > 0 ? (
 					<div className="p-12">Invalid or expired reset token</div>
 				) : (
 					<>
@@ -100,9 +97,9 @@ export default function ResetPassword() {
 								value={password}
 								onChange={handleChange}
 								errorMessage={passwordErrorMessages}
-                type="password"
-                hidden={isPwHidden}
-                toggleHidden={() => setIsPwHidden(!isPwHidden)}
+								type="password"
+								hidden={isPwHidden}
+								toggleHidden={() => setIsPwHidden(!isPwHidden)}
 							/>
 							<TextInput
 								name="confirmPassword"
@@ -110,9 +107,9 @@ export default function ResetPassword() {
 								value={confirmPassword}
 								onChange={handleChange}
 								errorMessage={confirmPasswordErrorMessages}
-                type="password"
-                hidden={isConfirmPwHidden}
-                toggleHidden={() => setIsConfirmPwHidden(!isConfirmPwHidden)}
+								type="password"
+								hidden={isConfirmPwHidden}
+								toggleHidden={() => setIsConfirmPwHidden(!isConfirmPwHidden)}
 							/>
 							<ButtonPrimary
 								onClick={() => {}}

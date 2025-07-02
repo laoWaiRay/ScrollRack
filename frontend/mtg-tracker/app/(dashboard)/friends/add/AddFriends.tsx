@@ -9,7 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useZxing } from "react-zxing";
 import QrCodeScan from "@/public/icons/qrcode-scan.svg";
 import { api } from "@/generated/client";
-import { getFriends } from "@/actions/friends";
+import { getFriends, sendFriendRequest } from "@/actions/friends";
 import useToast from "@/hooks/useToast";
 import { isAxiosError } from "axios";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
@@ -17,6 +17,8 @@ import { isValidationErrorArray } from "@/helpers/validationHelpers";
 import { useFriend } from "@/hooks/useFriend";
 import { ActionType } from "@/context/FriendContext";
 import UserAdd from "@/public/icons/user-add.svg";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { ServerApiError } from "@/types/server";
 
 export default function AddFriends() {
 	const { user } = useAuth();
@@ -56,22 +58,20 @@ export default function AddFriends() {
 	async function handleSendFriendRequest(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		try {
-			await api.postApiFriendRequestUserName(undefined, {
-				params: { userName: friendUserName },
-				withCredentials: true,
-			});
+			const authResult = await sendFriendRequest(friendUserName);
+      extractAuthResult(authResult);
 			setFriendUserName("");
 			toast(`Sent Friend Request to ${friendUserName}`, "success");
 		} catch (error) {
-			if (isAxiosError(error)) {
-				const status = error.response?.status;
+			if (error instanceof ServerApiError) {
+				const status = error.status;
 				switch (status) {
 					case NOT_FOUND:
 						toast("Username does not exist", "warn");
 						return;
 					case CONFLICT:
-						if (isValidationErrorArray(error.response?.data)) {
-							const errorMessage = error.response.data[0].description;
+						if (isValidationErrorArray(error.data)) {
+							const errorMessage = error.data[0]?.description;
 							toast(errorMessage, "warn");
 						} else {
 							toast("Could not send request", "warn");
@@ -95,7 +95,8 @@ export default function AddFriends() {
 		const updateFriendsList = async () => {
 			setResult("");
 			try {
-				const updatedFriends = (await getFriends()) ?? [];
+				const authResult = await getFriends();
+        const updatedFriends = extractAuthResult(authResult) ?? [];
 				dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
 			} catch (error) {
 				console.log(error);

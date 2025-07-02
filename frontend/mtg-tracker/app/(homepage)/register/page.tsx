@@ -18,10 +18,13 @@ import {
 } from "@/types/formValidation";
 import { renderErrors } from "@/helpers/renderErrors";
 import { Form, FormField } from "@/components/Form";
-import { handleAxiosErrors } from "@/helpers/validationHelpers";
+import { handleServerApiError } from "@/helpers/validationHelpers";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { ActionType } from "@/context/AuthContext";
+import { UserRegisterDTO } from "@/types/client";
+import { registerUser } from "@/actions/user";
+import { ServerApiError } from "@/types/server";
 
 const initialValues: FormData = {
 	email: "",
@@ -37,12 +40,12 @@ export default function RegisterPage() {
 	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
 	const [isConfirmPwHidden, setIsConfirmPwHidden] = useState(true);
-  const { dispatch } = useAuth();
+	const { dispatch } = useAuth();
 
 	const { email, username, password, confirmPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
 	const router = useRouter();
-  const [isFetching, setIsFetching] = useState(false);
+	const [isFetching, setIsFetching] = useState(false);
 
 	async function onSubmit(
 		data: FormData,
@@ -51,14 +54,24 @@ export default function RegisterPage() {
 	) {
 		const { username, email, password } = data;
 		try {
-      setIsFetching(true);
-      dispatch({ type: ActionType.LOGOUT });
-			const userDTO = await api.postApiUserregister({ userName: username, email, password }, { withCredentials: true });
-      dispatch({ type: ActionType.LOGIN, payload: userDTO });
-			router.push("/commandzone");
-      setIsFetching(false);
+			setIsFetching(true);
+			const userRegisterDTO: UserRegisterDTO = {
+				userName: username,
+				email,
+				password,
+			};
+			const authResult = await registerUser(userRegisterDTO);
+			if (authResult.success && authResult.data) {
+				const userDTO = authResult.data;
+				dispatch({ type: ActionType.LOGIN, payload: userDTO });
+				router.push("/commandzone");
+				setIsFetching(false);
+			} else {
+				const { status = 500, data = "Error" } = authResult.error ?? {};
+				throw new ServerApiError(status, data);
+			}
 		} catch (error) {
-			handleAxiosErrors<Errors>(
+			handleServerApiError<Errors>(
 				[UNAUTHORIZED, BAD_REQUEST],
 				error,
 				errorFieldMap,
@@ -66,7 +79,7 @@ export default function RegisterPage() {
 				_setErrors,
 				_errors
 			);
-      setIsFetching(false);
+			setIsFetching(false);
 		}
 	}
 
@@ -104,10 +117,10 @@ export default function RegisterPage() {
 			toggleHidden: () => setIsConfirmPwHidden(!isConfirmPwHidden),
 		},
 	];
-  
-  function handleGoogleRedirect() {
-    window.location.href = "https://localhost:7165/api/user/signin-google";
-  }
+
+	function handleGoogleRedirect() {
+		window.location.href = "https://localhost:7165/api/user/signin-google";
+	}
 
 	return (
 		<div className={`${styles.gridB} z-20`}>
@@ -122,7 +135,12 @@ export default function RegisterPage() {
 
 				<Form fields={formFields} handleChange={handleChange} />
 
-				<ButtonPrimary onClick={() => {}} type="submit" disabled={isFetching} uppercase={false}>
+				<ButtonPrimary
+					onClick={() => {}}
+					type="submit"
+					disabled={isFetching}
+					uppercase={false}
+				>
 					Sign Up
 				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
@@ -130,7 +148,12 @@ export default function RegisterPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={handleGoogleRedirect} style="google" disabled={isFetching} uppercase={false}>
+				<ButtonPrimary
+					onClick={handleGoogleRedirect}
+					style="google"
+					disabled={isFetching}
+					uppercase={false}
+				>
 					<div className="flex items-center justify-center">
 						Sign up with Google <GoogleLogo className="ml-2" />
 					</div>

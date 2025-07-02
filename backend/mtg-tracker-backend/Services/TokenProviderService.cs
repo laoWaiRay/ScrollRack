@@ -20,6 +20,9 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
             new Claim("email_verified", user.EmailConfirmed.ToString()),
+            new Claim(JwtRegisteredClaimNames.Iat, 
+                        DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), 
+                        ClaimValueTypes.Integer64)
         };
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));

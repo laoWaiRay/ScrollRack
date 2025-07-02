@@ -2,13 +2,14 @@
 
 import { api } from "@/generated/client";
 import { callWithAuth } from "./helpers/callWithAuth";
+import { DeckWriteDTO } from "@/types/client";
 
 /*
  * Login Logic
  * User initiates login
  *  Success => Server puts tokens into cookies, Client gets user data
  *  Fail => Client gets error
-*/
+ */
 
 /*
  * API Call Logic
@@ -19,8 +20,34 @@ import { callWithAuth } from "./helpers/callWithAuth";
  *  Client gets server response
  *    Success => now has user data
  *    Fail => redirect to "/login"
-*/
+ */
+
+// Server actions should NEVER throw errors. Instead they return an AuthResult object
+// that says whether or not the operation was successful. Need to change all try/catch to
+// check the success attribute on the client to see if there is possibly an error to handle.
 
 export async function getDecks() {
-	return (await callWithAuth(api.getApiDeck)) ?? [];
+	return await callWithAuth(api.getApiDeck);
+}
+
+export async function createDeck(deckWriteDTO: DeckWriteDTO) {
+	return await callWithAuth(api.postApiDeck, deckWriteDTO);
+}
+
+export async function editDeck(deckWriteDTO: DeckWriteDTO, deckId: number) {
+	return await callWithAuth(api.putApiDeckId, deckWriteDTO, {
+		params: { id: deckId },
+	});
+}
+
+export async function deleteDeck(deckId: number) {
+	return await callWithAuth(api.deleteApiDeckId, undefined, {
+		params: { id: deckId },
+	});
+}
+
+export async function getFriendDecks(friendId: string) {
+	return await callWithAuth(api.getApiDeckfriendId, {
+		params: { id: friendId },
+	});
 }
