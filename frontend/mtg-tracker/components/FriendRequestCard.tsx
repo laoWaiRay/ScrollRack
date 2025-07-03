@@ -8,6 +8,7 @@ import FriendRequestUserCard from "./FriendRequestUserCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { acceptFriendRequest, deleteFriendRequest, getReceivedFriendRequests } from "@/actions/friendRequests";
+import { useState } from "react";
 
 interface FriendRequestCardInterface {
 	user: UserReadDTO;
@@ -19,16 +20,20 @@ export default function FriendRequestCard({
 	const { toast } = useToast();
   const { friends, dispatch: dispatchFriend } = useFriend();
   const { mutate } = useFriendRequest();
+  const [isFetching, setIsFetching] = useState(false);
 
 	async function handleAccept() {
 		try {
+      setIsFetching(true);
       const userFriendAddDTO: UserFriendAddDTO = { id: user.id, requiresPermission: true };
       const authResult = await acceptFriendRequest(userFriendAddDTO);
       extractAuthResult(authResult);
       dispatchFriend({ type: FriendActionType.UPDATE, payload: [ ...friends, user] });
       mutate();
 			toast(`Added ${user.userName} to Friends`, "success");
+      setIsFetching(false);
 		} catch (error) {
+      setIsFetching(false);
       console.log(error);
 			toast("Error accepting friend request", "error");
 		}
@@ -36,10 +41,12 @@ export default function FriendRequestCard({
 
 	async function handleReject() {
     try {
+      setIsFetching(true);
       const authResult = await getReceivedFriendRequests();
       const receivedFriendRequests = extractAuthResult(authResult) ?? [];
       const toRemove = receivedFriendRequests.find(request => request.senderId == user.id);
       if (!toRemove || !toRemove.id) {
+        setIsFetching(false);
         return;
       }
       const deleteAuthResult = await deleteFriendRequest(toRemove.id);
@@ -48,6 +55,7 @@ export default function FriendRequestCard({
     } catch (error) {
       console.log(error);
     }
+    setIsFetching(false);
   }
 
 	return (
@@ -56,14 +64,16 @@ export default function FriendRequestCard({
       <FriendRequestUserCard user={user} styles={"pl-4"} />
 			<div className="flex gap-2 mt-1">
 				<Button
-					className="w-32 rounded-lg border border-error hover:bg-error text-error hover:text-white py-1 hover:cursor-pointer hover:saturate-200 font-semibold"
+					className="w-32 rounded-lg border border-error hover:bg-error text-error hover:text-white py-1 hover:cursor-pointer hover:saturate-200 font-semibold disabled:opacity-50"
 					onClick={handleReject}
+          disabled={isFetching}
 				>
 					Reject
 				</Button>
 				<Button
-					className="w-32 rounded-lg border border-success hover:bg-success text-success hover:text-white py-1 hover:cursor-pointer hover:saturate-200 font-semibold"
+					className="w-32 rounded-lg border border-success hover:bg-success text-success hover:text-white py-1 hover:cursor-pointer hover:saturate-200 font-semibold disabled:opacity-50"
 					onClick={handleAccept}
+          disabled={isFetching}
 				>
 					Accept
 				</Button>

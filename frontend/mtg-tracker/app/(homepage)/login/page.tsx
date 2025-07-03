@@ -33,6 +33,7 @@ export default function LoginPage() {
 	const [isPwHidden, setIsPwHidden] = useState(true);
 	const { loginAsync } = useLogin();
 	const { email, password } = values;
+  const [isFetching, setIsFetching] = useState(false);
 
 	async function onSubmit(
 		_: FormData,
@@ -40,11 +41,14 @@ export default function LoginPage() {
 		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
 	) {
 		try {
+      setIsFetching(true);
 			await loginAsync(email, password);
 			if (_setErrors) {
 				_setErrors({});
 			}
+      setIsFetching(false);
 		} catch (error) {
+      setIsFetching(false);
 			handleServerApiError<Errors>(
         [UNAUTHORIZED],
 				error,
@@ -106,7 +110,7 @@ export default function LoginPage() {
 				>
 					Forgot password?
 				</Link>
-				<ButtonPrimary type="submit" onClick={() => {}} uppercase={false}>
+				<ButtonPrimary type="submit" onClick={() => {}} uppercase={false} disabled={isFetching}>
 					Log in
 				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">

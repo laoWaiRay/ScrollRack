@@ -10,6 +10,7 @@ import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { useAuth } from "@/hooks/useAuth";
 import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
+import { ServerApiError } from "@/types/server";
 import { Field, Label } from "@headlessui/react";
 import { isAxiosError } from "axios";
 import {
@@ -38,6 +39,7 @@ export default function DeckAdd() {
 	const [moxfield, setMoxfield] = useState("");
 	const delayRef = useRef(false);
 	const { toast } = useToast();
+  const [isFetching, setIsFetching] = useState(false);
 
 	const handleComboboxSelect: Dispatch<SetStateAction<string | null>> = (
 		value
@@ -124,14 +126,17 @@ export default function DeckAdd() {
 		};
 
 		try {
+      setIsFetching(true);
 			const authResult = await createDeck(deckWriteDTO);
       extractAuthResult(authResult);
       setSelected(null);
       setQuery("");
       setMoxfield("");
       toast(`Saved deck: ${selected}`, "success");
+      setIsFetching(false);
 		} catch (error) {
-			if (isAxiosError(error) && error.response?.status === CONFLICT) {
+      setIsFetching(false);
+			if (error instanceof ServerApiError && error.status === CONFLICT) {
 				toast(`Deck with commander ${selected} already exists`, "warn");
 			} else {
 				console.log(error);

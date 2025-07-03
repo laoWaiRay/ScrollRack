@@ -33,7 +33,7 @@ const initialValues: FormData = {
 };
 
 export default function RegisterPage() {
-	const { values, errors, handleChange, handleSubmit } = useForm<
+	const { values, errors, handleChange, handleSubmit, isLoading } = useForm<
 		FormData,
 		Errors
 	>(initialValues, validateForm);
@@ -44,7 +44,6 @@ export default function RegisterPage() {
 
 	const { email, username, password, confirmPassword } = values;
 	const unknownErrorMessages = errors?.unknown && renderErrors(errors.unknown);
-	const [isFetching, setIsFetching] = useState(false);
 
 	async function onSubmit(
 		data: FormData,
@@ -53,7 +52,6 @@ export default function RegisterPage() {
 	) {
 		const { username, email, password } = data;
 		try {
-			setIsFetching(true);
 			const userRegisterDTO: UserRegisterDTO = {
 				userName: username,
 				email,
@@ -77,7 +75,6 @@ export default function RegisterPage() {
 				_setErrors,
 				_errors
 			);
-			setIsFetching(false);
 		}
 	}
 
@@ -136,7 +133,7 @@ export default function RegisterPage() {
 				<ButtonPrimary
 					onClick={() => {}}
 					type="submit"
-					disabled={isFetching}
+					disabled={isLoading}
 					uppercase={false}
 				>
 					Sign Up
@@ -149,7 +146,6 @@ export default function RegisterPage() {
 				<ButtonPrimary
 					onClick={handleGoogleRedirect}
 					style="google"
-					disabled={isFetching}
 					uppercase={false}
 				>
 					<div className="flex items-center justify-center">

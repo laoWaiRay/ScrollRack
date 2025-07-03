@@ -22,6 +22,7 @@ export default function DeckEdit() {
 	const [moxfield, setMoxfield] = useState<string>("");
 	const [selected, setSelected] = useState<string | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
 	const selectedDeck = decks.find((d) => d.commander === selected);
 
@@ -50,6 +51,7 @@ export default function DeckEdit() {
 				moxfield: moxfield,
 			};
 
+      setIsFetching(true);
       const authResult = await editDeck(deckWriteDTO, selectedDeck.id);
       extractAuthResult(authResult);
 			mutate();
@@ -57,8 +59,10 @@ export default function DeckEdit() {
 			setSelected(null);
 			setMoxfield("");
 			toast(`Updated deck "${selectedDeck.commander}"`, "success");
+      setIsFetching(false);
 		} catch (error) {
 			console.log(error);
+      setIsFetching(false);
 			toast("Error updating deck", "warn");
 		}
 	}
@@ -153,7 +157,7 @@ export default function DeckEdit() {
 						type="submit"
 						style="primary"
 						onClick={() => {}}
-						disabled={!selected}
+						disabled={!selected || isFetching}
 						uppercase={false}
 					>
 						Save Changes
