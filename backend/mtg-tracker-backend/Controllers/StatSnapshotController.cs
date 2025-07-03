@@ -89,14 +89,35 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     .Where(gp => gp.Game.NumPlayers >= podSize.Min && gp.Game.NumPlayers <= podSize.Max)
                     .ToList();
 
-                if (filteredGameParticipations.Count == 0)
-                {
-                    continue;
-                }
 
                 var filteredDecks = decks
                     .Where(d => d.CreatedAt >= startTime)
                     .ToList();
+
+                // No game participations, but there may be decks that were created for this
+                // time period
+                if (filteredGameParticipations.Count == 0)
+                {
+                    var deckOnlySnapshotDTO = new StatSnapshotDTO()
+                    {
+                        GamesPlayed = 0,
+                        GamesWon = 0,
+                        NumDecks = filteredDecks.Count,
+                        MostPlayedCommanders = [],
+                        LeastPlayedCommanders = [],
+                        CurrentWinStreak = 0,
+                        LongestLossStreak = 0,
+                        LongestWinStreak = 0,
+                    };
+                    var filteredDeckOnlySnapshotDTO = new FilteredStatSnapshotDTO()
+                    {
+                        Period = periodStartTimeToLabel[startTime],
+                        PlayerCount = podSize.Min,
+                        Snapshot = deckOnlySnapshotDTO,
+                    };
+                    filteredSnapshotDTOs.Add(filteredDeckOnlySnapshotDTO);
+                    continue;
+                }
 
                 // Compute simple stats
                 var lastWon = filteredGameParticipations
@@ -163,7 +184,6 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     DeckPlayCounts = deckPlayCounts,
                     LongestWinStreak = streakStats.LongestWinStreak,
                     LongestLossStreak = streakStats.LongestLossStreak,
-                    CreatedAt = user.StatSnapshot.CreatedAt,
                     MostRecentPlayedDeck = mrpdDTO,
                 };
 

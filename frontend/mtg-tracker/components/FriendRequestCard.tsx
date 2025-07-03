@@ -1,3 +1,4 @@
+"use client"
 import { ActionType as FriendActionType } from "@/context/FriendContext";
 import { useFriend } from "@/hooks/useFriend";
 import useToast from "@/hooks/useToast";

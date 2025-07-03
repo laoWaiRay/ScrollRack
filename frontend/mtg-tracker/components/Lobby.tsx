@@ -1,3 +1,4 @@
+"use client"
 import {
 	AddPlayerDTO,
 	DeckReadDTO,
@@ -14,10 +15,8 @@ import { Dispatch, FormEvent, MutableRefObject, SetStateAction, useState } from 
 import { HubConnection } from "@microsoft/signalr";
 import useToast from "@/hooks/useToast";
 import { useRoom } from "@/hooks/useRoom";
-import { api } from "@/generated/client";
 import { ActionType } from "@/context/RoomContext";
 import { CurrentGameData } from "@/app/(dashboard)/pod/create/CreatePod";
-import { isAxiosError } from "axios";
 import { CONFLICT } from "@/constants/httpStatus";
 import { addPlayerToRoom, removePlayerFromRoom } from "@/actions/rooms";
 import { extractAuthResult } from "@/helpers/extractAuthResult";

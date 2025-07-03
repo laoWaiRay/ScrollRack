@@ -1,10 +1,10 @@
+"use client"
 import { formatTime, IsoToDateString } from "@/helpers/time";
 import Close from "@/public/icons/close.svg";
 import ButtonIcon from "./ButtonIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import Dialog from "./Dialog";
-import { api } from "@/generated/client";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import useToast from "@/hooks/useToast";

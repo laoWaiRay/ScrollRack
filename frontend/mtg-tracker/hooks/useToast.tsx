@@ -1,3 +1,4 @@
+"use client"
 import { Slide, ToastOptions, toast as toasty } from "react-toastify";
 
 export default function useToast() {

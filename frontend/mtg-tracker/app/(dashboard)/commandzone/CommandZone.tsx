@@ -20,6 +20,8 @@ import DropdownMenu from "@/components/DropdownMenu";
 import DeckCard from "@/components/DeckCard";
 import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ButtonLink from "@/components/ButtonLink";
+import { useDeck } from "@/hooks/useDeck";
 
 interface StatCardData {
 	title: string;
@@ -59,26 +61,27 @@ export default function CommandZone() {
 	const { user } = useAuth();
 	const { gameState } = useGame();
 	const { snapshots, isLoading } = useStatSnapshot();
+	const { decks, isLoading: isLoadingDecks } = useDeck();
 	const router = useRouter();
 	const [timePeriodLabel, setTimePeriodLabel] = useState(timePeriodLabels[2]);
 	const [podSizeLabel, setPodSizeLabel] = useState(podSizeLabels[0]);
 
-  const podSize = labelToPodSize[podSizeLabel];
-  const timePeriod = labelToTimePeriod[timePeriodLabel];
+	const podSize = labelToPodSize[podSizeLabel];
+	const timePeriod = labelToTimePeriod[timePeriodLabel];
 
 	const snapshot = useMemo(() => {
+		console.log(snapshots);
 		return (
-			snapshots.find(
-				(s) =>
-					s.period == timePeriod &&
-					s.playerCount == podSize
-			)?.snapshot ?? defaultStatSnapshot
+			snapshots.find((s) => s.period == timePeriod && s.playerCount == podSize)
+				?.snapshot ?? defaultStatSnapshot
 		);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [timePeriodLabel, podSizeLabel, snapshots, podSize, timePeriod]);
 
 	const mostRecentDeck = snapshot.mostRecentPlayedDeck;
-  const mostRecentDeckStats = mostRecentDeck?.statistics?.find(s => s.podSize == podSize)?.stats;
+	const mostRecentDeckStats = mostRecentDeck?.statistics?.find(
+		(s) => s.podSize == podSize
+	)?.stats;
 
 	const statCardData: StatCardData[] = [
 		{
@@ -239,56 +242,114 @@ export default function CommandZone() {
 							</div>
 						</div>
 
-						{renderStatCards()}
-						{/* Line Chart */}
-						<StatCard
-							styles="col-span-4"
-							innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
-						>
-							<div className="w-full aspect-[3/1] min-h-[350px] block pb-4">
-								<LineChart buckets={snapshot.winLossGamesByPeriod ?? []} />
-							</div>
-						</StatCard>
-						{/* Donut Chart */}
-						<StatCard
-							styles="col-span-2"
-							innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
-						>
-							<div className="h-[350px] lg:h-full">
-								<PieChart
-									deckPlayCounts={snapshot.deckPlayCounts ?? []}
-									gamesPlayed={snapshot.gamesPlayed}
-								/>
-							</div>
-						</StatCard>
-						{/* Commander Showcase */}
-						<StatCard styles="col-span-2" innerStyles="!pb-2">
-							<h3 className="pb-4 border-b border-surface-500 text-fg-light">
-								Commander Showcase
-							</h3>
-							{mostRecentDeck && mostRecentDeckStats && (
-								<DeckCard
-									deck={mostRecentDeck}
-                  deckStats={mostRecentDeckStats}
-									styles="!bg-transparent"
-								/>
+						{/* No Decks Link To Deck Create */}
+						{!isLoadingDecks && decks.length === 0 && (
+							<StatCard
+								styles="col-span-2"
+								innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
+							>
+								<div className="flex flex-col items-start gap-6 py-4 px-4">
+									<h2 className="text-lg">No Decks Found</h2>
+									<p>Add some decks to get started</p>
+									<ButtonLink
+										href="/decks/add"
+										uppercase={false}
+										style="transparent"
+										styles="w-full text-center block border rounded border-surface-500"
+									>
+										Add Decks
+									</ButtonLink>
+								</div>
+							</StatCard>
+						)}
+
+						{/* No Games Found Link to Add Games */}
+						{!isLoadingDecks &&
+							decks.length > 0 &&
+							snapshot.gamesPlayed === 0 && (
+								<StatCard
+									styles="col-span-2 lg:row-start-3"
+									innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
+								>
+									<div className="flex flex-col items-start gap-6 py-4 px-4">
+										<h2 className="text-lg">No Games Found</h2>
+										<p>Add some games to start tracking</p>
+
+										<ButtonLink
+											href="/pod/create"
+											uppercase={false}
+											style="transparent"
+											styles="w-full text-center block border rounded border-surface-500"
+										>
+											Host a Pod
+										</ButtonLink>
+                    
+										<ButtonLink
+											href="/pod/join"
+											uppercase={false}
+											style="transparent"
+											styles="w-full text-center block border rounded border-surface-500 -mt-4"
+										>
+											Join a Pod
+										</ButtonLink>
+									</div>
+								</StatCard>
 							)}
-						</StatCard>
-						{/* Recent Game Log */}
-						<StatCard
-							styles="col-span-4 !hidden lg:!flex max-h-[29rem]"
-							innerStyles="lg:justify-start h-full"
-						>
-							<h3 className="pb-4 mb-4 border-b border-surface-500">
-								Recent Games
-							</h3>
-							<div className="overflow-y-auto flex flex-col gap-2 pr-2">
-								{gameState.games.length > 0 &&
-									gameState.games.map((data) => (
-										<GameLogCard key={data.id} game={data} size="sm" />
-									))}
-							</div>
-						</StatCard>
+						{renderStatCards()}
+
+						{snapshot.gamesPlayed > 0 && (
+							<>
+								{/* Line Chart */}
+								<StatCard
+									styles="col-span-4"
+									innerStyles="!px-2 !pt-4 !pb-0 !justify-start !items-stretch"
+								>
+									<div className="w-full aspect-[3/1] min-h-[350px] block pb-4">
+										<LineChart buckets={snapshot.winLossGamesByPeriod ?? []} />
+									</div>
+								</StatCard>
+								{/* Donut Chart */}
+								<StatCard
+									styles="col-span-2"
+									innerStyles="!px-2 !pt-4 !pb-4 !justify-center !items-stretch"
+								>
+									<div className="h-[350px] lg:h-full">
+										<PieChart
+											deckPlayCounts={snapshot.deckPlayCounts ?? []}
+											gamesPlayed={snapshot.gamesPlayed}
+										/>
+									</div>
+								</StatCard>
+								{/* Commander Showcase */}
+								{mostRecentDeck && mostRecentDeckStats && (
+									<StatCard styles="col-span-2" innerStyles="!pb-2">
+										<h3 className="pb-4 border-b border-surface-500 text-fg-light">
+											Commander Showcase
+										</h3>
+										<DeckCard
+											deck={mostRecentDeck}
+											deckStats={mostRecentDeckStats}
+											styles="!bg-transparent"
+										/>
+									</StatCard>
+								)}
+								{/* Recent Game Log */}
+								<StatCard
+									styles="col-span-4 !hidden lg:!flex max-h-[29rem]"
+									innerStyles="lg:justify-start h-full"
+								>
+									<h3 className="pb-4 mb-4 border-b border-surface-500">
+										Recent Games
+									</h3>
+									<div className="overflow-y-auto flex flex-col gap-2 pr-2">
+										{gameState.games.length > 0 &&
+											gameState.games.map((data) => (
+												<GameLogCard key={data.id} game={data} size="sm" />
+											))}
+									</div>
+								</StatCard>
+							</>
+						)}
 
 						<div className="lg:hidden w-full">
 							<div className="mx-10">

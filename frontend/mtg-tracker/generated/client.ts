@@ -55,7 +55,6 @@ type StatSnapshotDTO = {
   deckPlayCounts?: Array<DeckPlayCount> | undefined;
   longestWinStreak: number;
   longestLossStreak: number;
-  createdAt?: string | undefined;
 };
 type WinLossGameCount = {
   periodStart: string;
@@ -294,7 +293,6 @@ const StatSnapshotDTO: z.ZodType<StatSnapshotDTO> = z
     deckPlayCounts: z.array(DeckPlayCount).optional(),
     longestWinStreak: z.number().int(),
     longestLossStreak: z.number().int(),
-    createdAt: z.string().datetime({ offset: true }).optional(),
   })
   .passthrough();
 const FilteredStatSnapshotDTO: z.ZodType<FilteredStatSnapshotDTO> = z

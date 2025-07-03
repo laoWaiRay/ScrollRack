@@ -31,10 +31,6 @@ public class StatSnapshotDTO
     public List<DeckPlayCount> DeckPlayCounts { get; set; } = [];
     public required int LongestWinStreak { get; set; }
     public required int LongestLossStreak { get; set; }
-
-    // Leave this as default value on writes so that EF generates the
-    // value on DB insert.
-    public DateTime CreatedAt { get; set; }
 }
 
 public class FilteredStatSnapshotDTO

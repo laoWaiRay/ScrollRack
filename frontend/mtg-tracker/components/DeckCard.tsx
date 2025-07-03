@@ -147,7 +147,7 @@ export default function DeckCard({
 				)}
 			</div>
 
-			<div className="flex flex-col w-full lg:flex-row lg:justify-center lg:gap-2">
+			<div className="flex flex-col w-full lg:flex-row lg:justify-center gap-2">
 				<section className="grow w-full lg:w-fit flex justify-center self-center max-w-[336px] lg:min-w-1/2">
 					<div className="aspect-[5/7] relative rounded-3xl overflow-hidden max-w-[336px] w-full">
 						<Image
