@@ -5,11 +5,9 @@ import ButtonIcon from "./ButtonIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import Dialog from "./Dialog";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import useToast from "@/hooks/useToast";
 import { ActionType as GameActionType } from "@/context/GameContext";
-import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { GameParticipationReadDTO, GameReadDTO } from "@/types/client";
 import { deleteGame } from "@/actions/games";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
@@ -41,8 +39,6 @@ export function GameLogCard({
 }: GameLogCardInterface) {
 	const { user } = useAuth();
 	const { gameState, dispatch: dispatchGame } = useGame();
-	const { gameParticipations, dispatch: dispatchGameParticipation } =
-		useGameParticipation();
 	const { toast } = useToast();
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -65,14 +61,6 @@ export function GameLogCard({
 			dispatchGame({
 				type: GameActionType.UPDATE,
 				payload: [...gameState.games.filter((g) => g.id !== game.id)],
-			});
-			dispatchGameParticipation({
-				type: GameParticipationActionType.UPDATE,
-				payload: [
-					...gameParticipations.filter(
-						(gp) => gp.id !== thisGameParticipation.id
-					),
-				],
 			});
 
 			toast("Deleted game", "success");

@@ -312,7 +312,7 @@ export default function Log() {
 
 						<section className="w-full flex flex-col gap-2 lg:gap-4 px-2">
 							{renderLogs()}
-							<div hidden={!gameState.hasMore}>
+							<div hidden={!gameState.hasMore} className="max-w-xs w-full self-center">
 								<ButtonPrimary
 									onClick={handleLoadMore}
 									style="transparent"

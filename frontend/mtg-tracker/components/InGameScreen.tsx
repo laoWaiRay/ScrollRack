@@ -5,19 +5,15 @@ import {
 	GameWriteDTO,
 	GameParticipationWriteDTO,
 	UserReadDTO,
-	GameParticipationReadDTO,
 } from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
 import UserCard from "./UserCard";
 import Crown from "@/public/icons/crown.svg";
 import { Button } from "@headlessui/react";
-import { api } from "@/generated/client";
 import useToast from "@/hooks/useToast";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
-import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { formatTime } from "@/helpers/time";
 import Checkbox from "@mui/material/Checkbox";
 import { deleteGame, postGame } from "@/actions/games";
@@ -51,8 +47,6 @@ export default function InGameScreen({
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
 	const { toast } = useToast();
 	const { gameState, dispatch: dispatchGameState } = useGame();
-	const { gameParticipations, dispatch: dispatchGameParticipation } =
-		useGameParticipation();
 	const [isFetching, setIsFetching] = useState(false);
 	const [saveTime, setSaveTime] = useState(true);
 
@@ -122,13 +116,9 @@ export default function InGameScreen({
 				gameParticipationWriteDTOs.push(gameParticipationWriteDTO);
 			}
 
-			let hostGpReadDTO: GameParticipationReadDTO | null = null;
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
         const authResult = await postGameParticipation(gameParticipationWriteDTO);
-        const gpReadDTO = extractAuthResult(authResult);
-				if (gpReadDTO?.userId === user.id) {
-					hostGpReadDTO = gpReadDTO;
-				}
+        extractAuthResult(authResult);
 			}
 
 			toast("Game saved", "success");
@@ -136,12 +126,6 @@ export default function InGameScreen({
 				type: GameActionType.UPDATE,
 				payload: [...gameState.games, gameReadDTO],
 			});
-			if (hostGpReadDTO) {
-				dispatchGameParticipation({
-					type: GameParticipationActionType.UPDATE,
-					payload: [...gameParticipations, hostGpReadDTO],
-				});
-			}
 			setLocalStorageValue(null);
 			setCurrentGameData(null);
 			setIsFetching(false);

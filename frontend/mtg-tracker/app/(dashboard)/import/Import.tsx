@@ -23,9 +23,7 @@ import {
 import useToast from "@/hooks/useToast";
 import { useDeck } from "@/hooks/useDeck";
 import { useGame } from "@/hooks/useGame";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { ActionType as GameActionType } from "@/context/GameContext";
-import { ActionType as GameParticipationActionType } from "@/context/GameParticipationContext";
 import { deleteGame, postGame } from "@/actions/games";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { postGameParticipation } from "@/actions/gameParticipations";
@@ -44,8 +42,6 @@ export default function Import() {
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
 	const [isFetching, setIsFetching] = useState(false);
 	const { gameState, dispatch: dispatchGameState } = useGame();
-	const { gameParticipations, dispatch: dispatchGameParticipation } =
-		useGameParticipation();
 
 	// Have to do this because by default the user loaded through useAuth hook does not include
 	// deck data.
@@ -143,18 +139,9 @@ export default function Import() {
 				gameParticipationWriteDTOs.push(gameParticipationWriteDTO);
 			}
 
-			let hostGpReadDTO: GameParticipationReadDTO | null = null;
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
         const authResult = await postGameParticipation(gameParticipationWriteDTO);
-        const gpReadDTO = extractAuthResult(authResult);
-        
-        if (gpReadDTO == null) {
-          throw Error("No Game Participation info");
-        }
-
-				if (gpReadDTO.userId === user.id) {
-					hostGpReadDTO = gpReadDTO;
-				}
+        extractAuthResult(authResult);
 			}
 
 			toast("Game saved", "success");
@@ -162,12 +149,6 @@ export default function Import() {
 				type: GameActionType.UPDATE,
 				payload: [...gameState.games, gameReadDTO],
 			});
-			if (hostGpReadDTO) {
-				dispatchGameParticipation({
-					type: GameParticipationActionType.UPDATE,
-					payload: [...gameParticipations, hostGpReadDTO],
-				});
-			}
 			setIsFetching(false);
 		} catch (error) {
 			if (gameSaved) {

@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import DropdownMenu from "@/components/DropdownMenu";
 import DeckCard from "@/components/DeckCard";
-import { defaultStatSnapshot } from "@/context/StatSnapshotContext";
+import { defaultStatSnapshot } from "@/hooks/useStatSnapshot";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ButtonLink from "@/components/ButtonLink";
 import { useDeck } from "@/hooks/useDeck";
@@ -283,7 +283,7 @@ export default function CommandZone() {
 										>
 											Host a Pod
 										</ButtonLink>
-                    
+
 										<ButtonLink
 											href="/pod/join"
 											uppercase={false}
@@ -346,6 +346,18 @@ export default function CommandZone() {
 											gameState.games.map((data) => (
 												<GameLogCard key={data.id} game={data} size="sm" />
 											))}
+										<div className="hidden lg:block w-xs self-center">
+											<div className="mx-10">
+												<ButtonPrimary
+													onClick={() => router.push("/log")}
+													style="transparent"
+                          styles="!mb-0"
+													uppercase={false}
+												>
+													View All
+												</ButtonPrimary>
+											</div>
+										</div>
 									</div>
 								</StatCard>
 							</>

@@ -93,16 +93,16 @@ export default function DeckCard({
 
 	let streakStyle = "";
 
-	if (isCurrentWinStreak == true) {
+  if (!currentStreak || currentStreak === 0) {
+    streakStyle = ""
+  } else if (isCurrentWinStreak == true) {
 		streakStyle = "text-success";
-	}
-
-	if (isCurrentWinStreak == false) {
+	} else {
 		streakStyle = "text-error";
 	}
 
 	function getStreakString() {
-		if (currentStreak == null || isCurrentWinStreak == null) {
+		if (currentStreak == null || isCurrentWinStreak == null || currentStreak === 0) {
 			return "-";
 		}
 

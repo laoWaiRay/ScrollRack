@@ -6,8 +6,6 @@ import { RoomProvider } from "@/context/RoomContext";
 import { getRooms } from "@/actions/rooms";
 import { getGames } from "@/actions/games";
 import { GameProvider, GameState } from "@/context/GameContext";
-import { getGameParticipations } from "@/actions/gameParticipations";
-import { GameParticipationProvider } from "@/context/GameParticipationContext";
 import DatePickerProvider from "@/components/DatePickerProvider";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
@@ -16,10 +14,10 @@ export default async function layout({ children }: { children: ReactNode }) {
 	const friends = (await getFriends()).data ?? [];
 	const rooms = (await getRooms()).data ?? [];
 	const gameStateResult = await getGames();
-	const gameState: GameState = gameStateResult.success && gameStateResult.data
-		? gameStateResult.data
-		: { games: [], page: 0, hasMore: true };
-	const gameParticipations = (await getGameParticipations()).data ?? [];
+	const gameState: GameState =
+		gameStateResult.success && gameStateResult.data
+			? gameStateResult.data
+			: { games: [], page: 0, hasMore: true };
 
 	return (
 		<AppRouterCacheProvider>
@@ -28,11 +26,7 @@ export default async function layout({ children }: { children: ReactNode }) {
 					<FriendProvider initialFriends={friends}>
 						<RoomProvider initialRooms={rooms}>
 							<GameProvider initialGameState={gameState}>
-								<GameParticipationProvider
-									initialGameParticipations={gameParticipations}
-								>
-									<DashboardRootLayout>{children}</DashboardRootLayout>
-								</GameParticipationProvider>
+								<DashboardRootLayout>{children}</DashboardRootLayout>
 							</GameProvider>
 						</RoomProvider>
 					</FriendProvider>
