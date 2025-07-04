@@ -3,7 +3,6 @@ import { FormEvent, useState } from "react";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import {
 	DeckReadDTO,
-	GameParticipationReadDTO,
 	GameParticipationWriteDTO,
 	GameWriteDTO,
 	UserReadDTO,

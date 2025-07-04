@@ -5,6 +5,7 @@ import {
 	GameWriteDTO,
 	GameParticipationWriteDTO,
 	UserReadDTO,
+	GameParticipationReadDTO,
 } from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
@@ -16,7 +17,7 @@ import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { formatTime } from "@/helpers/time";
 import Checkbox from "@mui/material/Checkbox";
-import { deleteGame, postGame } from "@/actions/games";
+import { deleteGame, getGames, postGame } from "@/actions/games";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { postGameParticipation } from "@/actions/gameParticipations";
 
@@ -82,12 +83,12 @@ export default function InGameScreen({
 				winnerId: winner.id,
 			};
 
-      const authResult = await postGame(gameWriteDTO);
-      const gameReadDTO = extractAuthResult(authResult);
-      
-      if (!gameReadDTO) {
-        throw Error("No game data returned from server");
-      }
+			const authResult = await postGame(gameWriteDTO);
+			const gameReadDTO = extractAuthResult(authResult);
+
+			if (!gameReadDTO) {
+				throw Error("No game data returned from server");
+			}
 
 			gameSaved = true;
 			gameSavedId = gameReadDTO.id;
@@ -117,21 +118,28 @@ export default function InGameScreen({
 			}
 
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
-        const authResult = await postGameParticipation(gameParticipationWriteDTO);
-        extractAuthResult(authResult);
+				const authResult = await postGameParticipation(
+					gameParticipationWriteDTO
+				);
+				extractAuthResult(authResult);
 			}
 
 			toast("Game saved", "success");
-			dispatchGameState({
-				type: GameActionType.UPDATE,
-				payload: [...gameState.games, gameReadDTO],
-			});
 			setLocalStorageValue(null);
 			setCurrentGameData(null);
 			setIsFetching(false);
+
+			const gameStateAuthResult = await getGames(0);
+			const updatedGameState = extractAuthResult(gameStateAuthResult);
+			if (updatedGameState) {
+				dispatchGameState({
+					type: GameActionType.UPDATE,
+					payload: updatedGameState.games,
+				});
+			}
 		} catch (error) {
 			if (gameSaved) {
-        await deleteGame(gameSavedId);
+				await deleteGame(gameSavedId);
 			}
 			console.log(error);
 			toast("Error saving game", "warn");
@@ -194,13 +202,13 @@ export default function InGameScreen({
 					<Checkbox
 						checked={saveTime}
 						onChange={() => setSaveTime(!saveTime)}
-            sx={{
-              color: "var(--fg)",
-              "&.Mui-checked": {
-                color: "var(--primary-100)" 
-              }
-            }}
-            disableRipple={true} 
+						sx={{
+							color: "var(--fg)",
+							"&.Mui-checked": {
+								color: "var(--primary-100)",
+							},
+						}}
+						disableRipple={true}
 					/>
 				</div>
 				<div className="flex w-full justify-center items-center gap-4">

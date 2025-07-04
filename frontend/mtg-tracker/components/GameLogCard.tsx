@@ -50,11 +50,6 @@ export function GameLogCard({
 	)?.user;
 
 	async function handleDeleteGame() {
-		if (!thisGameParticipation) {
-			console.log("Error in handleDeleteGame: no gameParticipation found");
-			return;
-		}
-
 		try {
       const authResult = await deleteGame(game.id);
       extractAuthResult(authResult);

@@ -55,6 +55,9 @@ export function GameProvider({
 const gameReducer: Reducer<GameState, Action> = (state, action) => {
 	switch (action.type) {
 		case ActionType.UPDATE: {
+      console.log("UPDATE")
+      console.log(state)
+      console.log(action.payload)
 			return { ...state, games: action.payload };
 		}
     case ActionType.APPEND: {
