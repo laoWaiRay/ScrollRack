@@ -8,12 +8,10 @@ import OptionsLayout from "@/components/OptionsLayout";
 import { QRCodeSVG } from "qrcode.react";
 import { useZxing } from "react-zxing";
 import QrCodeScan from "@/public/icons/qrcode-scan.svg";
-import { addFriend, getFriends } from "@/actions/friends";
+import { addFriend } from "@/actions/friends";
 import useToast from "@/hooks/useToast";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { isValidationErrorArray } from "@/helpers/validationHelpers";
-import { useFriend } from "@/hooks/useFriend";
-import { ActionType } from "@/context/FriendContext";
 import UserAdd from "@/public/icons/user-add.svg";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 import { ServerApiError } from "@/types/server";
@@ -22,7 +20,6 @@ import { sendFriendRequest } from "@/actions/friendRequests";
 export default function AddFriends() {
 	const { user } = useAuth();
 	const { toast } = useToast();
-	const { dispatch } = useFriend();
 
 	const [friendUserName, setFriendUserName] = useState("");
 	const [isQrExpanded, setIsQrExpanded] = useState(false);
@@ -90,18 +87,7 @@ export default function AddFriends() {
 		}
 	}, [isScanning, videoReady, isVideoContainerHidden, ref]);
 
-	const tryAddAndUpdateFriends = useCallback(async () => {
-		const updateFriendsList = async () => {
-			setResult("");
-			try {
-				const authResult = await getFriends();
-        const updatedFriends = extractAuthResult(authResult) ?? [];
-				dispatch({ type: ActionType.UPDATE, payload: updatedFriends });
-			} catch (error) {
-				console.log(error);
-			}
-		};
-
+	const tryAddFriend = useCallback(async () => {
 		if (result) {
 			const userFriendAddDTO: UserFriendAddDTO = {
 				id: result,
@@ -111,7 +97,7 @@ export default function AddFriends() {
 			try {
         const authResult = await addFriend(userFriendAddDTO);
         extractAuthResult(authResult);
-				updateFriendsList();
+        setResult("");
 				toast("Successfully Added", "success");
 			} catch (error) {
 				if (error instanceof ServerApiError && error.status === CONFLICT) {
@@ -120,11 +106,11 @@ export default function AddFriends() {
 				toast("Error Adding Friend", "warn");
 			}
 		}
-	}, [result, dispatch, toast]);
+	}, [result, toast]);
 
 	useEffect(() => {
-		tryAddAndUpdateFriends();
-	}, [result, tryAddAndUpdateFriends]);
+		tryAddFriend();
+	}, [result, tryAddFriend]);
 
 	return (
 		<OptionsLayout title="Add Friends">

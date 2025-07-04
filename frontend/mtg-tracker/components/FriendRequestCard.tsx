@@ -1,6 +1,4 @@
 "use client"
-import { ActionType as FriendActionType } from "@/context/FriendContext";
-import { useFriend } from "@/hooks/useFriend";
 import useToast from "@/hooks/useToast";
 import { UserFriendAddDTO, UserReadDTO } from "@/types/client";
 import { Button } from "@headlessui/react";
@@ -18,7 +16,6 @@ export default function FriendRequestCard({
 	user,
 }: FriendRequestCardInterface) {
 	const { toast } = useToast();
-  const { friends, dispatch: dispatchFriend } = useFriend();
   const { mutate } = useFriendRequest();
   const [isFetching, setIsFetching] = useState(false);
 
@@ -28,7 +25,6 @@ export default function FriendRequestCard({
       const userFriendAddDTO: UserFriendAddDTO = { id: user.id, requiresPermission: true };
       const authResult = await acceptFriendRequest(userFriendAddDTO);
       extractAuthResult(authResult);
-      dispatchFriend({ type: FriendActionType.UPDATE, payload: [ ...friends, user] });
       mutate();
 			toast(`Added ${user.userName} to Friends`, "success");
       setIsFetching(false);

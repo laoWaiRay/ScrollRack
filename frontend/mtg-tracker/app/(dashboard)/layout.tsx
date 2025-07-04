@@ -1,7 +1,5 @@
 import { ReactNode } from "react";
 import DashboardRootLayout from "./DashboardRootLayout";
-import { FriendProvider } from "@/context/FriendContext";
-import { getFriends } from "@/actions/friends";
 import { RoomProvider } from "@/context/RoomContext";
 import { getRooms } from "@/actions/rooms";
 import { getGames } from "@/actions/games";
@@ -11,7 +9,6 @@ import MuiThemeProvider from "@/components/MuiThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 
 export default async function layout({ children }: { children: ReactNode }) {
-	const friends = (await getFriends()).data ?? [];
 	const rooms = (await getRooms()).data ?? [];
 	const gameStateResult = await getGames();
 	const gameState: GameState =
@@ -23,13 +20,11 @@ export default async function layout({ children }: { children: ReactNode }) {
 		<AppRouterCacheProvider>
 			<MuiThemeProvider>
 				<DatePickerProvider>
-					<FriendProvider initialFriends={friends}>
-						<RoomProvider initialRooms={rooms}>
-							<GameProvider initialGameState={gameState}>
-								<DashboardRootLayout>{children}</DashboardRootLayout>
-							</GameProvider>
-						</RoomProvider>
-					</FriendProvider>
+					<RoomProvider initialRooms={rooms}>
+						<GameProvider initialGameState={gameState}>
+							<DashboardRootLayout>{children}</DashboardRootLayout>
+						</GameProvider>
+					</RoomProvider>
 				</DatePickerProvider>
 			</MuiThemeProvider>
 		</AppRouterCacheProvider>

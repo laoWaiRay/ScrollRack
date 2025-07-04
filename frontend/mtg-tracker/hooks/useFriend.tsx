@@ -1,12 +1,13 @@
-import { FriendContext } from "@/context/FriendContext";
-import { useContext } from "react";
+import { getFriends } from "@/actions/friends";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
+import useSWR from "swr";
 
 export function useFriend() {
-  const context = useContext(FriendContext);
-  
-  if (context === undefined) {
-    throw new Error("useFriend must be used inside an AuthProvider");
+  const fetcher = async () => {
+    const authResult = await getFriends();
+    return extractAuthResult(authResult) ?? [];
   }
+  const { data, error, isLoading, mutate } = useSWR('/api/friends', fetcher);
   
-  return context;
+  return { friends: data ?? [], isError: error, isLoading, mutate }
 }

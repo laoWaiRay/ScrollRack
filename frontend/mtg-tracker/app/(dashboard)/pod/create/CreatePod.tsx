@@ -7,7 +7,6 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import { ActionType } from "@/context/RoomContext";
-import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriend } from "@/hooks/useFriend";
 import { useRoom } from "@/hooks/useRoom";

@@ -21,7 +21,6 @@ import { UserReadDTO } from "@/types/client";
 import FriendRequestCard from "./FriendRequestCard";
 import { useFriendRequest } from "@/hooks/useFriendRequest";
 import { useRouter } from "next/navigation";
-import { api } from "@/generated/client";
 import { useLogout } from "@/hooks/useLogout";
 
 interface DashboardLayoutInterface {

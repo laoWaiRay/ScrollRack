@@ -163,6 +163,7 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             .Include(u => u.Friends)
             .Include(u => u.SentFriendRequests)
             .Include(u => u.ReceivedFriendRequests)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)

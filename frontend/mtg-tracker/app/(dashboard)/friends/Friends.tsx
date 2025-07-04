@@ -14,13 +14,12 @@ import UserRemove from "@/public/icons/user-remove.svg";
 import { useFriendDeck } from "@/hooks/useFriendDeck";
 import Dialog from "@/components/Dialog";
 import useToast from "@/hooks/useToast";
-import { ActionType } from "@/context/FriendContext";
 import { deleteFriend } from "@/actions/friends";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export default function Friends() {
 	const { user } = useAuth();
-	const { friends, dispatch } = useFriend();
+	const { friends } = useFriend();
 	const [selected, setSelected] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
   const friendId = friends.find(f => f.userName === selected)?.id;
@@ -37,7 +36,6 @@ export default function Friends() {
     try {
       const authResult = await deleteFriend(friendId);
       extractAuthResult(authResult);
-      dispatch({ type: ActionType.UPDATE, payload: friends.filter(f => f.id !== friendId) });
       setSelected(null);
       setQuery("");
       toast(`Removed ${friendName} from friends`, "success");
