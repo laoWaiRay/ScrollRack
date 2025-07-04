@@ -7,14 +7,12 @@ import {
 	DashboardMain,
 } from "@/components/Dashboard";
 import RoomCodeInput from "@/components/RoomCodeInput";
-import { api } from "@/generated/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoom } from "@/hooks/useRoom";
 import useToast from "@/hooks/useToast";
 import Exit from "@/public/icons/exit.svg";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { isAxiosError } from "axios";
 import { CONFLICT, NOT_FOUND } from "@/constants/httpStatus";
 import { ActionType } from "@/context/RoomContext";
 import Dialog from "@/components/Dialog";

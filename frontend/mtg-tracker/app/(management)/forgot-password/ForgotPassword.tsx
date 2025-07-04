@@ -4,8 +4,6 @@ import { Dispatch, SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import TextInput from "@/components/TextInput";
-import { api } from "@/generated/client";
-import { ForgotPasswordRequestDTO } from "@/types/client";
 import useToast from "@/hooks/useToast";
 import {
 	ForgotPasswordFormData as FormData,

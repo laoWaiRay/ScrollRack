@@ -12,7 +12,6 @@ import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
 import { ServerApiError } from "@/types/server";
 import { Field, Label } from "@headlessui/react";
-import { isAxiosError } from "axios";
 import {
 	Dispatch,
 	FormEvent,
@@ -197,7 +196,7 @@ export default function DeckAdd() {
 						type="submit"
 						style="primary"
 						onClick={() => {}}
-						disabled={!selected}
+						disabled={!selected || isFetching}
 						uppercase={false}
 					>
 						Save Deck

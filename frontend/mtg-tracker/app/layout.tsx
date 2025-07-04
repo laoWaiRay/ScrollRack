@@ -30,6 +30,7 @@ export default async function layout({
   try {
     user = extractAuthResult(authResult);
   } catch (error) {
+    console.log(error);
   }
 
 	return (

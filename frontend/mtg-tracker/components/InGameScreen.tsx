@@ -5,7 +5,6 @@ import {
 	GameWriteDTO,
 	GameParticipationWriteDTO,
 	UserReadDTO,
-	GameParticipationReadDTO,
 } from "@/types/client";
 import { useEffect, useState } from "react";
 import ButtonPrimary from "./ButtonPrimary";
@@ -47,7 +46,7 @@ export default function InGameScreen({
 	});
 	const [winner, setWinner] = useState<UserReadDTO | null>(null);
 	const { toast } = useToast();
-	const { gameState, dispatch: dispatchGameState } = useGame();
+	const { dispatch: dispatchGameState } = useGame();
 	const [isFetching, setIsFetching] = useState(false);
 	const [saveTime, setSaveTime] = useState(true);
 
