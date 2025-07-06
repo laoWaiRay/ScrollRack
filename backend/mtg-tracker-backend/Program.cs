@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+var env = builder.Environment;
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -47,11 +48,23 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<MtgContext>(options =>
-    options
-        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-        .UseSnakeCaseNamingConvention()
-        .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))
-);
+{
+    if (env.IsDevelopment())
+    {
+        options
+            .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .UseSnakeCaseNamingConvention()
+            .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+    }
+    else
+    {
+        var connectionString = builder.Configuration["DB_CONNECTION_STRING"];
+        options
+            .UseNpgsql(connectionString)
+            .UseSnakeCaseNamingConvention()
+            .ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+    }
+});
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 // Custom Services
@@ -114,10 +127,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        var env = builder.Environment;
-
         if (env.IsDevelopment())
         {
+            Console.WriteLine("DEVELOPMENT");
             policy.WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.66:3000", "http://192.168.1.66:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -130,7 +142,6 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowCredentials();
         }
-
     });
 });
 
@@ -160,7 +171,7 @@ if (app.Environment.IsDevelopment())
     app.UseStaticFiles();
 
     // Only for development purposes - production should simply not expose http endpoints
-    app.UseHttpsRedirection();
+    // app.UseHttpsRedirection();
 }
 
 app.MapControllers();
