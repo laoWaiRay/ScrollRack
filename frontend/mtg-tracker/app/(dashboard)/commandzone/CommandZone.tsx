@@ -70,7 +70,6 @@ export default function CommandZone() {
 	const timePeriod = labelToTimePeriod[timePeriodLabel];
 
 	const snapshot = useMemo(() => {
-		console.log(snapshots);
 		return (
 			snapshots.find((s) => s.period == timePeriod && s.playerCount == podSize)
 				?.snapshot ?? defaultStatSnapshot

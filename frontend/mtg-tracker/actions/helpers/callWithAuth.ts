@@ -9,7 +9,6 @@ import { cookies } from "next/headers";
 import { setAuthCookies } from "./auth";
 import { AuthResult } from "@/types/server";
 
-
 interface ConfigOptions {
 	headers?: Record<string, string>;
 	params?: Record<string, string | number | boolean | undefined>;
@@ -18,25 +17,25 @@ interface ConfigOptions {
 }
 
 function genericErrorResponse<ReturnT>() {
-  const response: AuthResult<ReturnT> = {
-    success: false, 
-    error: {
-      data: "Internal Server Error",
-      status: 500,
-    }
-  };
-  return response;
+	const response: AuthResult<ReturnT> = {
+		success: false,
+		error: {
+			data: "Internal Server Error",
+			status: 500,
+		},
+	};
+	return response;
 }
 
 function unauthorizedErrorResponse<ReturnT>() {
-  const response: AuthResult<ReturnT> = {
-    success: false, 
-    error: {
-      data: "Unauthorized",
-      status: 401,
-    }
-  };
-  return response;
+	const response: AuthResult<ReturnT> = {
+		success: false,
+		error: {
+			data: "Unauthorized",
+			status: 401,
+		},
+	};
+	return response;
 }
 
 export async function callWithAuth<ReturnT>(
@@ -71,12 +70,12 @@ export async function callWithAuth<ReturnT>(
 	let accessToken = cookieStore.get("access_token")?.value;
 	let refreshToken = cookieStore.get("refresh_token")?.value;
 
-	if (!refreshToken || !accessToken) {
+	if (!refreshToken) {
 		return genericErrorResponse();
 	}
 
 	// Refresh tokens if access token is expired
-	if (isAccessTokenExpired(accessToken)) {
+	if (!accessToken || isAccessTokenExpired(accessToken)) {
 		const refreshRequest: RefreshRequestDTO = {
 			refreshToken: refreshToken,
 		};
@@ -86,8 +85,8 @@ export async function callWithAuth<ReturnT>(
 			refreshToken = refreshResponse.refreshToken;
 			await setAuthCookies(accessToken, refreshToken);
 		} catch (error) {
-			console.error(error);
-		}
+      console.log(error);
+    }
 	}
 
 	try {
@@ -117,28 +116,28 @@ export async function callWithAuth<ReturnT>(
 			return genericErrorResponse();
 		}
 
-    const response: AuthResult<ReturnT> = {
-      data,
-      success: true
-    };
+		const response: AuthResult<ReturnT> = {
+			data,
+			success: true,
+		};
 
-    return response;
+		return response;
 	} catch (error) {
 		if (isAxiosError(error) && error.response?.status == UNAUTHORIZED) {
 			return unauthorizedErrorResponse();
 		}
 
 		if (isAxiosError(error)) {
-      const response: AuthResult<ReturnT> = {
-        success: false,
-        error: {
-          status: error.response?.status ?? 500,
-          data: error.response?.data,
-        }
-      };
-      return response;
+			const response: AuthResult<ReturnT> = {
+				success: false,
+				error: {
+					status: error.response?.status ?? 500,
+					data: error.response?.data,
+				},
+			};
+			return response;
 		}
-    
-    return genericErrorResponse();
+
+		return genericErrorResponse();
 	}
 }

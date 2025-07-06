@@ -2,7 +2,6 @@
 import styles from "../styles.module.css";
 import TextInput from "@/components/TextInput";
 import { Dispatch, SetStateAction, useState } from "react";
-import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { useLogin } from "@/hooks/useLogin";
@@ -16,9 +15,13 @@ import {
 import useForm from "@/hooks/useForm";
 import { renderErrors } from "@/helpers/renderErrors";
 import { UNAUTHORIZED } from "@/constants/httpStatus";
-import {
-	handleServerApiError,
-} from "@/helpers/validationHelpers";
+import { handleServerApiError } from "@/helpers/validationHelpers";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { GoogleLoginRequestDTO } from "@/types/client";
+import { api } from "@/generated/client";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { ActionType } from "@/context/AuthContext";
 
 const initialValues: FormData = {
 	email: "",
@@ -31,9 +34,11 @@ export default function LoginPage() {
 		Errors
 	>(initialValues, validateForm);
 	const [isPwHidden, setIsPwHidden] = useState(true);
+  const { dispatch } = useAuth();
 	const { loginAsync } = useLogin();
 	const { email, password } = values;
-  const [isFetching, setIsFetching] = useState(false);
+	const [isFetching, setIsFetching] = useState(false);
+	const router = useRouter();
 
 	async function onSubmit(
 		_: FormData,
@@ -41,16 +46,16 @@ export default function LoginPage() {
 		_setErrors?: Dispatch<SetStateAction<Partial<Errors>>>
 	) {
 		try {
-      setIsFetching(true);
+			setIsFetching(true);
 			await loginAsync(email, password);
 			if (_setErrors) {
 				_setErrors({});
 			}
-      setIsFetching(false);
+			setIsFetching(false);
 		} catch (error) {
-      setIsFetching(false);
+			setIsFetching(false);
 			handleServerApiError<Errors>(
-        [UNAUTHORIZED],
+				[UNAUTHORIZED],
 				error,
 				errorFieldMap,
 				Errors,
@@ -59,10 +64,31 @@ export default function LoginPage() {
 			);
 		}
 	}
-  
-  function handleGoogleRedirect() {
-    window.location.href = "https://localhost:7165/api/user/signin-google";
-  }
+
+	async function handleGoogleLogin(credentialResponse: CredentialResponse) {
+		const idToken = credentialResponse.credential;
+		if (idToken) {
+			const request: GoogleLoginRequestDTO = {
+				idToken,
+			};
+			const response = await api.postApiUserauthgoogle(request);
+			const { accessToken, refreshToken, userData } = response;
+
+			// Set cookies
+			await fetch("/api/cookies", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+				body: JSON.stringify({ accessToken, refreshToken }),
+			});
+      
+      dispatch({ type: ActionType.LOGIN, payload: userData });
+
+			router.push("/commandzone");
+		}
+	}
 
 	const invalidLoginMessages =
 		errors?.invalidUsernameOrPassword &&
@@ -110,7 +136,12 @@ export default function LoginPage() {
 				>
 					Forgot password?
 				</Link>
-				<ButtonPrimary type="submit" onClick={() => {}} uppercase={false} disabled={isFetching}>
+				<ButtonPrimary
+					type="submit"
+					onClick={() => {}}
+					uppercase={false}
+					disabled={isFetching}
+				>
 					Log in
 				</ButtonPrimary>
 				<div className="text-fg-dark flex justify-center items-center">
@@ -118,11 +149,17 @@ export default function LoginPage() {
 					<span className="select-none">OR</span>
 					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
 				</div>
-				<ButtonPrimary onClick={handleGoogleRedirect} style="google" uppercase={false}>
-					<div className="flex items-center justify-center">
-						Sign in with Google <GoogleLogo className="ml-2" />
-					</div>
-				</ButtonPrimary>
+				<div className="w-full my-4 flex justify-center">
+					<GoogleLogin
+						onSuccess={handleGoogleLogin}
+						onError={() => console.log("Login Failed")}
+						size="large"
+						theme="outline"
+						shape="rectangular"
+						text="signin"
+						width={280}
+					/>
+				</div>
 				<div className="flex justify-center items-center">
 					{"Don't have an account? "}
 					<Link href="/register" className="link px-1">

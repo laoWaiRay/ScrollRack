@@ -1,27 +1,31 @@
 import { ReactNode } from "react";
 import DashboardRootLayout from "./DashboardRootLayout";
 import { RoomProvider } from "@/context/RoomContext";
-import { getRooms } from "@/actions/rooms";
-import { getGames } from "@/actions/games";
-import { GameProvider, GameState } from "@/context/GameContext";
+import {
+  defaultGameState,
+	GameProvider,
+  GameState,
+} from "@/context/GameContext";
 import DatePickerProvider from "@/components/DatePickerProvider";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { getGames } from "@/actions/games";
+import { getRooms } from "@/actions/rooms";
 
 export default async function layout({ children }: { children: ReactNode }) {
-	const rooms = (await getRooms()).data ?? [];
+	const initialRooms = (await getRooms()).data ?? [];
 	const gameStateResult = await getGames();
-	const gameState: GameState =
+	const initialGameState: GameState =
 		gameStateResult.success && gameStateResult.data
 			? gameStateResult.data
-			: { games: [], page: 0, hasMore: true };
+			: defaultGameState;
 
 	return (
 		<AppRouterCacheProvider>
 			<MuiThemeProvider>
 				<DatePickerProvider>
-					<RoomProvider initialRooms={rooms}>
-						<GameProvider initialGameState={gameState}>
+					<RoomProvider initialRooms={initialRooms}>
+						<GameProvider initialGameState={initialGameState}>
 							<DashboardRootLayout>{children}</DashboardRootLayout>
 						</GameProvider>
 					</RoomProvider>

@@ -52,17 +52,17 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
 
         _context.RefreshTokens.Add(refreshToken);
 
-        // Remove old refresh tokens
-        var activeTokens = _context.RefreshTokens
-            .Where(rt => rt.UserId == user.Id && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
-            .OrderByDescending(rt => rt.CreatedAt)
-            .Skip(5); // keep last 5
+        // Remove expired and revoked refresh tokens
+        var expiredOrRevokedTokens = await _context.RefreshTokens
+            .Where(rt => rt.UserId == user.Id && (rt.ExpiresAt < DateTime.UtcNow || rt.IsRevoked))
+            .ToListAsync();
 
-        if (activeTokens.Any())
+        if (expiredOrRevokedTokens.Count > 0)
         {
-            _context.RefreshTokens.RemoveRange(activeTokens);
-            await _context.SaveChangesAsync();
+            _context.RefreshTokens.RemoveRange(expiredOrRevokedTokens);
         }
+
+        await _context.SaveChangesAsync();
 
         return refreshToken;
     }
@@ -78,7 +78,13 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
             return null;
         }
 
-        return await _context.Users.FindAsync(token.UserId);
+        var user = await _context.Users.FindAsync(token.UserId);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return user;
     }
 
     public async Task InvalidateRefreshToken(string token)

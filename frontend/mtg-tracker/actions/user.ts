@@ -4,6 +4,7 @@ import { api } from "@/generated/client";
 import {
 	ForgotPasswordRequestDTO,
 	LogoutRequestDTO,
+	RefreshRequestDTO,
 	ResetPasswordRequestDTO,
 	UserLoginDTO,
 	UserRegisterDTO,
@@ -153,4 +154,21 @@ export async function registerUser(userRegisterDTO: UserRegisterDTO) {
 			},
 		};
 	}
+}
+
+// Throws an error if refresh fails
+export async function tryRefreshTokens() {
+	const refreshToken = await getRefreshToken();
+
+	if (!refreshToken) {
+		throw Error("No refresh token found");
+	}
+
+	const refreshRequest: RefreshRequestDTO = {
+		refreshToken,
+	};
+	const response = await api.postApiUserrefresh(refreshRequest);
+	const { accessToken, refreshToken: newRefreshToken, userData } = response;
+	await setAuthCookies(accessToken, newRefreshToken);
+  return userData;
 }

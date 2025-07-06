@@ -104,11 +104,6 @@ builder.Services.AddAuthentication(options =>
                 return Task.CompletedTask;
             }
         };
-    })
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     });
 
 
@@ -158,7 +153,6 @@ app.UseStaticFiles();
 // Only for development purposes - production should simply not expose http endpoints
 app.UseHttpsRedirection();
 
-// app.MapIdentityApi<ApplicationUser>();
 app.MapControllers();
 app.MapHub<RoomHub>("/hub");
 

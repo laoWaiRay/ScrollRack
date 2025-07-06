@@ -1,5 +1,3 @@
-"use server";
-
 import DeckAdd from "./DeckAdd";
 
 export default async function page() {

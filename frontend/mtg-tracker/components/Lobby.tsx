@@ -135,8 +135,6 @@ export default function Lobby({
 		setLocalStorageValue(initialGameData);
 		setCurrentGameData(initialGameData);
 	}
-  
-  console.log(JSON.stringify(hostedRoom.players?.map(p => p.userName)))
 
 	return (
 		<>

@@ -11,9 +11,7 @@ using Mtg_tracker.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using System.Net.Mail;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
-using System.Security.Claims;
+using Google.Apis.Auth;
 
 namespace Mtg_tracker.Controllers;
 
@@ -370,7 +368,10 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     {
         var refreshToken = request.RefreshToken;
         var user = await tokenProvider.ValidateRefreshToken(refreshToken);
-        if (user == null) return Unauthorized();
+        if (user == null)
+        {
+            return Unauthorized();
+        }
 
         // Invalidate old refresh token
         await tokenProvider.InvalidateRefreshToken(refreshToken);
@@ -380,6 +381,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
         return Ok(new RefreshResponseDTO()
         {
+            UserData = _mapper.Map<UserWithEmailDTO>(user),
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken.Token
         });
@@ -561,47 +563,40 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
     }
 
-    [HttpGet("signin-google")]
-    public IActionResult SignInWithGoogle([FromQuery] string? returnUrl = null)
-    {
-        var redirectUrl = Url.Action("GoogleCallback", "User", new { returnUrl });
-        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-    }
-
-    [HttpGet("google-callback")]
-    public async Task<IActionResult> GoogleCallback(
+    [HttpPost("auth/google")]
+    public async Task<ActionResult<LoginResponseDTO>> GoogleLogin(
+        IConfiguration configuration,
+        GoogleLoginRequestDTO request,
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        TokenProviderService tokenProvider)
     {
-        var externalLoginInfo = await signInManager.GetExternalLoginInfoAsync();
-        if (externalLoginInfo == null)
+        if (string.IsNullOrWhiteSpace(request.IdToken))
         {
-            return BadRequest("External login information not found.");
+            return BadRequest("No Google ID token");
         }
 
-        // Try to sign in with external login
-        var result = await signInManager.ExternalLoginSignInAsync(
-            externalLoginInfo.LoginProvider,
-            externalLoginInfo.ProviderKey,
-            isPersistent: true,
-            bypassTwoFactor: true);
-
-        if (result.Succeeded)
+        string? email;
+        try
         {
-            return Redirect("https://localhost:3000"); // your frontend home page
+            var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = [configuration["Authentication:Google:ClientId"]]
+            });
+
+            email = payload?.Email;
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest();
+            }
+
         }
-
-        // Create a new user if one doesn't exist
-        var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
-        var name = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
-
-        if (email == null)
+        catch (InvalidJwtException)
         {
-            return BadRequest("Google login must return an email address.");
+            return BadRequest();
         }
 
         var user = await userManager.FindByEmailAsync(email);
+
         if (user == null)
         {
             user = new ApplicationUser
@@ -611,28 +606,27 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
                 EmailConfirmed = true,
             };
 
-            user.StatSnapshot = new StatSnapshot()
-            {
-                UserId = user.Id,
-            };
-
             var createResult = await userManager.CreateAsync(user);
+
             if (!createResult.Succeeded)
             {
                 return BadRequest(createResult.Errors);
             }
 
+            user.StatSnapshot = new StatSnapshot()
+            {
+                UserId = user.Id,
+            };
             await _context.SaveChangesAsync(); // Save the new StatSnapshot
         }
 
-        var addLoginResult = await userManager.AddLoginAsync(user, externalLoginInfo);
-        if (!addLoginResult.Succeeded)
+        string accessToken = tokenProvider.CreateAccessToken(user);
+        string refreshToken = (await tokenProvider.CreateRefreshToken(user)).Token;
+        return Ok(new LoginResponseDTO
         {
-            return BadRequest(addLoginResult.Errors);
-        }
-
-        await signInManager.SignInAsync(user, isPersistent: true);
-
-        return Redirect("https://localhost:3000"); // or a custom success page
+            UserData = _mapper.Map<UserWithEmailDTO>(user),
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+        });
     }
 }

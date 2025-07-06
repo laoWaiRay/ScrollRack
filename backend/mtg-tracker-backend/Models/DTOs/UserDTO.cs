@@ -91,6 +91,12 @@ public class RefreshRequestDTO
 
 public class RefreshResponseDTO
 {
+    public required UserWithEmailDTO UserData { get; set; }
     public required string AccessToken { get; set; }
     public required string RefreshToken { get; set; }
+}
+
+public class GoogleLoginRequestDTO
+{
+    public required string IdToken { get; set; }
 }

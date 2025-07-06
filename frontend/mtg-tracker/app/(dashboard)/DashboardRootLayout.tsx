@@ -19,6 +19,16 @@ import Tooltip from "@/components/Tooltip";
 import Hamburger from "@/components/animations/Hamburger";
 import { getPath } from "@/helpers/url";
 import Drawer from "@/components/Drawer";
+import { useAuth } from "@/hooks/useAuth";
+import { logout, tryRefreshTokens } from "@/actions/user";
+import { ActionType as AuthActionType } from "@/context/AuthContext";
+import { ActionType as RoomActionType } from "@/context/RoomContext";
+import { defaultGameState, ActionType as GameActionType } from "@/context/GameContext";
+import { useRoom } from "@/hooks/useRoom";
+import { useGame } from "@/hooks/useGame";
+import { getRooms } from "@/actions/rooms";
+import { getGames } from "@/actions/games";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 interface DashboardRootLayoutProps {
 	children: ReactNode;
@@ -92,6 +102,38 @@ export default function DashboardRootLayout({
 	const pathname = usePathname();
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const router = useRouter();
+	const { user, dispatch: dispatchAuth } = useAuth();
+	const { dispatch: dispatchRoom } = useRoom();
+	const { dispatch: dispatchGameState } = useGame();
+
+	useEffect(() => {
+	  // If user was null, try to refresh the access token and update all context data.
+		async function run() {
+			try {
+	      const userData = await tryRefreshTokens();
+	      const roomAuthResult = await getRooms();
+	      const roomData = extractAuthResult(roomAuthResult);
+	      const gameAuthResult = await getGames();
+	      const gameData = extractAuthResult(gameAuthResult);
+	      dispatchAuth({ type: AuthActionType.LOGIN, payload: userData });
+	      dispatchRoom({ type: RoomActionType.UPDATE , payload: roomData ?? [] });
+	      dispatchGameState({ type: GameActionType.UPDATE, payload: gameData?.games ?? defaultGameState.games });
+	      dispatchGameState({ type: GameActionType.SET_HAS_MORE, payload: gameData?.hasMore ?? defaultGameState.hasMore });
+	      dispatchGameState({ type: GameActionType.SET_PAGE, payload: gameData?.page ?? defaultGameState.page });
+			} catch (error) {
+	      console.log(error);
+				if (pathname !== "/login") {
+					await logout();
+					router.push("/login");
+				}
+			}
+		}
+
+		if (!user) {
+			run();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user]);
 
 	function renderDesktopLinks(links: LinkData[]) {
 		return links.map((data) => (

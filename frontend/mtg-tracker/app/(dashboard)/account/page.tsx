@@ -1,5 +1,3 @@
-"use server";
-
 import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import Account from "./Account";
 import { extractAuthResult } from "@/helpers/extractAuthResult";

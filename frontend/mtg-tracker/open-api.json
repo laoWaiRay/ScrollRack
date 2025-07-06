@@ -1627,36 +1627,51 @@
         }
       }
     },
-    "/api/User/signin-google": {
-      "get": {
+    "/api/User/auth/google": {
+      "post": {
         "tags": [
           "User"
         ],
-        "parameters": [
-          {
-            "name": "returnUrl",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": null
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleLoginRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleLoginRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleLoginRequestDTO"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/User/google-callback": {
-      "get": {
-        "tags": [
-          "User"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDTO"
+                }
+              }
+            }
           }
         }
       }
@@ -2094,6 +2109,17 @@
           }
         }
       },
+      "GoogleLoginRequestDTO": {
+        "required": [
+          "idToken"
+        ],
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "type": "string"
+          }
+        }
+      },
       "LoginResponseDTO": {
         "required": [
           "userData",
@@ -2155,11 +2181,15 @@
       },
       "RefreshResponseDTO": {
         "required": [
+          "userData",
           "accessToken",
           "refreshToken"
         ],
         "type": "object",
         "properties": {
+          "userData": {
+            "$ref": "#/components/schemas/UserWithEmailDTO"
+          },
           "accessToken": {
             "type": "string"
           },

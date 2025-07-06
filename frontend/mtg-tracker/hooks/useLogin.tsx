@@ -1,5 +1,5 @@
+"use client"
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { ActionType } from "@/context/AuthContext";
 import { UserLoginDTO } from "@/types/client";
@@ -26,7 +26,5 @@ export function useLogin() {
 		}
 	}
 
-	const loginAsync = useCallback(_loginAsync, []);
-
-	return { loginAsync };
+	return { loginAsync: _loginAsync };
 }

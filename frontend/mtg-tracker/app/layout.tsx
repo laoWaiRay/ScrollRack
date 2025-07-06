@@ -1,10 +1,14 @@
+// This makes the root layout dynamically rendered and fixes strange build issue:
+// Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import { Commissioner, Dancing_Script } from "next/font/google";
 import "./globals.css";
-import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import RootLayout from "./RootLayout";
-import { extractAuthResult } from "@/helpers/extractAuthResult";
+import { getUserWithEmail } from "@/actions/getUserWithEmail";
 import { UserWithEmailDTO } from "@/types/client";
+import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",

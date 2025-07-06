@@ -1,4 +1,3 @@
-"use server";
 import ResetPassword from "./ResetPassword";
 
 export default async function page() {

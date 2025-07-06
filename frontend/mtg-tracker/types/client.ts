@@ -31,3 +31,4 @@ export type LoginResponseDTO = z.infer<typeof schemas.LoginResponseDTO>;
 export type RefreshRequestDTO = z.infer<typeof schemas.RefreshRequestDTO>;
 export type RefreshResponseDTO = z.infer<typeof schemas.RefreshResponseDTO>;
 export type LogoutRequestDTO = z.infer<typeof schemas.LogoutRequestDTO>;
+export type GoogleLoginRequestDTO = z.infer<typeof schemas.GoogleLoginRequestDTO>;

@@ -112,6 +112,11 @@ type PagedResultOfGameReadDTO = Partial<{
   page: number;
   hasMore: boolean;
 }>;
+type RefreshResponseDTO = {
+  userData: UserWithEmailDTO;
+  accessToken: string;
+  refreshToken: string;
+};
 type RoomDTO = {
   id: number;
   roomOwnerId: string;
@@ -338,13 +343,18 @@ const UserLoginDTO = z
   .object({ email: z.string(), password: z.string() })
   .passthrough();
 const RefreshRequestDTO = z.object({ refreshToken: z.string() }).passthrough();
-const RefreshResponseDTO = z
-  .object({ accessToken: z.string(), refreshToken: z.string() })
+const RefreshResponseDTO: z.ZodType<RefreshResponseDTO> = z
+  .object({
+    userData: UserWithEmailDTO,
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  })
   .passthrough();
 const ForgotPasswordRequestDTO = z.object({ email: z.string() }).passthrough();
 const ResetPasswordRequestDTO = z
   .object({ id: z.string(), token: z.string(), password: z.string() })
   .passthrough();
+const GoogleLoginRequestDTO = z.object({ idToken: z.string() }).passthrough();
 
 export const schemas = {
   DeckStats,
@@ -378,6 +388,7 @@ export const schemas = {
   RefreshResponseDTO,
   ForgotPasswordRequestDTO,
   ResetPasswordRequestDTO,
+  GoogleLoginRequestDTO,
 };
 
 const endpoints = makeApi([
@@ -795,18 +806,25 @@ const endpoints = makeApi([
     response: z.array(DeckReadDTO),
   },
   {
+    method: "post",
+    path: "/api/User/auth/google",
+    alias: "postApiUserauthgoogle",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.object({ idToken: z.string() }).passthrough(),
+      },
+    ],
+    response: LoginResponseDTO,
+  },
+  {
     method: "get",
     path: "/api/User/email",
     alias: "getApiUseremail",
     requestFormat: "json",
     response: UserWithEmailDTO,
-  },
-  {
-    method: "get",
-    path: "/api/User/google-callback",
-    alias: "getApiUsergoogleCallback",
-    requestFormat: "json",
-    response: z.void(),
   },
   {
     method: "get",
@@ -923,20 +941,6 @@ const endpoints = makeApi([
         name: "body",
         type: "Body",
         schema: z.object({ email: z.string() }).passthrough(),
-      },
-    ],
-    response: z.void(),
-  },
-  {
-    method: "get",
-    path: "/api/User/signin-google",
-    alias: "getApiUsersigninGoogle",
-    requestFormat: "json",
-    parameters: [
-      {
-        name: "returnUrl",
-        type: "Query",
-        schema: z.string().optional().default(null),
       },
     ],
     response: z.void(),
