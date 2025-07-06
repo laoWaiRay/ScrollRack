@@ -25,8 +25,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetDecks()
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        // Stopwatch stopwatch = new();
+        // stopwatch.Start();
 
         var userId = User.GetUserId();
         if (userId is null)
@@ -35,8 +35,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
         }
         
         var deckReadDTOs = await GetUserDecksAsync(userId);
-        stopwatch.Stop();
-        Console.WriteLine($"GET /api/deck took {stopwatch.ElapsedMilliseconds}ms");
+        // stopwatch.Stop();
+        // Console.WriteLine($"GET /api/deck took {stopwatch.ElapsedMilliseconds}ms");
         return deckReadDTOs;
     }
 
@@ -46,8 +46,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
     [HttpGet("friend/{id}")]
     public async Task<ActionResult<List<DeckReadDTO>>> GetFriendDecks(string id)
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        // Stopwatch stopwatch = new();
+        // stopwatch.Start();
 
         var userId = User.GetUserId();
         if (userId is null)
@@ -72,8 +72,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
         }
 
         List<DeckReadDTO> deckReadDTOs = await GetUserDecksAsync(id);
-        stopwatch.Stop();
-        Console.WriteLine($"GET /api/deck/friend took {stopwatch.ElapsedMilliseconds}ms");
+        // stopwatch.Stop();
+        // Console.WriteLine($"GET /api/deck/friend took {stopwatch.ElapsedMilliseconds}ms");
         return deckReadDTOs;
     }
 

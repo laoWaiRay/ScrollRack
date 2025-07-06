@@ -26,8 +26,9 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
     [HttpGet]
     public async Task<ActionResult<List<FilteredStatSnapshotDTO>>> GetStatSnapshot()
     {
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
+        // Stopwatch stopwatch = new();
+        // stopwatch.Start();
+
         var userId = User.GetUserId();
         if (userId is null)
         {
@@ -198,8 +199,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             }
         }
 
-        stopwatch.Stop();
-        Console.WriteLine($"Total Time for GET StatSnapshots: {stopwatch.Elapsed.TotalMilliseconds}");
+        // stopwatch.Stop();
+        // Console.WriteLine($"Total Time for GET StatSnapshots: {stopwatch.Elapsed.TotalMilliseconds}");
         return filteredSnapshotDTOs;
     }
 

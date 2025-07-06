@@ -13,7 +13,7 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
 
     public string CreateAccessToken(ApplicationUser user)
     {
-        string secretKey = configuration["Jwt:Secret"]!;
+        string secretKey = configuration["Jwt_Secret"]!;
 
         var claims = new[] {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -29,8 +29,8 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: configuration["Jwt:Audience"],
+            issuer: configuration["Jwt_Issuer"],
+            audience: configuration["Jwt_Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: credentials

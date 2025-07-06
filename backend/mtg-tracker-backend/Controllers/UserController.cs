@@ -580,7 +580,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         {
             var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, new GoogleJsonWebSignature.ValidationSettings
             {
-                Audience = [configuration["Authentication:Google:ClientId"]]
+                Audience = [configuration["Authentication_Google_ClientId"]]
             });
 
             email = payload?.Email;

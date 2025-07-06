@@ -11,9 +11,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
-Console.WriteLine("JWT Secret: " + builder.Configuration["Jwt:Secret"]);
-Console.WriteLine("JWT Issuer: " + builder.Configuration["Jwt:Issuer"]);
-Console.WriteLine("JWT Audience: " + builder.Configuration["Jwt:Audience"]);
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
@@ -81,9 +79,9 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+            ValidIssuer = builder.Configuration["Jwt_Issuer"],
+            ValidAudience = builder.Configuration["Jwt_Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt_Secret"]!)),
             ClockSkew = TimeSpan.Zero,
         };
 
@@ -155,17 +153,5 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 app.MapHub<RoomHub>("/hub");
-
-app.Use(async (context, next) =>
-{
-    await next();
-
-    if (context.Response.StatusCode == 401)
-    {
-        Console.WriteLine("401 Unauthorized!");
-        var authHeader = context.Request.Headers.Authorization.ToString();
-        Console.WriteLine("Authorization Header: " + authHeader);
-    }
-});
 
 app.Run();
