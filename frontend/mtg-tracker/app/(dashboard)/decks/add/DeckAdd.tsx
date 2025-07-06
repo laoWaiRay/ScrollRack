@@ -99,7 +99,7 @@ export default function DeckAdd() {
 		} catch (error) {
 			console.log(`Fetch Error: ${error}`);
 		}
-	}, [query]);
+	}, [query, includeNonLegal]);
 
 	async function handleAddDeck(e: FormEvent<HTMLElement>) {
 		e.preventDefault();
