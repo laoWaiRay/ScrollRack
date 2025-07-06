@@ -29,21 +29,13 @@ export default async function layout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const authResult = await getUserWithEmail();
-  let user: UserWithEmailDTO | null = null;
-  try {
-    user = extractAuthResult(authResult);
-  } catch (error) {
-    console.log(error);
-  }
-
 	return (
 		<html lang="en">
 			<body
 				id="root"
 				className={`${commissioner.className} ${dancingScript.variable} bg-surface-600 text-fg min-h-dvh`}
 			>
-        <RootLayout user={user}>
+        <RootLayout>
           { children }
         </RootLayout>
 			</body>

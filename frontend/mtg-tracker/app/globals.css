@@ -101,7 +101,7 @@ body {
 }
 
 /* Dark mode variants */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light), (prefers-color-scheme: dark) {
 	:root {
 		--bg-light: #000000de;
 		--bg: #00000099;

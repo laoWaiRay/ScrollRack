@@ -12,6 +12,7 @@ import useToast from "@/hooks/useToast";
 import { DeckWriteDTO } from "@/types/client";
 import { ServerApiError } from "@/types/server";
 import { Field, Label } from "@headlessui/react";
+import Checkbox from "@mui/material/Checkbox";
 import {
 	Dispatch,
 	FormEvent,
@@ -38,7 +39,8 @@ export default function DeckAdd() {
 	const [moxfield, setMoxfield] = useState("");
 	const delayRef = useRef(false);
 	const { toast } = useToast();
-  const [isFetching, setIsFetching] = useState(false);
+	const [isFetching, setIsFetching] = useState(false);
+	const [includeNonLegal, setIncludeNonLegal] = useState(false);
 
 	const handleComboboxSelect: Dispatch<SetStateAction<string | null>> = (
 		value
@@ -58,10 +60,13 @@ export default function DeckAdd() {
 		delayRef.current = false;
 
 		const cardName = query.replaceAll(/[^a-zA-Z0-9,-\s]/g, "");
-		const filteredSearchString = `${cardName} type:legendary (game:paper)`;
+		let filteredSearchString = `${cardName} type:legendary (game:paper)`;
+    if (includeNonLegal) {
+      filteredSearchString += " include:extras";
+    }
 		try {
 			const response = await fetch(
-				`https://api.scryfall.com/cards/search?q=${filteredSearchString}`
+				`https://api.scryfall.com/cards/search?q=${encodeURIComponent(filteredSearchString)}`
 			);
 
 			if (response.status === NOT_FOUND) {
@@ -125,16 +130,16 @@ export default function DeckAdd() {
 		};
 
 		try {
-      setIsFetching(true);
+			setIsFetching(true);
 			const authResult = await createDeck(deckWriteDTO);
-      extractAuthResult(authResult);
-      setSelected(null);
-      setQuery("");
-      setMoxfield("");
-      toast(`Saved deck: ${selected}`, "success");
-      setIsFetching(false);
+			extractAuthResult(authResult);
+			setSelected(null);
+			setQuery("");
+			setMoxfield("");
+			toast(`Saved deck: ${selected}`, "success");
+			setIsFetching(false);
 		} catch (error) {
-      setIsFetching(false);
+			setIsFetching(false);
 			if (error instanceof ServerApiError && error.status === CONFLICT) {
 				toast(`Deck with commander ${selected} already exists`, "warn");
 			} else {
@@ -172,6 +177,20 @@ export default function DeckAdd() {
 						setSelected={handleComboboxSelect}
 					/>
 				</Field>
+				<div className="self-end -mt-2 flex items-center justify-center">
+					<span className="">Include Extras: </span>
+					<Checkbox
+						checked={includeNonLegal}
+						onChange={() => setIncludeNonLegal(!includeNonLegal)}
+						sx={{
+							color: "var(--fg)",
+							"&.Mui-checked": {
+								color: "var(--primary-100)",
+							},
+						}}
+						disableRipple={true}
+					/>
+				</div>
 				<Field>
 					<TextInput
 						label="Moxfield Decklist (optional)"

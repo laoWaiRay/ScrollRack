@@ -137,7 +137,7 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins("https://scrollrack.win")
+            policy.WithOrigins("https://scrollrack.win", "https://www.scrollrack.win", "https://scrollrack-ezbnefh0h0fjh3cz.canadacentral-01.azurewebsites.net")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

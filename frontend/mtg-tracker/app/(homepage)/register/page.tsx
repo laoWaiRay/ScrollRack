@@ -1,7 +1,6 @@
 "use client";
 import styles from "../styles.module.css";
 import { Dispatch, SetStateAction, useState } from "react";
-import GoogleLogo from "@/public/icons/google.svg";
 import ButtonPrimary from "@/components/ButtonPrimary";
 import Link from "next/link";
 import { BAD_REQUEST, UNAUTHORIZED } from "@/constants/httpStatus";
@@ -113,10 +112,6 @@ export default function RegisterPage() {
 		},
 	];
 
-	function handleGoogleRedirect() {
-		window.location.href = `${process.env.SERVER_URL}/api/user/signin-google`;
-	}
-
 	return (
 		<div className={`${styles.gridB} z-20`}>
 			<form
@@ -137,20 +132,6 @@ export default function RegisterPage() {
 					uppercase={false}
 				>
 					Sign Up
-				</ButtonPrimary>
-				<div className="text-fg-dark flex justify-center items-center">
-					<div className="bg-fg-dark h-[1px] grow mr-4 ml-1" />
-					<span className="select-none">OR</span>
-					<div className="bg-fg-dark h-[1px] grow ml-4 mr-1" />
-				</div>
-				<ButtonPrimary
-					onClick={handleGoogleRedirect}
-					style="google"
-					uppercase={false}
-				>
-					<div className="flex items-center justify-center">
-						Sign up with Google <GoogleLogo className="ml-2" />
-					</div>
 				</ButtonPrimary>
 
 				<div className="flex justify-center items-center py-2">
