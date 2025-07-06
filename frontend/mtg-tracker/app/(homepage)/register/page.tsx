@@ -114,7 +114,7 @@ export default function RegisterPage() {
 	];
 
 	function handleGoogleRedirect() {
-		window.location.href = "https://localhost:7165/api/user/signin-google";
+		window.location.href = `${process.env.SERVER_URL}/api/user/signin-google`;
 	}
 
 	return (

@@ -5,6 +5,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"generate": "openapi-zod-client ./open-api.json -o ./generated/client.ts --base-url=https://localhost:7165 --export-schemas --export-types=true",
+		"generate-production": "openapi-zod-client ./open-api.json -o ./generated/client.ts --base-url=https://scrollrack-ezbnefh0h0fjh3cz.canadacentral-01.azurewebsites.net/ --export-schemas --export-types=true",
 		"dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --turbopack --experimental-https",
 		"build": "next build",
 		"start": "next start",

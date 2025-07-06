@@ -27,7 +27,7 @@ export function useRoomConnection(
 
 	useEffect(() => {
 		const conn = new HubConnectionBuilder()
-			.withUrl("https://localhost:7165/hub", {
+			.withUrl(`${process.env.SERVER_URL}/hub`, {
 				logger: LogLevel.Information,
         accessTokenFactory: getAccessToken
 			})

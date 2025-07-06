@@ -114,10 +114,23 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
     {
-        policy.WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.66:3000", "http://192.168.1.66:3000")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+        var env = builder.Environment;
+
+        if (env.IsDevelopment())
+        {
+            policy.WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.66:3000", "http://192.168.1.66:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+        else
+        {
+            policy.WithOrigins("https://scrollrack.win")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+
     });
 });
 
@@ -137,19 +150,18 @@ app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Only for development (inspecting tutorial on fetch api) - production frontend will be Next.js
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+
+    // Only for development purposes - production should simply not expose http endpoints
+    app.UseHttpsRedirection();
 }
-
-// Only for development (inspecting tutorial on fetch api) - production frontend will be Next.js
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-// Only for development purposes - production should simply not expose http endpoints
-app.UseHttpsRedirection();
 
 app.MapControllers();
 app.MapHub<RoomHub>("/hub");

@@ -966,7 +966,10 @@ const endpoints = makeApi([
   },
 ]);
 
-export const api = new Zodios("https://localhost:7165", endpoints);
+export const api = new Zodios(
+  "https://scrollrack-ezbnefh0h0fjh3cz.canadacentral-01.azurewebsites.net/",
+  endpoints
+);
 
 export function createApiClient(baseUrl: string, options?: ZodiosOptions) {
   return new Zodios(baseUrl, endpoints, options);
