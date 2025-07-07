@@ -6,9 +6,6 @@ import type { Metadata } from "next";
 import { Commissioner, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import RootLayout from "./RootLayout";
-import { getUserWithEmail } from "@/actions/getUserWithEmail";
-import { UserWithEmailDTO } from "@/types/client";
-import { extractAuthResult } from "@/helpers/extractAuthResult";
 
 export const metadata: Metadata = {
 	title: "ScrollRack",

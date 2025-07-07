@@ -1,10 +1,10 @@
-import { getAccessToken } from "@/actions/helpers/auth";
+import { getRefreshToken } from "@/actions/helpers/auth";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
-  const accessToken = await getAccessToken();
+  const refreshToken = await getRefreshToken();
 
-	if (!accessToken) {
+	if (!refreshToken) {
 		redirect("/login");
 	}
 

@@ -157,6 +157,7 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                 var leastPlayedCommanders = commandersByPlayrate
                     .Select(grouping => grouping.Key)
                     .TakeLast(3)
+                    .Reverse()
                     .ToList();
 
                 // Group games/wins/losses by time period for displaying on Line Chart
