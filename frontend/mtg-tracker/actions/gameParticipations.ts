@@ -8,6 +8,14 @@ export async function postGameParticipation(
 	requestDTO: GameParticipationWriteDTO
 ) {
 	return await callWithAuth(api.postApiGameParticipation, requestDTO, {
+		queries: { imported: false },
+	});
+}
+
+export async function postGameParticipationImported(
+	requestDTO: GameParticipationWriteDTO
+) {
+	return await callWithAuth(api.postApiGameParticipation, requestDTO, {
 		queries: { imported: true },
 	});
 }

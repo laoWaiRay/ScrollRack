@@ -101,7 +101,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        if (user.HostedRoom is null)
+        if (gameWriteDTO.Imported == false && user.HostedRoom is null)
         {
             return BadRequest("Only room host can create a game");
         }

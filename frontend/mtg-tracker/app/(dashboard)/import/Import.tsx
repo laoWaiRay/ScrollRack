@@ -25,7 +25,7 @@ import { useGame } from "@/hooks/useGame";
 import { ActionType as GameActionType } from "@/context/GameContext";
 import { deleteGame, postGame } from "@/actions/games";
 import { extractAuthResult } from "@/helpers/extractAuthResult";
-import { postGameParticipation } from "@/actions/gameParticipations";
+import { postGameParticipationImported } from "@/actions/gameParticipations";
 
 export default function Import() {
 	const { toast } = useToast();
@@ -104,6 +104,7 @@ export default function Import() {
 				imported: true,
 			};
 
+      console.log("Writing game")
       const authResult = await postGame(gameWriteDTO);
       const gameReadDTO = extractAuthResult(authResult);
       
@@ -139,7 +140,8 @@ export default function Import() {
 			}
 
 			for (const gameParticipationWriteDTO of gameParticipationWriteDTOs) {
-        const authResult = await postGameParticipation(gameParticipationWriteDTO);
+        console.log("Writing game participation")
+        const authResult = await postGameParticipationImported(gameParticipationWriteDTO);
         extractAuthResult(authResult);
 			}
 
