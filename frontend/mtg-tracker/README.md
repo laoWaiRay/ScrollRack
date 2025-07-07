@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scroll Rack
 
-## Getting Started
+👉 **[Visit ScrollRack to start tracking your Commander games](https://scrollrack.win/login)**
 
-First, run the development server:
+Scroll Rack is an intuitive, minimal stat tracker for the *Commander* format of *Magic: The Gathering* I made to help players record games, analyse deck performance, and share insights with their friends.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Key Features
+| Capability | Description |
+|------------|-------------|
+| **Deck + Game Tracking** | Record wins, losses, streaks, and more for all of your Commander decks |
+| **Stat Filtering** | Filter and sort statistics by number of players, date ranges, opponents and other game metrics to easily gain insight into the performance of all your decks
+| **Real‑Time Updates** | SignalR and SWR keep all participants’ views synchronised during and after games |
+| **Social** | Create a social network by adding friends to share deck stats within your play group
+| **Responsive and Accessible UI** | Built with Tailwind CSS, Headless UI and Material components for a polished experience on desktop and mobile |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | **Next.js 15** (App Router) + **TypeScript** | Modern React framework with type‑safety and server components |
+| | **SWR** | Automatic data fetching, caching and revalidation. |
+| | Tailwind CSS + Headless UI + Material UI | Utility‑first styling with accessible components |
+| **Backend** | **ASP.NET Core 9** (controller‑based Web API) | Backend API server |
+| | **PostgreSQL** | SQL data store (hosted on Neon DB) |
+| | **SignalR** | Allows real-time updates and reactions to game events by letting server push data to clients through RPCs |
+| | **JWT** | Token‑based authentication and authorisation to keep users' claims secure |
+| | **OpenAPI + Zod** | Leveraging OpenAPI to automatically generate type‑safe TS client using *openapi‑zod‑client* |
+| **Infrastructure** | **Vercel** (frontend) · **Azure App Service** (API) · **Cloudflare** (proxy/CDN) · **Neon** (database) | Minimal cost deployment |
+| **Email** | **Mailjet** | Transactional email delivery. |
