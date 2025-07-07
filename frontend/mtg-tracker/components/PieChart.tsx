@@ -19,9 +19,6 @@ export default function PieChart({
 	deckPlayCounts,
 	gamesPlayed,
 }: PieChartInterface) {
-	console.log(deckPlayCounts);
-	console.log(gamesPlayed);
-
 	function renderTooltip({
 		series,
 		seriesIndex,

@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
+import { getAccessToken } from "@/actions/helpers/auth";
 import { redirect } from "next/navigation";
 
 export default async function HomePage() {
-	const aspNetCoreIdentityCookieName = ".AspNetCore.Identity.Application";
-	const cookieStore = await cookies();
-	const cookie = cookieStore.get(aspNetCoreIdentityCookieName);
+  const accessToken = await getAccessToken();
 
-	if (cookie === undefined) {
+	if (!accessToken) {
 		redirect("/login");
 	}
 
