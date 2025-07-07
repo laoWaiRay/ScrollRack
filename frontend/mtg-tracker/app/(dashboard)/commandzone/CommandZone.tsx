@@ -166,7 +166,7 @@ export default function CommandZone() {
 			],
 			styles: {
 				main: `text-lg ${
-					snapshot.isCurrentWinStreak == null
+					snapshot.isCurrentWinStreak == null || snapshot.currentWinStreak === 0
 						? "text-fg-light"
 						: snapshot.isCurrentWinStreak
 						? "text-success"
