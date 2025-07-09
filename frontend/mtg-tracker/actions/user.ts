@@ -5,6 +5,7 @@ import {
 	ForgotPasswordRequestDTO,
 	LogoutRequestDTO,
 	RefreshRequestDTO,
+	RefreshResponseDTO,
 	ResetPasswordRequestDTO,
 	UserLoginDTO,
 	UserRegisterDTO,
@@ -19,6 +20,7 @@ import {
 import { callWithAuth } from "./helpers/callWithAuth";
 import { isAxiosError } from "axios";
 import { AuthResult } from "@/types/server";
+import { UNAUTHORIZED } from "@/constants/httpStatus";
 
 export async function login(loginDTO: UserLoginDTO) {
 	try {
@@ -157,7 +159,7 @@ export async function registerUser(userRegisterDTO: UserRegisterDTO) {
 }
 
 // Throws an error if refresh fails
-export async function tryRefreshTokens() {
+export async function tryRefreshTokens(retryCount = 4) {
 	const refreshToken = await getRefreshToken();
 
 	if (!refreshToken) {
@@ -167,8 +169,20 @@ export async function tryRefreshTokens() {
 	const refreshRequest: RefreshRequestDTO = {
 		refreshToken,
 	};
-	const response = await api.postApiUserrefresh(refreshRequest);
-	const { accessToken, refreshToken: newRefreshToken, userData } = response;
-	await setAuthCookies(accessToken, newRefreshToken);
-  return userData;
+  
+  try {
+    const response = await api.postApiUserrefresh(refreshRequest);
+    const { accessToken, refreshToken: newRefreshToken, userData } = response;
+    await setAuthCookies(accessToken, newRefreshToken);
+    return userData;
+  } catch (error) {
+    // Retry in case of Azure / Neon servers being down due to cold starts
+    if (isAxiosError(error) && error.response?.status !== UNAUTHORIZED && retryCount > 0) {
+      console.log(`Retry attempt: ${retryCount}`)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return tryRefreshTokens(retryCount - 1);
+    } else {
+      throw error;  
+    }
+  }
 }

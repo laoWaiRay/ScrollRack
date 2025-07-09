@@ -5,9 +5,7 @@ using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using System.Text.Json;
 using Mtg_tracker.Services;
-using System.Diagnostics;
 
 namespace Mtg_tracker.Controllers;
 

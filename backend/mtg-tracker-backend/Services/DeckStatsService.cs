@@ -47,8 +47,11 @@ public class DeckStatsService(IMapper mapper)
     {
         var isWinStreak = gameParticipations.FirstOrDefault()?.Won;
 
-        var streak = gameParticipations
+        var unimportedGameParticipations = gameParticipations
             .Where(gp => !gp.Game.Imported)
+            .ToList();
+
+        var streak = unimportedGameParticipations
             .TakeWhile(gp => gp.Won == isWinStreak)
             .Count();
 
@@ -56,7 +59,7 @@ public class DeckStatsService(IMapper mapper)
         int currLossStreak = 0;
         int longestWinStreak = 0;
         int longestLossStreak = 0;
-        foreach (var gp in gameParticipations)
+        foreach (var gp in unimportedGameParticipations)
         {
             currWinStreak = gp.Won ? currWinStreak + 1 : 0;
             currLossStreak = !gp.Won ? currLossStreak + 1 : 0;
