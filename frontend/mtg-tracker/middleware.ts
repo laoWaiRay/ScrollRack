@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
 const publicRoutes = [
+  "/",
 	"/login",
 	"/register",
 	"/verify-email",
@@ -34,6 +35,6 @@ export const config = {
 		 * - icons/
 		 * - images/
 		 */
-		"/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|icons|images|installHook.js.map|icon.svg).*)",
+		"/((?!api|_next/static|_next/image|favicon.*|sitemap.xml|robots.txt|icons|images|installHook.js.map|icon.svg|manifest.json|web-app-manifest.*|icon0.svg|icon1.png|apple-icon.png).*)",
 	],
 };

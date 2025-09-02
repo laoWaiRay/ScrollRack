@@ -10,6 +10,9 @@ import RootLayout from "./RootLayout";
 export const metadata: Metadata = {
 	title: "ScrollRack",
 	description: "A Commander stat tracker for Magic: The Gathering®",
+  appleWebApp: {
+    title: "ScrollRack"
+  }
 };
 
 const commissioner = Commissioner({
