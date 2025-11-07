@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
+using System.Data;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Models.Errors;
 
 namespace Mtg_tracker.Controllers;
@@ -29,8 +29,8 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
             return Unauthorized();
         }
 
-        List<FriendRequest> receivedRequests = await _context.FriendRequests
-            .Where(fr => fr.ReceiverId == userId)
+        List<FriendRequest> receivedRequests = await _context
+            .FriendRequests.Where(fr => fr.ReceiverId == userId)
             .ToListAsync();
 
         return _mapper.Map<List<FriendRequestDTO>>(receivedRequests);
@@ -48,8 +48,8 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
             return Unauthorized();
         }
 
-        List<FriendRequest> sentRequests = await _context.FriendRequests
-            .Where(fr => fr.SenderId == userId)
+        List<FriendRequest> sentRequests = await _context
+            .FriendRequests.Where(fr => fr.SenderId == userId)
             .ToListAsync();
 
         return _mapper.Map<List<FriendRequestDTO>>(sentRequests);
@@ -67,8 +67,8 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Friends)
+        var user = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         var receiver = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
@@ -80,11 +80,13 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
 
         if (receiver is null)
         {
-            ErrorResponse[] errors = [
-                new ErrorResponse {
+            ErrorResponse[] errors =
+            [
+                new ErrorResponse
+                {
                     Code = "UserNameNotFound",
-                    Description = "Username does not exist"
-                }
+                    Description = "Username does not exist",
+                },
             ];
             return NotFound(errors);
         }
@@ -93,20 +95,14 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
         var isAlreadyFriend = user.Friends.Any(u => u.Id == receiver.Id);
         if (isAlreadyFriend)
         {
-            ErrorResponse[] errors = [
-                new ErrorResponse {
-                    Code = "AlreadyFriend",
-                    Description = "Already friends"
-                }
+            ErrorResponse[] errors =
+            [
+                new ErrorResponse { Code = "AlreadyFriend", Description = "Already friends" },
             ];
             return Conflict(errors);
         }
-        
-        var friendRequest = new FriendRequest
-        {
-            SenderId = userId,
-            ReceiverId = receiver.Id
-        };
+
+        var friendRequest = new FriendRequest { SenderId = userId, ReceiverId = receiver.Id };
 
         _context.FriendRequests.Add(friendRequest);
 
@@ -118,11 +114,13 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
         {
             // This could happen if A has already received a request from B,
             // and A tries to send a request to B.
-            ErrorResponse[] errors = [
-                new ErrorResponse {
+            ErrorResponse[] errors =
+            [
+                new ErrorResponse
+                {
                     Code = "AlreadySent",
-                    Description = "Friend Request already sent"
-                }
+                    Description = "Friend Request already sent",
+                },
             ];
             return Conflict(errors);
         }
@@ -167,6 +165,5 @@ public class FriendRequestController(MtgContext context, IMapper mapper) : Contr
         return NoContent();
     }
 
-    private bool FriendRequestExists(int id) =>
-        _context.FriendRequests.Any(fr => fr.Id == id);
+    private bool FriendRequestExists(int id) => _context.FriendRequests.Any(fr => fr.Id == id);
 }

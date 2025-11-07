@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
+using System.Data;
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using System.Text;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 
 namespace Mtg_tracker.Controllers;
 
@@ -35,8 +35,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return BadRequest();
         }
 
-        var rooms = await _context.Rooms
-            .Include(r => r.Players)
+        var rooms = await _context
+            .Rooms.Include(r => r.Players)
             .ThenInclude(player => player.Decks)
             .AsSplitQuery()
             .Where(r => r.Players.Contains(user))
@@ -50,8 +50,9 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     [Authorize]
     [HttpGet("{roomCode}")]
     public async Task<ActionResult<RoomDTO>> GetRoom(string roomCode)
-    {   var rooms = await _context.Rooms
-            .Include(r => r.Players)
+    {
+        var rooms = await _context
+            .Rooms.Include(r => r.Players)
             .ThenInclude(player => player.Decks)
             .AsSplitQuery()
             .ToListAsync();
@@ -81,10 +82,9 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         // User must not have any hosted or joined rooms before creating a room
-        var isCurrentlyInRoom = await _context.Rooms
-            .Include(r => r.Players)
-            .AnyAsync(r => r.RoomOwnerId == userId ||
-                r.Players.Any(p => p.Id == userId));
+        var isCurrentlyInRoom = await _context
+            .Rooms.Include(r => r.Players)
+            .AnyAsync(r => r.RoomOwnerId == userId || r.Players.Any(p => p.Id == userId));
 
         if (isCurrentlyInRoom)
         {
@@ -113,7 +113,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         {
             Code = roomCode,
             RoomOwnerId = userId,
-            Players = [user]
+            Players = [user],
         };
 
         _context.Rooms.Add(room);
@@ -127,11 +127,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return StatusCode(500, "Unable to create room");
         }
 
-        return CreatedAtAction(
-            nameof(GetRoom),
-            new { roomCode },
-            _mapper.Map<RoomDTO>(room)
-        );
+        return CreatedAtAction(nameof(GetRoom), new { roomCode }, _mapper.Map<RoomDTO>(room));
     }
 
     // POST: api/room/{roomCode}
@@ -147,18 +143,17 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         // User must not have any hosted or joined rooms before joining a room
-        var isCurrentlyInRoom = await _context.Rooms
-            .Include(r => r.Players)
-            .AnyAsync(r => r.RoomOwnerId == userId ||
-                r.Players.Any(p => p.Id == userId));
+        var isCurrentlyInRoom = await _context
+            .Rooms.Include(r => r.Players)
+            .AnyAsync(r => r.RoomOwnerId == userId || r.Players.Any(p => p.Id == userId));
 
         if (isCurrentlyInRoom)
         {
             return Conflict("Cannot join room when already in one");
         }
 
-        var room = await _context.Rooms
-            .Include(r => r.Players)
+        var room = await _context
+            .Rooms.Include(r => r.Players)
             .ThenInclude(p => p.Decks)
             .AsSplitQuery()
             .FirstOrDefaultAsync(r => r.Code == roomCode);
@@ -168,8 +163,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return NotFound();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Decks)
+        var user = await _context
+            .Users.Include(u => u.Decks)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -204,8 +199,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        var room = await _context.Rooms
-            .Include(r => r.Players)
+        var room = await _context
+            .Rooms.Include(r => r.Players)
             .ThenInclude(p => p.Decks)
             .AsSplitQuery()
             .FirstOrDefaultAsync(r => r.Code == roomCode);
@@ -222,8 +217,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         // Player to add must not already be in a room
-        var playerToAdd = await _context.Users
-            .Include(u => u.HostedRoom)
+        var playerToAdd = await _context
+            .Users.Include(u => u.HostedRoom)
             .Include(u => u.JoinedRoom)
             .Include(u => u.Decks)
             .FirstOrDefaultAsync(u => u.Id == playerId);
@@ -239,13 +234,11 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         // Check that players are friends before allowing host to manually add
-        var host = await _context.Users
-            .Include(u => u.Friends)
+        var host = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-        if (host is null ||
-            host.Friends is null ||
-            host.Friends.Contains(playerToAdd) is false)
+        if (host is null || host.Friends is null || host.Friends.Contains(playerToAdd) is false)
         {
             return Unauthorized("Can only add users in host's friend list");
         }
@@ -283,17 +276,15 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return BadRequest();
         }
 
-        var user = await _context.Users
-            .Include(u => u.HostedRoom)
+        var user = await _context
+            .Users.Include(u => u.HostedRoom)
             .ThenInclude(r => r!.Players)
             .ThenInclude(p => p.Decks)
             .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         // Only the Host can remove a player from the room
-        if (user is null ||
-            user.HostedRoom is null ||
-            user.HostedRoom.Code != roomCode)
+        if (user is null || user.HostedRoom is null || user.HostedRoom.Code != roomCode)
         {
             return Unauthorized();
         }
@@ -324,8 +315,8 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.HostedRoom)
+        var user = await _context
+            .Users.Include(u => u.HostedRoom)
             .Include(u => u.JoinedRoom)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
@@ -344,7 +335,7 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
         {
             user.JoinedRoom = null;
         }
-        
+
         try
         {
             await _context.SaveChangesAsync();
@@ -361,9 +352,10 @@ public class RoomController(MtgContext context, IMapper mapper) : ControllerBase
     private static string GenerateRoomCode()
     {
         // ['A' ... 'Z', '0' ... '9']
-        char[] lettersAndNumbers = [
+        char[] lettersAndNumbers =
+        [
             .. Enumerable.Range('A', 'Z' - 'A' + 1).Select(i => (char)i),
-            .. Enumerable.Range(0, 10).Select(i => Convert.ToChar(i + '0'))
+            .. Enumerable.Range(0, 10).Select(i => Convert.ToChar(i + '0')),
         ];
 
         StringBuilder roomCodeBuilder = new(ROOM_CODE_NUM_DIGITS);

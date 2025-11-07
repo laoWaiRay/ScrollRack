@@ -1,17 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
+using System.Net.Mail;
+using System.Text;
 using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Models.Errors;
 using Mtg_tracker.Services;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
-using System.Net.Mail;
-using Google.Apis.Auth;
 
 namespace Mtg_tracker.Controllers;
 
@@ -33,7 +33,8 @@ namespace Mtg_tracker.Controllers;
 */
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailSender emailSender) : ControllerBase
+public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailSender emailSender)
+    : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
@@ -65,7 +66,9 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     // Get a list of all users corresponding to the given ids
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers(UserMultipleDTO userMultipleDTO)
+    public async Task<ActionResult<IEnumerable<UserReadDTO>>> GetUsers(
+        UserMultipleDTO userMultipleDTO
+    )
     {
         List<ApplicationUser> userData = [];
         foreach (var userId in userMultipleDTO.Ids)
@@ -117,9 +120,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     [HttpGet("{id}/decks")]
     public async Task<ActionResult<IEnumerable<DeckReadDTO>>> GetUserDecks(string id)
     {
-        var user = await _context.Users
-            .Include(u => u.Decks)
-            .FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _context.Users.Include(u => u.Decks).FirstOrDefaultAsync(u => u.Id == id);
 
         if (user is null)
         {
@@ -133,7 +134,11 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     // Edit username / profile picture
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult> PutUser(UserManager<ApplicationUser> userManager, string id, UserWriteDTO userWriteDTO)
+    public async Task<ActionResult> PutUser(
+        UserManager<ApplicationUser> userManager,
+        string id,
+        UserWriteDTO userWriteDTO
+    )
     {
         var userId = User.GetUserId();
         if (userId is null || userId != id)
@@ -152,7 +157,10 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
 
         // Handle only changing username and profile picture
-        if (string.IsNullOrEmpty(userWriteDTO.CurrentPassword) || string.IsNullOrEmpty(userWriteDTO.NewPassword))
+        if (
+            string.IsNullOrEmpty(userWriteDTO.CurrentPassword)
+            || string.IsNullOrEmpty(userWriteDTO.NewPassword)
+        )
         {
             user.Profile = userWriteDTO.Profile;
             user.UserName = userWriteDTO.UserName;
@@ -164,7 +172,6 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             return NoContent();
         }
 
-
         // Otherwise, need to handle changing password, username and profile picture atomically.
         if (userWriteDTO.CurrentPassword == null)
         {
@@ -172,26 +179,34 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
 
         // First check that the provided password is correct
-        var passwordVerified = await userManager.CheckPasswordAsync(user, userWriteDTO.CurrentPassword);
+        var passwordVerified = await userManager.CheckPasswordAsync(
+            user,
+            userWriteDTO.CurrentPassword
+        );
         if (!passwordVerified)
         {
-            var errors = new List<ErrorResponse> {
-                new() {
+            var errors = new List<ErrorResponse>
+            {
+                new()
+                {
                     Code = "IncorrectCurrentPassword",
-                    Description = "Current password is incorrect"
-                }
+                    Description = "Current password is incorrect",
+                },
             };
             return BadRequest(errors);
         }
 
         // Check the new password passes validations
         var passwordValidator = new PasswordValidator<ApplicationUser>();
-        var passwordResult = await passwordValidator.ValidateAsync(userManager, user, userWriteDTO.NewPassword);
+        var passwordResult = await passwordValidator.ValidateAsync(
+            userManager,
+            user,
+            userWriteDTO.NewPassword
+        );
         if (!passwordResult.Succeeded)
         {
             return BadRequest(passwordResult.Errors);
         }
-
 
         // Attempt to update everything except password
         user.Profile = userWriteDTO.Profile;
@@ -204,7 +219,11 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
 
         // Finally, update the password with the new one that was already validated
-        var passwordChangeResult = await userManager.ChangePasswordAsync(user, userWriteDTO.CurrentPassword, userWriteDTO.NewPassword);
+        var passwordChangeResult = await userManager.ChangePasswordAsync(
+            user,
+            userWriteDTO.CurrentPassword,
+            userWriteDTO.NewPassword
+        );
         if (!passwordChangeResult.Succeeded)
         {
             return BadRequest(passwordChangeResult.Errors);
@@ -216,14 +235,13 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             {
                 EmailTemplateContext emailContext = new()
                 {
-
                     ToEmail = user.Email,
                     Type = EmailType.ResetPasswordConfirmation,
                     Variables = new ResetPasswordConfirmationVariables()
                     {
                         UserId = user.Id,
                         Name = user.UserName ?? "",
-                    }
+                    },
                 };
                 await _emailSender.SendEmailAsync(emailContext);
             }
@@ -239,7 +257,8 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     public async Task<ActionResult<LoginResponseDTO>> Register(
         TokenProviderService tokenProvider,
         UserManager<ApplicationUser> userManager,
-        UserRegisterDTO userRegisterDTO)
+        UserRegisterDTO userRegisterDTO
+    )
     {
         var user = new ApplicationUser
         {
@@ -282,10 +301,7 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             }
 
             // Create initial empty stat snapshot
-            user.StatSnapshot = new StatSnapshot
-            {
-                UserId = user.Id
-            };
+            user.StatSnapshot = new StatSnapshot { UserId = user.Id };
 
             await _context.SaveChangesAsync();
         }
@@ -304,24 +320,29 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             {
                 Name = user.UserName,
                 UserId = user.Id,
-                Token = urlEncodedToken
-            }
+                Token = urlEncodedToken,
+            },
         };
         await _emailSender.SendEmailAsync(emailContext);
 
         var accessToken = tokenProvider.CreateAccessToken(user);
         var refreshToken = await tokenProvider.CreateRefreshToken(user);
-        return Ok(new LoginResponseDTO
-        {
-            UserData = _mapper.Map<UserWithEmailDTO>(user),
-            AccessToken = accessToken,
-            RefreshToken = refreshToken.Token
-        });
+        return Ok(
+            new LoginResponseDTO
+            {
+                UserData = _mapper.Map<UserWithEmailDTO>(user),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+            }
+        );
     }
 
     [Authorize]
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout(TokenProviderService tokenProvider, LogoutRequestDTO requestDTO)
+    public async Task<IActionResult> Logout(
+        TokenProviderService tokenProvider,
+        LogoutRequestDTO requestDTO
+    )
     {
         await tokenProvider.InvalidateRefreshToken(requestDTO.RefreshToken);
         return Ok();
@@ -329,14 +350,19 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
     // Returns an access token that can be used to authenticate the user
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponseDTO>> Login(TokenProviderService tokenProvider, UserManager<ApplicationUser> userManager, UserLoginDTO loginDTO)
+    public async Task<ActionResult<LoginResponseDTO>> Login(
+        TokenProviderService tokenProvider,
+        UserManager<ApplicationUser> userManager,
+        UserLoginDTO loginDTO
+    )
     {
         var user = await userManager.FindByEmailAsync(loginDTO.Email);
-        List<ErrorResponse> errors = [
+        List<ErrorResponse> errors =
+        [
             new ErrorResponse
             {
                 Code = "InvalidLoginCredentials",
-                Description = "Invalid Email or Password"
+                Description = "Invalid Email or Password",
             },
         ];
 
@@ -354,17 +380,21 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
         var accessToken = tokenProvider.CreateAccessToken(user);
         var refreshToken = await tokenProvider.CreateRefreshToken(user);
-        return Ok(new LoginResponseDTO
-        {
-            UserData = _mapper.Map<UserWithEmailDTO>(user),
-            AccessToken = accessToken,
-            RefreshToken = refreshToken.Token
-        });
+        return Ok(
+            new LoginResponseDTO
+            {
+                UserData = _mapper.Map<UserWithEmailDTO>(user),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+            }
+        );
     }
 
-
     [HttpPost("refresh")]
-    public async Task<ActionResult<RefreshResponseDTO>> Refresh(TokenProviderService tokenProvider, RefreshRequestDTO request)
+    public async Task<ActionResult<RefreshResponseDTO>> Refresh(
+        TokenProviderService tokenProvider,
+        RefreshRequestDTO request
+    )
     {
         var refreshToken = request.RefreshToken;
         var user = await tokenProvider.ValidateRefreshToken(refreshToken);
@@ -379,14 +409,15 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         var newAccessToken = tokenProvider.CreateAccessToken(user);
         var newRefreshToken = await tokenProvider.CreateRefreshToken(user);
 
-        return Ok(new RefreshResponseDTO()
-        {
-            UserData = _mapper.Map<UserWithEmailDTO>(user),
-            AccessToken = newAccessToken,
-            RefreshToken = newRefreshToken.Token
-        });
+        return Ok(
+            new RefreshResponseDTO()
+            {
+                UserData = _mapper.Map<UserWithEmailDTO>(user),
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken.Token,
+            }
+        );
     }
-
 
     [HttpPost("resend-verify-email-link")]
     [Authorize]
@@ -414,9 +445,8 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             {
                 Name = user.UserName ?? "",
                 UserId = user.Id,
-                Token = urlEncodedToken
-            }
-
+                Token = urlEncodedToken,
+            },
         };
         await _emailSender.SendEmailAsync(emailContext);
 
@@ -424,8 +454,11 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     }
 
     [HttpPost("verify-email")]
-    public async Task<IActionResult> VerifyEmail(UserManager<ApplicationUser> userManager,
-        [FromQuery] string id, [FromQuery] string token)
+    public async Task<IActionResult> VerifyEmail(
+        UserManager<ApplicationUser> userManager,
+        [FromQuery] string id,
+        [FromQuery] string token
+    )
     {
         if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(token))
         {
@@ -458,7 +491,10 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     }
 
     [HttpPost("send-password-reset")]
-    public async Task<IActionResult> SendPasswordReset(UserManager<ApplicationUser> userManager, ForgotPasswordRequestDTO request)
+    public async Task<IActionResult> SendPasswordReset(
+        UserManager<ApplicationUser> userManager,
+        ForgotPasswordRequestDTO request
+    )
     {
         try
         {
@@ -466,17 +502,17 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         }
         catch
         {
-            ErrorResponse[] errors = [
-                 new ErrorResponse {
-                    Code = "InvalidEmail",
-                    Description = "Invalid Email Format"
-                }
-             ];
+            ErrorResponse[] errors =
+            [
+                new ErrorResponse { Code = "InvalidEmail", Description = "Invalid Email Format" },
+            ];
             return BadRequest(errors);
         }
 
         var normalizedEmail = userManager.NormalizeEmail(request.Email);
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
+        var user = await _context.Users.FirstOrDefaultAsync(u =>
+            u.NormalizedEmail == normalizedEmail
+        );
 
         if (user is null || user.Email is null)
         {
@@ -488,14 +524,13 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
 
         EmailTemplateContext emailContext = new()
         {
-
             ToEmail = user.Email,
             Type = EmailType.ForgotPassword,
             Variables = new ForgotPasswordRequestVariables()
             {
                 UserId = user.Id,
-                Token = urlEncodedToken
-            }
+                Token = urlEncodedToken,
+            },
         };
         await _emailSender.SendEmailAsync(emailContext);
 
@@ -503,8 +538,10 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(UserManager<ApplicationUser> userManager,
-        ResetPasswordRequestDTO request)
+    public async Task<IActionResult> ResetPassword(
+        UserManager<ApplicationUser> userManager,
+        ResetPasswordRequestDTO request
+    )
     {
         var id = request.Id;
         var token = request.Token;
@@ -539,18 +576,19 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
             if (!string.IsNullOrEmpty(user.Email))
             {
                 var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
-                var urlEncodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+                var urlEncodedToken = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(resetToken)
+                );
 
                 EmailTemplateContext emailContext = new()
                 {
-
                     ToEmail = user.Email,
                     Type = EmailType.ResetPasswordConfirmation,
                     Variables = new ResetPasswordConfirmationVariables()
                     {
                         UserId = user.Id,
                         Name = user.UserName ?? "",
-                    }
+                    },
                 };
                 await _emailSender.SendEmailAsync(emailContext);
             }
@@ -568,7 +606,8 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         IConfiguration configuration,
         GoogleLoginRequestDTO request,
         UserManager<ApplicationUser> userManager,
-        TokenProviderService tokenProvider)
+        TokenProviderService tokenProvider
+    )
     {
         if (string.IsNullOrWhiteSpace(request.IdToken))
         {
@@ -578,17 +617,19 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
         string? email;
         try
         {
-            var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, new GoogleJsonWebSignature.ValidationSettings
-            {
-                Audience = [configuration["Authentication_Google_ClientId"]]
-            });
+            var payload = await GoogleJsonWebSignature.ValidateAsync(
+                request.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = [configuration["Authentication_Google_ClientId"]],
+                }
+            );
 
             email = payload?.Email;
             if (string.IsNullOrWhiteSpace(email))
             {
                 return BadRequest();
             }
-
         }
         catch (InvalidJwtException)
         {
@@ -613,20 +654,19 @@ public class UserController(MtgContext context, IMapper mapper, ITemplatedEmailS
                 return BadRequest(createResult.Errors);
             }
 
-            user.StatSnapshot = new StatSnapshot()
-            {
-                UserId = user.Id,
-            };
+            user.StatSnapshot = new StatSnapshot() { UserId = user.Id };
             await _context.SaveChangesAsync(); // Save the new StatSnapshot
         }
 
         string accessToken = tokenProvider.CreateAccessToken(user);
         string refreshToken = (await tokenProvider.CreateRefreshToken(user)).Token;
-        return Ok(new LoginResponseDTO
-        {
-            UserData = _mapper.Map<UserWithEmailDTO>(user),
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-        });
+        return Ok(
+            new LoginResponseDTO
+            {
+                UserData = _mapper.Map<UserWithEmailDTO>(user),
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+            }
+        );
     }
 }

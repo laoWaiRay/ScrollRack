@@ -1,14 +1,14 @@
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.MappingProfiles;
-using Microsoft.AspNetCore.Identity;
-using Mtg_tracker.Hubs;
-using Mtg_tracker.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Mtg_tracker.Hubs;
+using Mtg_tracker.MappingProfiles;
+using Mtg_tracker.Models;
+using Mtg_tracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
@@ -22,29 +22,34 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mtg Tracker Api", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid token."
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "Bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Enter 'Bearer' [space] and then your valid token.",
         }
-    });
+    );
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                new string[] { }
+            },
+        }
+    );
 });
 
 builder.Services.AddDbContext<MtgContext>(options =>
@@ -79,11 +84,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+builder
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(jwtOptions =>
     {
         jwtOptions.TokenValidationParameters = new TokenValidationParameters
@@ -94,7 +100,9 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt_Issuer"],
             ValidAudience = builder.Configuration["Jwt_Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt_Secret"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt_Secret"]!)
+            ),
             ClockSkew = TimeSpan.Zero,
         };
 
@@ -106,43 +114,54 @@ builder.Services.AddAuthentication(options =>
                 var path = context.HttpContext.Request.Path;
 
                 // Only allow tokens for SignalR endpoints
-                if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/hub"))
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hub"))
                 {
                     context.Token = accessToken;
                 }
 
                 return Task.CompletedTask;
-            }
+            },
         };
     });
 
-
-builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-    .AddEntityFrameworkStores<MtgContext>();
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkStores<MtgContext>();
 
 // CORS
 var MyAllowSpecificOrigins = "Client";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
-    {
-        if (env.IsDevelopment())
+    options.AddPolicy(
+        name: MyAllowSpecificOrigins,
+        policy =>
         {
-            Console.WriteLine("DEVELOPMENT");
-            policy.WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.66:3000", "http://192.168.1.66:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+            if (env.IsDevelopment())
+            {
+                Console.WriteLine("DEVELOPMENT");
+                policy
+                    .WithOrigins(
+                        "https://localhost:3000",
+                        "http://localhost:3000",
+                        "https://192.168.1.66:3000",
+                        "http://192.168.1.66:3000"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            }
+            else
+            {
+                policy
+                    .WithOrigins(
+                        "https://scrollrack.win",
+                        "https://www.scrollrack.win",
+                        "https://scrollrack-ezbnefh0h0fjh3cz.canadacentral-01.azurewebsites.net"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            }
         }
-        else
-        {
-            policy.WithOrigins("https://scrollrack.win", "https://www.scrollrack.win", "https://scrollrack-ezbnefh0h0fjh3cz.canadacentral-01.azurewebsites.net")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        }
-    });
+    );
 });
 
 // SignalR

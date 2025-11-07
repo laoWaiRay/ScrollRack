@@ -4,14 +4,21 @@ using Mtg_tracker.Models.DTOs;
 
 namespace Mtg_tracker.Services;
 
-public record StreakStats(int CurrentStreak, bool? IsCurrentWinStreak, int LongestWinStreak, int LongestLossStreak);
+public record StreakStats(
+    int CurrentStreak,
+    bool? IsCurrentWinStreak,
+    int LongestWinStreak,
+    int LongestLossStreak
+);
+
 public record PodSizeConstraint(int Min, int Max);
 
 public class DeckStatsService(IMapper mapper)
 {
     private readonly IMapper _mapper = mapper;
 
-    public List<PodSizeConstraint> PodSizeConstraints = [
+    public List<PodSizeConstraint> PodSizeConstraints =
+    [
         new PodSizeConstraint(2, 2),
         new PodSizeConstraint(3, 3),
         new PodSizeConstraint(4, 4),
@@ -51,9 +58,7 @@ public class DeckStatsService(IMapper mapper)
             .Where(gp => !gp.Game.Imported)
             .ToList();
 
-        var streak = unimportedGameParticipations
-            .TakeWhile(gp => gp.Won == isWinStreak)
-            .Count();
+        var streak = unimportedGameParticipations.TakeWhile(gp => gp.Won == isWinStreak).Count();
 
         int currWinStreak = 0;
         int currLossStreak = 0;
@@ -67,12 +72,7 @@ public class DeckStatsService(IMapper mapper)
             longestLossStreak = Math.Max(currLossStreak, longestLossStreak);
         }
 
-        return new StreakStats(
-            streak,
-            isWinStreak,
-            longestWinStreak,
-            longestLossStreak
-        );
+        return new StreakStats(streak, isWinStreak, longestWinStreak, longestLossStreak);
     }
 
     // Deck game participations should be sorted by Newest First
@@ -100,7 +100,8 @@ public class DeckStatsService(IMapper mapper)
 
             var latestWin = filteredGameParticipations
                 .Where(gp => gp.Won && !gp.Game.Imported)
-                .FirstOrDefault()?.CreatedAt;
+                .FirstOrDefault()
+                ?.CreatedAt;
 
             var lastPlayed = filteredGameParticipations.FirstOrDefault()?.CreatedAt;
 
@@ -118,11 +119,7 @@ public class DeckStatsService(IMapper mapper)
                 Par = par,
                 LastPlayed = lastPlayed,
             };
-            FilteredDeckStats filteredStats = new()
-            {
-                PodSize = podSize.Min,
-                Stats = deckStats,
-            };
+            FilteredDeckStats filteredStats = new() { PodSize = podSize.Min, Stats = deckStats };
             filteredDeckStats.Add(filteredStats);
         }
 
@@ -133,7 +130,9 @@ public class DeckStatsService(IMapper mapper)
     }
 
     // Groups games/wins/losses by time period for displaying on Line Chart
-    public List<WinLossGameCount> ComputeWinLossGameCounts(List<GameParticipation> gameParticipations)
+    public List<WinLossGameCount> ComputeWinLossGameCounts(
+        List<GameParticipation> gameParticipations
+    )
     {
         int bucketCount = 12;
 
@@ -146,18 +145,21 @@ public class DeckStatsService(IMapper mapper)
         for (int i = 0; i < bucketCount; i++)
         {
             var periodStart = firstDate.AddSeconds(i * bucketSpan.TotalSeconds);
-            var periodEnd = (i == bucketCount - 1)
-                ? lastDate
-                : firstDate.AddSeconds((i + 1) * bucketSpan.TotalSeconds);
+            var periodEnd =
+                (i == bucketCount - 1)
+                    ? lastDate
+                    : firstDate.AddSeconds((i + 1) * bucketSpan.TotalSeconds);
 
-            buckets.Add(new WinLossGameCount()
-            {
-                PeriodStart = periodStart,
-                PeriodEnd = periodEnd,
-                Games = 0,
-                Wins = 0,
-                Losses = 0
-            });
+            buckets.Add(
+                new WinLossGameCount()
+                {
+                    PeriodStart = periodStart,
+                    PeriodEnd = periodEnd,
+                    Games = 0,
+                    Wins = 0,
+                    Losses = 0,
+                }
+            );
         }
 
         foreach (var gp in gameParticipations)

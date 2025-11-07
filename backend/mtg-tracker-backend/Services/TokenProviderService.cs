@@ -15,14 +15,17 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
     {
         string secretKey = configuration["Jwt_Secret"]!;
 
-        var claims = new[] {
+        var claims = new[]
+        {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
             new Claim("email_verified", user.EmailConfirmed.ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, 
-                        DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), 
-                        ClaimValueTypes.Integer64)
+            new Claim(
+                JwtRegisteredClaimNames.Iat,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64
+            ),
         };
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -53,8 +56,10 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
         _context.RefreshTokens.Add(refreshToken);
 
         // Remove expired and revoked refresh tokens
-        var expiredOrRevokedTokens = await _context.RefreshTokens
-            .Where(rt => rt.UserId == user.Id && (rt.ExpiresAt < DateTime.UtcNow || rt.IsRevoked))
+        var expiredOrRevokedTokens = await _context
+            .RefreshTokens.Where(rt =>
+                rt.UserId == user.Id && (rt.ExpiresAt < DateTime.UtcNow || rt.IsRevoked)
+            )
             .ToListAsync();
 
         if (expiredOrRevokedTokens.Count > 0)
@@ -69,8 +74,10 @@ public class TokenProviderService(IConfiguration configuration, MtgContext conte
 
     public async Task<ApplicationUser?> ValidateRefreshToken(string refreshToken)
     {
-        var token = await _context.RefreshTokens
-            .Where(rt => rt.Token == refreshToken && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow)
+        var token = await _context
+            .RefreshTokens.Where(rt =>
+                rt.Token == refreshToken && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow
+            )
             .FirstOrDefaultAsync();
 
         if (token == null)

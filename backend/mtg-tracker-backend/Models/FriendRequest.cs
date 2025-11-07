@@ -1,6 +1,6 @@
 /*
  * Query this table to find all friend requests for a given user.
- * 
+ *
  * Includes computed columns for a database constraint to prevent duplicate
  * requests if A sends to B and B sends to A. Duplicates should also be
  * avoided at the Domain (API) level.

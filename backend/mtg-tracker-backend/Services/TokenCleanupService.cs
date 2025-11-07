@@ -11,8 +11,8 @@ public class TokenCleanupService(MtgContext context)
     {
         var now = DateTime.UtcNow;
 
-        var expiredTokens = await _context.RefreshTokens
-            .Where(t => t.ExpiresAt < now || t.IsRevoked)
+        var expiredTokens = await _context
+            .RefreshTokens.Where(t => t.ExpiresAt < now || t.IsRevoked)
             .ToListAsync();
 
         if (expiredTokens.Count > 0)

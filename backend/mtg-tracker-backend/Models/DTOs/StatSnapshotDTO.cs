@@ -1,6 +1,7 @@
 namespace Mtg_tracker.Models.DTOs;
 
-public class WinLossGameCount {
+public class WinLossGameCount
+{
     public required DateTime PeriodStart { get; set; }
     public required DateTime PeriodEnd { get; set; }
     public required int Wins { get; set; }

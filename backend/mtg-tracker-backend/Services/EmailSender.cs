@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using Mailjet.Client;
 using Mailjet.Client.Resources;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace Mtg_tracker.Services;
@@ -24,9 +24,8 @@ public class ResetPasswordConfirmationVariables
     public required string Name { get; set; }
 }
 
-public class EmailSender(
-    IOptions<EmailSenderOptions> optionsAccessor,
-    ILogger<EmailSender> logger) : ITemplatedEmailSender
+public class EmailSender(IOptions<EmailSenderOptions> optionsAccessor, ILogger<EmailSender> logger)
+    : ITemplatedEmailSender
 {
     private readonly ILogger _logger = logger;
 
@@ -34,16 +33,23 @@ public class EmailSender(
 
     public async Task SendEmailAsync(EmailTemplateContext context)
     {
-        if (string.IsNullOrEmpty(Options.MailjetEmail) ||
-                  string.IsNullOrEmpty(Options.MailjetApiKey) ||
-                  string.IsNullOrEmpty(Options.MailjetSecretKey))
+        if (
+            string.IsNullOrEmpty(Options.MailjetEmail)
+            || string.IsNullOrEmpty(Options.MailjetApiKey)
+            || string.IsNullOrEmpty(Options.MailjetSecretKey)
+        )
         {
             throw new Exception("Missing Mailjet Data");
         }
 
         try
         {
-            await Execute(Options.MailjetEmail, Options.MailjetApiKey, Options.MailjetSecretKey, context);
+            await Execute(
+                Options.MailjetEmail,
+                Options.MailjetApiKey,
+                Options.MailjetSecretKey,
+                context
+            );
         }
         catch (Exception e)
         {
@@ -51,7 +57,12 @@ public class EmailSender(
         }
     }
 
-    public async Task Execute(string fromEmail, string apiKey, string secretKey, EmailTemplateContext context)
+    public async Task Execute(
+        string fromEmail,
+        string apiKey,
+        string secretKey,
+        EmailTemplateContext context
+    )
     {
         MailjetClient client = new(apiKey, secretKey);
         MailjetRequest? request = null;
@@ -59,20 +70,20 @@ public class EmailSender(
         switch (context.Type)
         {
             case EmailType.VerifyEmail:
-                {
-                    request = VerifyEmailRequest(fromEmail, context);
-                    break;
-                }
+            {
+                request = VerifyEmailRequest(fromEmail, context);
+                break;
+            }
             case EmailType.ForgotPassword:
-                {
-                    request = ForgotPasswordRequest(fromEmail, context);
-                    break;
-                }
+            {
+                request = ForgotPasswordRequest(fromEmail, context);
+                break;
+            }
             case EmailType.ResetPasswordConfirmation:
-                {
-                    request = ResetPasswordConfirmation(fromEmail, context);
-                    break;
-                }
+            {
+                request = ResetPasswordConfirmation(fromEmail, context);
+                break;
+            }
             default:
                 throw new Exception("Not a valid Email Type");
         }
@@ -87,7 +98,9 @@ public class EmailSender(
 
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine(string.Format("Total: {0}, Count: {1}", response.GetTotal(), response.GetCount()));
+            Console.WriteLine(
+                string.Format("Total: {0}, Count: {1}", response.GetTotal(), response.GetCount())
+            );
             Console.WriteLine(response.GetData());
         }
         else
@@ -101,85 +114,113 @@ public class EmailSender(
 
     private static MailjetRequest VerifyEmailRequest(string fromEmail, EmailTemplateContext context)
     {
-        var vars = (context.Variables as VerifyEmailRequestVariables)
-            ?? throw new ArgumentNullException("Variables must be of type VerifyEmailRequestVariables.");
+        var vars =
+            (context.Variables as VerifyEmailRequestVariables)
+            ?? throw new ArgumentNullException(
+                "Variables must be of type VerifyEmailRequestVariables."
+            );
 
-        var request = new MailjetRequest { Resource = SendV31.Resource }
-        .Property(Send.Messages, new JArray {
-            new JObject {
-                // {"From", new JObject {
-                //     {"Email", fromEmail},
-                // }},
-                {"To", new JArray {
-                    new JObject {
-                        {"Email", context.ToEmail},
-                    }
-                }},
-                {"TemplateID", 7113645},
-                {"TemplateLanguage", true},
-                {"Variables", new JObject {
-                    {"name", vars.Name},
-                    {"userId", vars.UserId},
-                    {"token", vars.Token},
-                }}
+        var request = new MailjetRequest { Resource = SendV31.Resource }.Property(
+            Send.Messages,
+            new JArray
+            {
+                new JObject
+                {
+                    // {"From", new JObject {
+                    //     {"Email", fromEmail},
+                    // }},
+                    {
+                        "To",
+                        new JArray { new JObject { { "Email", context.ToEmail } } }
+                    },
+                    { "TemplateID", 7113645 },
+                    { "TemplateLanguage", true },
+                    {
+                        "Variables",
+                        new JObject
+                        {
+                            { "name", vars.Name },
+                            { "userId", vars.UserId },
+                            { "token", vars.Token },
+                        }
+                    },
+                },
             }
-        });
+        );
 
         return request;
     }
 
-    private static MailjetRequest ForgotPasswordRequest(string fromEmail, EmailTemplateContext context)
+    private static MailjetRequest ForgotPasswordRequest(
+        string fromEmail,
+        EmailTemplateContext context
+    )
     {
-        var vars = (context.Variables as ForgotPasswordRequestVariables)
-            ?? throw new ArgumentNullException("Variables must be of type ForgotPasswordRequestVariables.");
+        var vars =
+            (context.Variables as ForgotPasswordRequestVariables)
+            ?? throw new ArgumentNullException(
+                "Variables must be of type ForgotPasswordRequestVariables."
+            );
 
-        var request = new MailjetRequest { Resource = SendV31.Resource }
-        .Property(Send.Messages, new JArray {
-            new JObject {
-                // {"From", new JObject {
-                //     {"Email", fromEmail},
-                // }},
-                {"To", new JArray {
-                    new JObject {
-                        {"Email", context.ToEmail},
-                    }
-                }},
-                {"TemplateID", 7113643},
-                {"TemplateLanguage", true},
-                {"Variables", new JObject {
-                    {"userId", vars.UserId},
-                    {"token", vars.Token},
-                }}
+        var request = new MailjetRequest { Resource = SendV31.Resource }.Property(
+            Send.Messages,
+            new JArray
+            {
+                new JObject
+                {
+                    // {"From", new JObject {
+                    //     {"Email", fromEmail},
+                    // }},
+                    {
+                        "To",
+                        new JArray { new JObject { { "Email", context.ToEmail } } }
+                    },
+                    { "TemplateID", 7113643 },
+                    { "TemplateLanguage", true },
+                    {
+                        "Variables",
+                        new JObject { { "userId", vars.UserId }, { "token", vars.Token } }
+                    },
+                },
             }
-        });
+        );
 
         return request;
     }
 
-    private static MailjetRequest ResetPasswordConfirmation(string fromEmail, EmailTemplateContext context)
+    private static MailjetRequest ResetPasswordConfirmation(
+        string fromEmail,
+        EmailTemplateContext context
+    )
     {
-        var vars = (context.Variables as ResetPasswordConfirmationVariables)
-            ?? throw new ArgumentNullException("Variables must be of type ResetPasswordConfirmationVariables.");
+        var vars =
+            (context.Variables as ResetPasswordConfirmationVariables)
+            ?? throw new ArgumentNullException(
+                "Variables must be of type ResetPasswordConfirmationVariables."
+            );
 
-        var request = new MailjetRequest { Resource = SendV31.Resource }
-        .Property(Send.Messages, new JArray {
-            new JObject {
-                // {"From", new JObject {
-                //     {"Email", fromEmail},
-                // }},
-                {"To", new JArray {
-                    new JObject {
-                        {"Email", context.ToEmail},
-                    }
-                }},
-                {"TemplateID", 7114426},
-                {"TemplateLanguage", true},
-                {"Variables", new JObject {
-                    {"userId", vars.UserId},
-                    {"name", vars.Name},
-                }}
+        var request = new MailjetRequest { Resource = SendV31.Resource }.Property(
+            Send.Messages,
+            new JArray
+            {
+                new JObject
+                {
+                    // {"From", new JObject {
+                    //     {"Email", fromEmail},
+                    // }},
+                    {
+                        "To",
+                        new JArray { new JObject { { "Email", context.ToEmail } } }
+                    },
+                    { "TemplateID", 7114426 },
+                    { "TemplateLanguage", true },
+                    {
+                        "Variables",
+                        new JObject { { "userId", vars.UserId }, { "name", vars.Name } }
+                    },
+                },
             }
-        });
+        );
 
         return request;
     }

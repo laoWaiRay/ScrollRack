@@ -1,6 +1,6 @@
+using AutoMapper;
 using Mtg_tracker.Models;
 using Mtg_tracker.Models.DTOs;
-using AutoMapper;
 
 namespace Mtg_tracker.MappingProfiles;
 

@@ -1,13 +1,13 @@
+using System.Data;
+using System.Text.Json;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
 using Mtg_tracker.Models;
 using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using System.Data;
-using AutoMapper.QueryableExtensions;
-using System.Text.Json;
 
 namespace Mtg_tracker.Controllers;
 
@@ -30,8 +30,8 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        var currentUser = await _context.Users
-            .Include(u => u.Friends)
+        var currentUser = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (currentUser is null)
@@ -41,7 +41,7 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
 
         return _mapper.Map<UserReadDTO[]>(currentUser.Friends);
     }
-    
+
     // GET: api/friend/detailed
     // Returns all friends of current user, including details such as decklists, ...
     [Authorize]
@@ -54,8 +54,8 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        var currentUser = await _context.Users
-            .Include(u => u.Friends)
+        var currentUser = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (currentUser is null)
@@ -65,14 +65,14 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
 
         var friendIds = currentUser.Friends.Select(f => f.Id).ToList();
 
-        var friendsWithDecks = await _context.Users
-            .Where(f => friendIds.Contains(f.Id))
+        var friendsWithDecks = await _context
+            .Users.Where(f => friendIds.Contains(f.Id))
             .Include(f => f.Decks)
             .AsSplitQuery()
             .ToListAsync();
 
         return _mapper.Map<List<UserReadDTO>>(friendsWithDecks);
-    } 
+    }
 
     // POST: api/friend
     // Adds a friend (optionally with/without needing to send/accept a request)
@@ -86,14 +86,14 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Friends)
+        var user = await _context
+            .Users.Include(u => u.Friends)
             .Include(u => u.ReceivedFriendRequests)
             .AsSplitQuery()
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-        var friendUser = await _context.Users
-            .Include(u => u.Friends)
+        var friendUser = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userFriendAddDTO.Id);
 
         if (user is null)
@@ -114,7 +114,8 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
         {
             // A friend request must exist with current user as receiver to add friend
             var friendRequest = user.ReceivedFriendRequests.FirstOrDefault(fr =>
-                fr.ReceiverId == userId && fr.SenderId == userFriendAddDTO.Id);
+                fr.ReceiverId == userId && fr.SenderId == userFriendAddDTO.Id
+            );
 
             if (friendRequest is null)
             {
@@ -137,9 +138,7 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
         {
             await _context.SaveChangesAsync();
         }
-        catch (Exception e) when (
-            e is DbUpdateConcurrencyException ||
-            e is DbUpdateException)
+        catch (Exception e) when (e is DbUpdateConcurrencyException || e is DbUpdateException)
         {
             return StatusCode(500, "Could not add friend");
         }
@@ -159,8 +158,8 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Friends)
+        var user = await _context
+            .Users.Include(u => u.Friends)
             .Include(u => u.SentFriendRequests)
             .Include(u => u.ReceivedFriendRequests)
             .AsSplitQuery()
@@ -177,8 +176,8 @@ public class FriendController(MtgContext context, IMapper mapper) : ControllerBa
             return NotFound();
         }
 
-        var loadedFriendUser = await _context.Users
-            .Include(u => u.Friends)
+        var loadedFriendUser = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == id);
 
         if (loadedFriendUser is null)

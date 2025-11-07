@@ -5,7 +5,7 @@ public class Deck
     public int Id { get; set; }
     public required string UserId { get; set; }
     public ApplicationUser User { get; set; } = null!;
-    
+
     public List<GameParticipation> GameParticipations { get; } = [];
 
     public required string Commander { get; set; }

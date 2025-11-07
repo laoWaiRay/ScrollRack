@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 
 namespace Mtg_tracker.Controllers;
 
@@ -23,7 +23,8 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
     public async Task<ActionResult<PagedResult<GameReadDTO>>> GetGames(
         [FromQuery] int page,
         [FromQuery] DateTime? startDate,
-        [FromQuery] DateTime? endDate)
+        [FromQuery] DateTime? endDate
+    )
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -31,8 +32,7 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
             return Unauthorized();
         }
 
-        var query = _context.Games
-            .Where(g => g.GameParticipations.Any(gp => gp.UserId == userId));
+        var query = _context.Games.Where(g => g.GameParticipations.Any(gp => gp.UserId == userId));
 
         if (startDate != null && endDate != null)
         {
@@ -42,15 +42,12 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
         query = query
             .Include(g => g.CreatedBy)
             .Include(g => g.GameParticipations)
-               .ThenInclude(gp => gp.Deck)
+            .ThenInclude(gp => gp.Deck)
             .Include(g => g.GameParticipations)
-               .ThenInclude(gp => gp.User)
+            .ThenInclude(gp => gp.User)
             .OrderByDescending(g => g.CreatedAt);
 
-        var pagedGames = await query
-            .Skip(page * PAGE_SIZE)
-            .Take(PAGE_SIZE + 1)
-            .ToListAsync();
+        var pagedGames = await query.Skip(page * PAGE_SIZE).Take(PAGE_SIZE + 1).ToListAsync();
 
         var games = pagedGames.Take(PAGE_SIZE).ToList();
 
@@ -92,8 +89,8 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
         }
 
         // User must be the host of a room to create a game
-        var user = await _context.Users
-            .Include(u => u.HostedRoom)
+        var user = await _context
+            .Users.Include(u => u.HostedRoom)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -111,8 +108,8 @@ public class GameController(MtgContext context, IMapper mapper) : ControllerBase
         _context.Games.Add(game);
         await _context.SaveChangesAsync();
 
-        game = await _context.Games
-            .Include(g => g.Winner)
+        game = await _context
+            .Games.Include(g => g.Winner)
             .FirstOrDefaultAsync(g => g.Id == game.Id);
 
         if (game is null)

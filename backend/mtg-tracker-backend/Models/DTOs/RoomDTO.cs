@@ -6,7 +6,7 @@ public class RoomDTO
     public required string RoomOwnerId { get; set; }
     public required string Code { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+
     // A list of all players in the room
     public List<UserReadDTO> Players { get; set; } = null!;
 }

@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Services;
 
 namespace Mtg_tracker.Controllers;
@@ -13,7 +13,11 @@ public record PodSizeConstraint(int Min, int Max);
 
 [Route("api/[controller]")]
 [ApiController]
-public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStatsService deckStatsService) : ControllerBase
+public class StatSnapshotController(
+    MtgContext context,
+    IMapper mapper,
+    DeckStatsService deckStatsService
+) : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
@@ -33,8 +37,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.StatSnapshot)
+        var user = await _context
+            .Users.Include(u => u.StatSnapshot)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -47,31 +51,26 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             return NotFound();
         }
 
-        var gameParticipations = await _context.GameParticipations
-            .Include(gp => gp.Game)
+        var gameParticipations = await _context
+            .GameParticipations.Include(gp => gp.Game)
             .Include(gp => gp.Deck)
             .Where(gp => gp.UserId == userId)
             .OrderByDescending(gp => gp.CreatedAt)
             .ToListAsync();
 
-        var decks = await _context.Decks
-            .Where(d => d.UserId == userId)
-            .ToListAsync();
+        var decks = await _context.Decks.Where(d => d.UserId == userId).ToListAsync();
 
         // Stats are computed for each time period (All-time, Current Year, Current Month) and for
         // each pod size
         DateTime now = DateTime.Now;
-        DateTime[] periodStartTimes = [
+        DateTime[] periodStartTimes =
+        [
             new DateTime(2000, 1, 1),
             DateTime.Now.AddYears(-1),
             DateTime.Now.AddDays(-30),
         ];
 
-        string[] periodLabels = [
-            "AllTime",
-            "CurrentYear",
-            "CurrentMonth",
-        ];
+        string[] periodLabels = ["AllTime", "CurrentYear", "CurrentMonth"];
 
         var periodStartTimeToLabel = periodStartTimes
             .Select((startTime, i) => new { startTime, label = periodLabels[i] })
@@ -85,13 +84,12 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             {
                 var filteredGameParticipations = gameParticipations
                     .Where(gp => gp.CreatedAt >= startTime)
-                    .Where(gp => gp.Game.NumPlayers >= podSize.Min && gp.Game.NumPlayers <= podSize.Max)
+                    .Where(gp =>
+                        gp.Game.NumPlayers >= podSize.Min && gp.Game.NumPlayers <= podSize.Max
+                    )
                     .ToList();
 
-
-                var filteredDecks = decks
-                    .Where(d => d.CreatedAt >= startTime)
-                    .ToList();
+                var filteredDecks = decks.Where(d => d.CreatedAt >= startTime).ToList();
 
                 // No game participations, but there may be decks that were created for this
                 // time period
@@ -121,7 +119,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                 // Compute simple stats
                 var lastWon = filteredGameParticipations
                     .Where(gp => gp.Won)
-                    .FirstOrDefault()?.CreatedAt;
+                    .FirstOrDefault()
+                    ?.CreatedAt;
 
                 // Compute stats for Most Recently Played Deck
                 var mostRecentPlayedDeck = filteredGameParticipations.FirstOrDefault()?.Deck;
@@ -133,8 +132,10 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                 DeckReadDTO? mrpdDTO = null;
                 if (mostRecentPlayedDeck != null)
                 {
-                    mrpdDTO = _deckStatsService
-                        .ComputeDeckStats(mrpdGameParticipations, mostRecentPlayedDeck);
+                    mrpdDTO = _deckStatsService.ComputeDeckStats(
+                        mrpdGameParticipations,
+                        mostRecentPlayedDeck
+                    );
                 }
 
                 // Compute streak stats
@@ -159,14 +160,17 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
                     .ToList();
 
                 // Group games/wins/losses by time period for displaying on Line Chart
-                var buckets = _deckStatsService.ComputeWinLossGameCounts(filteredGameParticipations);
+                var buckets = _deckStatsService.ComputeWinLossGameCounts(
+                    filteredGameParticipations
+                );
 
                 var deckPlayCounts = commandersByPlayrate
                     .Select(grouping => new DeckPlayCount()
                     {
                         Commander = grouping.Key,
                         NumGames = grouping.Count,
-                        PercentOfGamesPlayed = (double)grouping.Count / filteredGameParticipations.Count
+                        PercentOfGamesPlayed =
+                            (double)grouping.Count / filteredGameParticipations.Count,
                     })
                     .ToList();
 
@@ -215,8 +219,8 @@ public class StatSnapshotController(MtgContext context, IMapper mapper, DeckStat
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.StatSnapshot)
+        var user = await _context
+            .Users.Include(u => u.StatSnapshot)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)

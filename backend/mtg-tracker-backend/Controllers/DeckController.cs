@@ -1,19 +1,20 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
+using System.Data;
+using System.Diagnostics;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 using Mtg_tracker.Services;
-using System.Diagnostics;
 
 namespace Mtg_tracker.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DeckController(MtgContext context, IMapper mapper, DeckStatsService deckStatsService) : ControllerBase
+public class DeckController(MtgContext context, IMapper mapper, DeckStatsService deckStatsService)
+    : ControllerBase
 {
     private readonly MtgContext _context = context;
     private readonly IMapper _mapper = mapper;
@@ -33,7 +34,7 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
         {
             return Unauthorized();
         }
-        
+
         var deckReadDTOs = await GetUserDecksAsync(userId);
         // stopwatch.Stop();
         // Console.WriteLine($"GET /api/deck took {stopwatch.ElapsedMilliseconds}ms");
@@ -55,8 +56,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Friends)
+        var user = await _context
+            .Users.Include(u => u.Friends)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -105,8 +106,8 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.Decks)
+        var user = await _context
+            .Users.Include(u => u.Decks)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
@@ -195,13 +196,13 @@ public class DeckController(MtgContext context, IMapper mapper, DeckStatsService
 
     private async Task<List<DeckReadDTO>> GetUserDecksAsync(string userId)
     {
-        List<Deck> userDecks = await _context.Decks
-            .Where(d => d.UserId == userId)
+        List<Deck> userDecks = await _context
+            .Decks.Where(d => d.UserId == userId)
             .OrderBy(d => d.Commander)
             .ToListAsync();
 
-        List<GameParticipation> userGameParticipations = await _context.GameParticipations
-            .Include(gp => gp.Game)
+        List<GameParticipation> userGameParticipations = await _context
+            .GameParticipations.Include(gp => gp.Game)
             .Where(gp => gp.UserId == userId)
             .OrderByDescending(gp => gp.CreatedAt)
             .ToListAsync();

@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mtg_tracker.Models;
-using Mtg_tracker.Models.DTOs;
-using Mtg_tracker.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mtg_tracker.Extensions;
+using Mtg_tracker.Models;
+using Mtg_tracker.Models.DTOs;
 
 namespace Mtg_tracker.Controllers;
 
@@ -27,17 +27,15 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user is null)
         {
             return Unauthorized();
         }
 
-        var gameParticipations = await _context.GameParticipations
-            .Where(gp => gp.UserId == userId)
+        var gameParticipations = await _context
+            .GameParticipations.Where(gp => gp.UserId == userId)
             .Include(gp => gp.User)
             .Include(gp => gp.Deck)
             .ToListAsync();
@@ -51,7 +49,8 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
     [HttpPost]
     public async Task<ActionResult<GameParticipationReadDTO>> PostGameParticipation(
         GameParticipationWriteDTO gpwDTO,
-        [FromQuery] bool imported = false)
+        [FromQuery] bool imported = false
+    )
     {
         var userId = User.GetUserId();
         if (userId is null)
@@ -59,16 +58,16 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
             return Unauthorized();
         }
 
-        var user = await _context.Users
-            .Include(u => u.HostedRoom)
+        var user = await _context
+            .Users.Include(u => u.HostedRoom)
             .Include(u => u.GameParticipations)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         // Shortcut for imported games: No room, no host in this context => less checks
         if (imported)
         {
-            var playerToAdd = await _context.Users
-                .Include(u => u.Decks)
+            var playerToAdd = await _context
+                .Users.Include(u => u.Decks)
                 .FirstOrDefaultAsync(u => u.Id == gpwDTO.UserId);
 
             if (playerToAdd is null)
@@ -100,8 +99,8 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
             return Ok(_mapper.Map<GameParticipationReadDTO>(importedGp));
         }
 
-        var game = await _context.Games
-            .Include(g => g.Room)
+        var game = await _context
+            .Games.Include(g => g.Room)
             .FirstOrDefaultAsync(g => g.Id == gpwDTO.GameId);
 
         if (game is null || game.Room is null)
@@ -110,15 +109,13 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
         }
 
         // Only the host can create game participations
-        if (user is null ||
-            user.HostedRoom is null ||
-            user.HostedRoom.Code != game.Room.Code)
+        if (user is null || user.HostedRoom is null || user.HostedRoom.Code != game.Room.Code)
         {
             return Unauthorized();
         }
 
-        var userToAdd = await _context.Users
-            .Include(u => u.JoinedRoom)
+        var userToAdd = await _context
+            .Users.Include(u => u.JoinedRoom)
             .Include(u => u.Decks)
             .FirstOrDefaultAsync(u => u.Id == gpwDTO.UserId);
 
@@ -129,7 +126,10 @@ public class GameParticipationController(MtgContext context, IMapper mapper) : C
 
         // Only allow creating a gameparticipation if the user is the host or
         // the user is currently in the room
-        if (userToAdd.Id != userId && (userToAdd.JoinedRoom is null || userToAdd.JoinedRoom.Code != game.Room.Code))
+        if (
+            userToAdd.Id != userId
+            && (userToAdd.JoinedRoom is null || userToAdd.JoinedRoom.Code != game.Room.Code)
+        )
         {
             return BadRequest();
         }
