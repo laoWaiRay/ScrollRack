@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mtg-tracker-backend", "mtg-tracker-backend\mtg-tracker-backend.csproj", "{6E50EEEA-614A-4FE3-A705-AEE249C47395}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{6E50EEEA-614A-4FE3-A705-AEE249C47395}.Release|x64.Build.0 = Release|Any CPU
 		{6E50EEEA-614A-4FE3-A705-AEE249C47395}.Release|x86.ActiveCfg = Release|Any CPU
 		{6E50EEEA-614A-4FE3-A705-AEE249C47395}.Release|x86.Build.0 = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|x64.Build.0 = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Debug|x86.Build.0 = Debug|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|x64.Build.0 = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|x86.ActiveCfg = Release|Any CPU
+		{0F351DF9-BAC2-423E-9EA1-8D654AD43D1C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
