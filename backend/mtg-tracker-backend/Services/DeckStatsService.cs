@@ -52,11 +52,10 @@ public class DeckStatsService(IMapper mapper)
 
     public StreakStats ComputeStreakStats(List<GameParticipation> gameParticipations)
     {
-        var isWinStreak = gameParticipations.FirstOrDefault()?.Won;
+        var orderedGps = gameParticipations.OrderByDescending(gp => gp.CreatedAt);
+        var isWinStreak = orderedGps.FirstOrDefault()?.Won;
 
-        var unimportedGameParticipations = gameParticipations
-            .Where(gp => !gp.Game.Imported)
-            .ToList();
+        var unimportedGameParticipations = orderedGps.Where(gp => !gp.Game.Imported).ToList();
 
         var streak = unimportedGameParticipations.TakeWhile(gp => gp.Won == isWinStreak).Count();
 
@@ -82,7 +81,9 @@ public class DeckStatsService(IMapper mapper)
         foreach (var podSize in PodSizeConstraints)
         {
             List<GameParticipation> filteredGameParticipations = deckGameParticipations
+                .Where(gp => gp.DeckId == deck.Id)
                 .Where(gp => gp.Game.NumPlayers >= podSize.Min && gp.Game.NumPlayers <= podSize.Max)
+                .OrderByDescending(gp => gp.CreatedAt)
                 .ToList();
 
             var streakStats = ComputeStreakStats(filteredGameParticipations);
