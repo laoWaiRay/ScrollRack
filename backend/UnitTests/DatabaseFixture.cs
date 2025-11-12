@@ -62,7 +62,16 @@ public sealed class DatabaseFixture : IAsyncLifetime
         await SeedDb(Context);
     }
 
-    public MtgContext CreateContext() => new(Options);
+    public MtgContext CreateContext()
+    {
+        var context = new MtgContext(Options);
+
+        // Start an uncommitted transaction for each context to make sure changes to the database do
+        // not persist, promoting test independence
+        // See: https://learn.microsoft.com/en-us/ef/core/testing/testing-with-the-database#tests-which-modify-data
+        context.Database.BeginTransaction();
+        return context;
+    }
 
     private static async Task SeedDb(MtgContext context)
     {
